@@ -1,0 +1,18 @@
+{
+    "name": "Lazarus/LazarusDb",
+    "description": "Database connection mnager for Snorkel Web framework",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Lazarus\\LazarusDb\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Martin Bamber"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
