@@ -1,5 +1,5 @@
 {
-    "name": "Lazarus/LazarusDb",
+    "name": "lazarus/lazarusdb",
     "description": "Database connection mnager for Snorkel Web framework",
     "type": "library",
     "license": "MIT",
