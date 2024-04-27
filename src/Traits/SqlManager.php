@@ -1,8 +1,12 @@
 <?php
-namespace Lazarus\LazarusDb\Traits;
+namespace LazarusPhp\LazarusDb\Traits;
 
+use LazarusPhp\LazarusDb\Database;
 use PDOException;
 use PDO;
+use PDOStatement;
+
+use function SnorkelWeb\DBManager\OpenConnection;
 
 trait SqlManager
 {
@@ -11,27 +15,42 @@ trait SqlManager
     private static $stmt;
 
 
+    // Dummy run
+    public static $param;
+    public static $paramvalue = [];
+    public static $paramkey = [];
+
     // Note: Need to add support for bind values;
-    public static function GenerateQuery(string $sql, $array = null)
+    public static function GenerateQuery(string $sql,)
     {
+
             self::$stmt = self::$connection->prepare($sql);
-            // Need to add Param Binding
+            // Using ParamBindiner
+            self::parambinder();
             self::$stmt->execute();
             return self::$stmt;
+            // Check if parameters array is not empty
+    
     }
-        
 
-    public static function BindValues($array)
+    public static function parambinder($array=null)
     {
-        // !is_null($array) ? $this->param = $array :  $this->param = array_combine($this->paramkey, $this->paramvalue);
-        if (!empty($array)) {       // Prepare code
-            foreach ($array as $key => $value) {
+       self::$param = array_combine(self::$paramkey, self::$paramvalue);
+        // print_r($this->param);
+        if (!empty(self::$param)) {
+            // Prepare code
+            foreach (self::$param as $key => $value) {
                 //    Execute the loop and bind the parameters
-                 self::$stmt->bindValue(":".$key, $value);
+                self::$stmt->bindValue($key, $value);
             }
         }
     }
 
+    public static function withParams($keys, $values) {
+        // Store parameter keys and values in arrays
+        self::$paramkey[] = $keys;
+        self::$paramvalue[] = $values;
+    }
 
 // Count Rows
     public function RowCount()

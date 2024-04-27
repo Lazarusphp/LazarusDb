@@ -1,10 +1,10 @@
 <?php
 
-namespace Lazarus\LazarusDb;
+namespace LazarusPhp\LazarusDb;
 
-use Lazarus\LazarusDb\Traits\CredentialManager;
+use LazarusPhp\LazarusDb\Traits\CredentialManager;
 use App\System\BaseClasses\Files;
-use Lazarus\LazarusDb\Traits\SqlManager;
+use LazarusPhp\LazarusDb\Traits\SqlManager;
 use PDO;
 
 class Database
@@ -35,15 +35,22 @@ class Database
     {
         $file = is_file(self::$config) && file_exists(self::$config) ? true : false;
 
-        if($file == true)
-        {
-            // Instantiate the connection
-            self::$connection = $this->OpenConnection();
+
+        try {
+            self::$connection =  new PDO(self::Dsn(), self::$passport["username"], self::$passport["password"], self::Options());
+        } catch (\PDOException $e) {
+            throw new \PDOException($e->getMessage(), (int)$e->getCode());
         }
-        else
-        {
-            exit("file not found or may not be a file format");
-        }
+        
+        // if($file == true)
+        // {
+        //     // Instantiate the connection
+        //     self::$connection = $this->OpenConnection();
+        // }
+        // else
+        // {
+        //     exit("file not found or may not be a file format");
+        // }
     
     }
 
@@ -96,7 +103,7 @@ class Database
         }
     }
 
-    public function OpenConnection()
+    public static function OpenConnection()
     {
         /**
          * this area needs cleaning up a littlet
@@ -104,11 +111,9 @@ class Database
 
         //  self::$config Needs to be Defined on the root system.
 
-        try {
-            return new PDO($this->Dsn(), self::$passport["username"], self::$passport["password"], self::Options());
-        } catch (\PDOException $e) {
-            throw new \PDOException($e->getMessage(), (int)$e->getCode());
-        }
+      
+
+    
     }
 
     public static function Options()

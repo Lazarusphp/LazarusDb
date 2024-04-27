@@ -1,6 +1,6 @@
 <?php
 
-namespace Lazarus\LazarusDb\Traits;
+namespace LazarusPhp\LazarusDb\Traits;
 
 trait CredentialManager
 {
@@ -66,7 +66,7 @@ trait CredentialManager
         return self::$passport;
     }
 
-    private function Dsn()
+    private static function Dsn()
     {
         return self::$passport["type"] . ":host=" . self::$passport["hostname"] . ";dbname=" . self::$passport["dbname"];
     }
