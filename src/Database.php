@@ -103,18 +103,6 @@ class Database
         }
     }
 
-    public static function OpenConnection()
-    {
-        /**
-         * this area needs cleaning up a littlet
-         */
-
-        //  self::$config Needs to be Defined on the root system.
-
-      
-
-    
-    }
 
     public static function Options()
     {

@@ -21,22 +21,39 @@ trait SqlManager
     public static $paramkey = [];
 
     // Note: Need to add support for bind values;
-    public static function GenerateQuery(string $sql,)
+    public static function GenerateQuery(string $sql,array $array=null)
     {
 
+           if(is_array(self::$paramkey) && is_array(self::$paramvalue) && is_null($array))
+           {
+             self::$param = array_combine(self::$paramkey, self::$paramvalue);
+           }
+           elseif(is_array($array))
+           {
+            self::$param = $array;
+           }
+           else
+           {
+            echo "An Error Occurred";
+           }
+
+
             self::$stmt = self::$connection->prepare($sql);
-            // Using ParamBindiner
-            self::parambinder();
+        
+            is_array(self::$param) ? self::parambinder() : false;
             self::$stmt->execute();
             return self::$stmt;
             // Check if parameters array is not empty
     
     }
 
-    public static function parambinder($array=null)
+
+ 
+
+    public static function parambinder()
     {
-       self::$param = array_combine(self::$paramkey, self::$paramvalue);
-        // print_r($this->param);
+
+        // self::$param = array_combine(self::$paramkey, self::$paramvalue);
         if (!empty(self::$param)) {
             // Prepare code
             foreach (self::$param as $key => $value) {

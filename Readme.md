@@ -51,4 +51,6 @@ In order to create a connection simpy use the Following commands
     ?>
 
 
+<a href='Sqlmanager.md'>Click here</a> For Sql Manager Readme
+
 Please Note this Script is currently a Work in progress project and is freely available to use without any Warrinty or responsibilty to any issues your website may come accross when using with your own scripts.
