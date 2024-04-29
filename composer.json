@@ -1,11 +1,11 @@
 {
     "name": "lazarus/lazarusdb",
-    "description": "Database connection mnager for Snorkel Web framework",
+    "description": "Database connection mnager for LazarusPhp framework",
     "type": "library",
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Lazarus\\LazarusDb\\": "src/"
+            "LazarusPhp\\LazarusDb\\": "src/"
         }
     },
     "authors": [
