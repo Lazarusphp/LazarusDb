@@ -53,8 +53,14 @@ class Database
         } catch (PDOException $e) {
             throw new PDOException($e->getMessage(), (int)$e->getCode());
         }
+
+
     }
 
+    public function connect()
+    {
+        return $this->connection;
+    }
     public function __destruct()
     {
     }
