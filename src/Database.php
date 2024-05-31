@@ -79,6 +79,7 @@ class Database
         try {
             $this->stmt = $this->connection->prepare($sql);
             if (!empty($this->param)) $this->BindParams();
+            $this->param = [];
             $this->stmt->execute();
             return $this->stmt;
         } catch (PDOException $e) {
@@ -91,8 +92,6 @@ class Database
         if (!empty($this->param)) {
             // Prepare code
             foreach ($this->param as $key => $value) {
-
-
                 $type = $this->GetParamTpe($value);
                 $this->stmt->bindValue($key, $value,$type);
             }
