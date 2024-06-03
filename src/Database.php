@@ -8,6 +8,10 @@ use PDOException;
 
 class Database
 {
+    public $version  = "1.0.1";
+    public $filename = __FILE__;
+    public $updated = "31/05/2024";
+    
     private $sql;
     private  $config;
     private  $connection;
@@ -69,8 +73,8 @@ class Database
     {
         $this->connection = null;
     }
-
-    public function GenerateSql($sql, $array = [])
+    
+    public function GenerateQuery($sql, $array = [])
     {
         // Get the Params
         if (!empty($array)) $this->param = $array;
@@ -123,25 +127,25 @@ class Database
 
     public function One($sql, $type = PDO::FETCH_OBJ)
     {
-        $stmt = $this->GenerateSql($sql);
+        $stmt = $this->GenerateQuery($sql);
         return $stmt->fetch($type);
     }
 
     public function All($sql)
     {
-        $stmt = $this->GenerateSql($sql);
+        $stmt = $this->GenerateQuery($sql);
         return $stmt->fetchAll();
     }
 
     public function FetchColumn($sql)
     {
-        $stmt = $this->GenerateSql($sql);
+        $stmt = $this->GenerateQuery($sql);
         return $stmt->fetchColumn();
     }
 
     public function RowCount($sql)
     {
-        $stmt = $this->GenerateSql($sql);
+        $stmt = $this->GenerateQuery($sql);
         return $stmt->rowCount();
     }
 
