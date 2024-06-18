@@ -8,9 +8,9 @@ use PDOException;
 
 class Database
 {
-    public $version  = "1.0.1";
+    public $version  = "1.0.2";
     public $filename = __FILE__;
-    public $updated = "31/05/2024";
+    public $updated = "18/06/2024";
     
     private $sql;
     private  $config;
@@ -60,6 +60,7 @@ class Database
 
 
     }
+    
 
     public function connect()
     {
@@ -73,15 +74,23 @@ class Database
     {
         $this->connection = null;
     }
-    
-    public function GenerateQuery($sql, $array = [])
+
+    public function sql($sql,$params=null)
     {
+        $this->sql = $sql;
+        !is_null($params) ?  $this->param = $params : false;
+        return $this;
+    }
+    
+    public function GenerateQuery($sql=null, $array = [])
+    {
+        !is_null($sql) ? $this->sql = $sql : false;
         // Get the Params
         if (!empty($array)) $this->param = $array;
 
         // Check there is a connection
         try {
-            $this->stmt = $this->connection->prepare($sql);
+            $this->stmt = $this->connection->prepare($this->sql);
             if (!empty($this->param)) $this->BindParams();
             $this->param = [];
             $this->stmt->execute();
@@ -125,7 +134,15 @@ class Database
         return $this;
     }
 
-    public function One($sql, $type = PDO::FETCH_OBJ)
+/**
+ * Undocumented function
+ *
+ * @param [type] $type
+ * @return void
+ * Use Sql Function to chainload the following functions 
+ * Updated 18/06/2024
+ */
+    public function One($sql,$type = PDO::FETCH_OBJ)
     {
         $stmt = $this->GenerateQuery($sql);
         return $stmt->fetch($type);
