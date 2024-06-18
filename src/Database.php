@@ -142,9 +142,9 @@ class Database
  * Use Sql Function to chainload the following functions 
  * Updated 18/06/2024
  */
-    public function One($sql,$type = PDO::FETCH_OBJ)
+    public function One($type = PDO::FETCH_OBJ)
     {
-        $stmt = $this->GenerateQuery($sql);
+        $stmt = $this->GenerateQuery();
         return $stmt->fetch($type);
     }
 
@@ -154,15 +154,15 @@ class Database
         return $stmt->fetchAll();
     }
 
-    public function FetchColumn($sql)
+    public function FetchColumn()
     {
-        $stmt = $this->GenerateQuery($sql);
+        $stmt = $this->GenerateQuery();
         return $stmt->fetchColumn();
     }
 
-    public function RowCount($sql)
+    public function RowCount()
     {
-        $stmt = $this->GenerateQuery($sql);
+        $stmt = $this->GenerateQuery();
         return $stmt->rowCount();
     }
 
