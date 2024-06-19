@@ -148,10 +148,10 @@ class Database
         return $stmt->fetch($type);
     }
 
-    public function All($sql)
+    public function All(type = PDO::FETCH_OBJ)
     {
-        $stmt = $this->GenerateQuery($sql);
-        return $stmt->fetchAll();
+        $stmt = $this->GenerateQuery();
+        return $stmt->fetchAll($type);
     }
 
     public function FetchColumn()
