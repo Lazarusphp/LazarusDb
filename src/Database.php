@@ -6,7 +6,7 @@ use App\System\Core;
 use PDO;
 use PDOException;
 
-class Database
+abstract class Database
 {
     public $version  = "1.0.2";
     public $filename = __FILE__;
