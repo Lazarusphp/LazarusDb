@@ -1,11 +1,11 @@
 {
-    "name": "lazarusphp/database-manager",
+    "name": "lazarusphp/databasemanager",
     "description": "Database connection mnager for LazarusPhp framework",
     "type": "library",
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Lazarusphp\\DatabaseManager\\": "src/"      
+            "LazarusPhp\\DatabaseManager\\": "src/"      
         }
     },
     "authors": [
