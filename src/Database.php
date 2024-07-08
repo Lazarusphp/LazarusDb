@@ -2,18 +2,18 @@
 
 namespace LazarusPhp\DatabaseManager;
 
+use App\System\App;
+use LazarusPhp\DatabaseManager\CredentialsManager;
 use App\System\Core;
 use PDO;
 use PDOException;
+use PSpell\Config;
 
-abstract class Database
+abstract class Database extends CredentialsManager
 {
-    public $version  = "1.0.2";
-    public $filename = __FILE__;
-    public $updated = "18/06/2024";
+    public $config;
     
     private $sql;
-    private  $config;
     private  $connection;
     public  $is_connected = false;
     private $stmt;
@@ -21,9 +21,6 @@ abstract class Database
 
     // Params
     private  $param = array();
-    //private  $paramkey;
-    //private  $paramvalue;
-
     // Db Credntials
 
     private  $type;
@@ -35,17 +32,16 @@ abstract class Database
 
     public function __construct()
     {
-
-        $this->config = Core::GenerateRoot() . "/Config.php";
-        if (is_file($this->config) && file_exists($this->config)) {
-            include($this->config);
-            $this->type = $type;
-            $this->hostname = $hostname;
-            $this->username = $username;
-            $this->password = $password;
-            $this->dbname = $dbname;
+        $this->config = self::LoadConfig();
+        if (is_file($this->config) && file_exists($this->config)) 
+        {
+            $this->type = self::GetType();
+            $this->hostname = self::GetHostname();
+            $this->username = self::GetUsername();
+            $this->password = self::GetPassword();
+            $this->dbname = self::GetDbName();
         } else {
-            throw new \Exception("Failed to load config", 1);
+            trigger_error(E_ERROR,"Config File Does not Exist");
         }
 
         try {
