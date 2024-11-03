@@ -40,7 +40,7 @@ use Encryption;
         self::$dbname = self::$configInterface->setDbname();
     }
 
-    public static function LoadConfig(string $filename, array $class = [PhpWriter::class],):void
+    public static function Load(string $filename, array $class = [PhpWriter::class],):void
     {
        
         self::$filename = $filename;
@@ -51,7 +51,7 @@ use Encryption;
         
     }
 
-    protected static function callConfig()
+    protected static function returnConfig()
     {
         return self::BindProperties();
     }
