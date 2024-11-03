@@ -3,6 +3,9 @@ namespace LazarusPhp\DatabaseManager\Traits;
 
 trait Encryption
 {
+    private static $key = "b157faed8b8974d55ae3af5ea733cd55e2e1138cbf7020048eb0ebe9234ac4702";
+    private static $cipher = 'AES-256-CBC';
+
     public static function encryptValue($value)
     {
         $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length(self::$cipher));
