@@ -30,7 +30,7 @@ abstract class Database extends DbConfig
 
     public function __construct()
     {
-            self::callConfig();
+            self::returnConfig();
      
             $this->type = self::GetType();
             $this->hostname = self::GetHostname();
