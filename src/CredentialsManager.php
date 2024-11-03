@@ -1,6 +1,7 @@
 <?php
 namespace LazarusPhp\DatabaseManager;
 use App\System\Classes\Required\CustomErrorHandler;
+use LazarusPhp\DatabaseManager\Traits\Encryption;
 
 class CredentialsManager
 {
@@ -12,14 +13,73 @@ class CredentialsManager
     private static $dbname;
     private static $password;
 
+    private static $key = ""; // Make sure to use a secure key
+    private static $cipher = 'AES-256-CBC';
+
+
+    // Filename;
+    private static $ext;
+    // Inject Config Interface.
+    private static ConfigInterface $configInterface;
+
+    // this will work as one or the other
+    protected static $configClass = false;
+    protected static $configFile = false;
+
+
+    use Encryption;
     private function __construct()
     {
         CustomErrorHandler::Boot();
     }
-    public static function DetectFormat()
+
+    public static function configClass(array $class,$key=null,$cipher=null)
     {
-        $ext = pathinfo(self::$config,PATHINFO_EXTENSION);
+        self::$key = $key ?? self::$key;
+        self::$cipher = $cipher ?? self::$cipher;
+        if(is_array($class))
+        {
+            if(class_exists($class[0]))
+            {
+                self::$configInterface = new $class[0]();
+            }
+        }
+       $key =  self::encryptvalue(self::$configInterface->setHostname());
+       echo $key;
+      echo  self::decryptValue($key);
+
+        self::$configClass = true;
+    }
+    
+    public static function configFile($filename)
+    {
+        self::validFile($filename) ? self::$config = $filename : trigger_error("Config File $filename cannot be located.");
+
+        self::$configFile = true;
+    }
+
+
+    // Validate that the file exists and $filename is a file.
+    private static function validFile($filename):bool{
+        if(file_exists($filename) && (is_file($filename)))
+        {
+            self::$ext = self::getExtention($filename);
+            echo self::$ext;
+            return true;
+        }
+        return false;
+    }
+
+    private static function getExtention($filename)
+    {
+        return pathinfo($filename,PATHINFO_EXTENSION);
+    }
+
+
+    protected static function DetectFormat()
+    {
        
+        $ext = self::getExtention(self::$config);
         if($ext == "php")
         {
             include(self::$config);
@@ -49,7 +109,7 @@ class CredentialsManager
         self::$config = $config;
     }
 
-    public static function LoadConfig()
+    protected static function LoadConfig()
     {
         if(self::DetectFormat() == true)
         {
@@ -59,6 +119,8 @@ class CredentialsManager
             echo "Invalid Config File";
         }
     }
+
+
     public static function GetType()
     {
         return self::$type;

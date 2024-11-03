@@ -7,7 +7,6 @@ use LazarusPhp\DatabaseManager\CredentialsManager;
 use App\System\Core;
 use PDO;
 use PDOException;
-use PSpell\Config;
 
 abstract class Database extends CredentialsManager
 {
@@ -32,17 +31,17 @@ abstract class Database extends CredentialsManager
 
     public function __construct()
     {
-        $this->config = self::LoadConfig();
-        if (is_file($this->config) && file_exists($this->config)) 
-        {
+            self::LoadConfig();
+        // if (is_file($this->config) && file_exists($this->config)) 
+        // {
             $this->type = self::GetType();
             $this->hostname = self::GetHostname();
             $this->username = self::GetUsername();
             $this->password = self::GetPassword();
             $this->dbname = self::GetDbName();
-        } else {
-            trigger_error(E_ERROR,"Config File Does not Exist");
-        }
+        // } else {
+        //     trigger_error("Config File Does not Exist");
+        // }
 
         try {
             // Manage Credentials
