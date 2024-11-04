@@ -31,6 +31,11 @@ class PhpWriter implements ConfigInterface
                 trigger_error("Error Could not Located file $file");
             }
         }
+        else
+        {
+            trigger_error("Wrong File Type Loaded, Please Load a php File");
+            exit();
+        }
     }
 
     public function DetectFileType($filename)
