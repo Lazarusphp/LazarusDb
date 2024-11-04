@@ -16,10 +16,6 @@ composer require lazarusphp/databasemanager
 
 alternatively Files can be downloaded using the code dropdown menu
 
-![alt text](image.png)
-
-
-
 ## Instantiating the Database.
 Making a connection between to the database can be made by calling the static mathod DbConfig::load();
 the load() method makes use of 2 parameters the first one which is required is used to pass the configuration file.
