@@ -66,16 +66,6 @@ abstract class Database extends DbConfig
         $this->connection = null;
     }
 
-    public function sql($sql,$params=null)
-    {
-        $this->sql = $sql;
-        !is_null($params) ?  $this->param = $params : false;
-        return $this;
-    }
-    
-
-
-
     public function Options()
     {
         $options = [
