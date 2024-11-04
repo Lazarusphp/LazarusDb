@@ -52,6 +52,13 @@ trait DbQueries
         }
     }
 
+    public function sql($sql,$params=null)
+    {
+        $this->sql = $sql;
+        !is_null($params) ?  $this->param = $params : false;
+        return $this;
+    }
+    
 
     public function AddParams($name, $value)
     {
