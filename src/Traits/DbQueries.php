@@ -6,7 +6,6 @@ use PDOException;
 trait DbQueries
 {
 
-
     public function GenerateQuery($sql=null, $array = [])
     {
         !is_null($sql) ? $this->sql = $sql : false;
@@ -18,10 +17,13 @@ trait DbQueries
             $this->stmt = $this->connection->prepare($this->sql);
             if (!empty($this->param)) $this->BindParams();
             $this->param = [];
+            $this->connection->beginTransaction();
             $this->stmt->execute();
+            $this->connection->commit();
             return $this->stmt;
         } catch (PDOException $e) {
-            throw new PDOException($e->getMessage() . $e->getCode());
+            $this->connection->rollback();
+            throw $e;
         }
     }
 
