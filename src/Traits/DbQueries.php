@@ -6,12 +6,13 @@ use PDOException;
 trait DbQueries
 {
 
+    
+
     public function GenerateQuery($sql=null, $array = [])
     {
         !is_null($sql) ? $this->sql = $sql : false;
         // Get the Params
         if (!empty($array)) $this->param = $array;
-
         // Check there is a connection
         try {
             $this->stmt = $this->connection->prepare($this->sql);

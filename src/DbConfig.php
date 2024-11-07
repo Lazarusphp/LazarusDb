@@ -40,9 +40,10 @@ use Encryption;
         self::$dbname = self::$configInterface->setDbname();
     }
 
-    public static function Load(string $filename, array $class = [PhpWriter::class],):void
+    public static function Load(string $filename, array $class = [PhpWriter::class],$key):void
     {
-       
+        // Override $key
+        self::$key = $key;
         self::$filename = $filename;
         if(is_array($class))
         {

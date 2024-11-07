@@ -5,15 +5,13 @@ use LazarusPhp\DatabaseManager\Traits\Encryption;
 
 class PhpWriter implements ConfigInterface
 {
-
-
     private $type;
     private $hostname;
     private $username;
     private $password;
     private $dbname;
 
- use Encryption;
+    use Encryption;
     public function __construct($filename)
     {
         if($this->DetectFileType($filename) === "php"){
