@@ -16,7 +16,7 @@ class DbConfig
     private static $password;
     private static ConfigInterface $configInterface;
 
-    // Get the filename;
+    // get the filename;
     private static $filename;
     private static $class;
    
@@ -54,27 +54,27 @@ class DbConfig
         return self::BindProperties();
     }
 
-    protected static function GetType()
+    protected static function getType()
     {
         return EncryptionCall::decryptValue(self::$type);
     }
 
-    protected static function GetHostname()
+    protected static function getHostname()
     {
         return EncryptionCall::decryptValue(self::$hostname);
     }
 
-    protected static function GetUsername()
+    protected static function getUsername()
     {
         return EncryptionCall::decryptValue(self::$username);
     }
 
-    protected static function GetPassword()
+    protected static function getPassword()
     {
         return EncryptionCall::decryptValue(self::$password);
     }
 
-    protected static function GetDbName()
+    protected static function getDbName()
     {
         return EncryptionCall::decryptValue(self::$dbname);
     }
