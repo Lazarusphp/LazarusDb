@@ -1,13 +1,15 @@
 <?php
 
 namespace LazarusPhp\DatabaseManager;
+
+
 use PDO;
 use PDOException;
 
 abstract class Database extends DbConfig
 {
     // public $config;
-    
+    protected $config = [];
     protected $sql;
     protected  $connection;
     protected  $is_connected = false;
@@ -27,30 +29,27 @@ abstract class Database extends DbConfig
 
     public function __construct()
     {
-            self::returnConfig();
+            self::loadConfig();
      
-            $this->type = self::getType();
-            $this->hostname = self::getHostname();
-            $this->username = self::getUsername();
-            $this->password = self::getPassword();
-            $this->dbname = self::GetDbName();
-
+            $this->config = [
+                "type"=>self::getType(),
+                "hostname"=>self::getHostname(),
+                "username" => self::getUsername(),
+                "password" => self::getPassword(),
+                "dbname"=>self::getDbName(),
+            ];
 
         try {
             // Manage Credentials
             if ($this->is_connected !== true) {
                 $this->is_connected = true;
-                $this->connection = new PDO($this->dsn(), $this->username, $this->password, $this->Options());
+                $this->connection = new PDO($this->dsn(), $this->config["username"], $this->config["password"], $this->options());
             }
         } catch (PDOException $e) {
             throw new PDOException($e->getMessage(), (int)$e->getCode());
         }
 
-
     }
-
-
-
 
     public function connect():mixed
     {
@@ -62,7 +61,7 @@ abstract class Database extends DbConfig
     }
 
 
-    public function Options():array
+    public function options():array
     {
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
@@ -75,6 +74,6 @@ abstract class Database extends DbConfig
 
     private function dsn():string
     {
-        return $this->type . ":host=" . $this->hostname . ";dbname=" . $this->dbname;
+        return $this->config["type"] . ":host=" . $this->config["hostname"] . ";dbname=" . $this->config["dbname"];
     }
 }
