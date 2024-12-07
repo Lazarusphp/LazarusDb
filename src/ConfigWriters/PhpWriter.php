@@ -1,7 +1,7 @@
 <?php
 namespace LazarusPhp\DatabaseManager\ConfigWriters;
 use LazarusPhp\DatabaseManager\Interfaces\ConfigInterface;
-use LazarusPhp\DatabaseManager\Traits\Encryption;
+use LazarusPhp\SecurityFramework\EncryptionCall;
 
 class PhpWriter implements ConfigInterface
 {
@@ -10,8 +10,6 @@ class PhpWriter implements ConfigInterface
     private $username;
     private $password;
     private $dbname;
-
-    use Encryption;
     public function __construct($filename)
     {
         if($this->DetectFileType($filename) === "php"){
@@ -45,29 +43,29 @@ class PhpWriter implements ConfigInterface
 
     public function setType()
     {
-        return self::encryptValue($this->type);
+        return EncryptionCall::encryptValue($this->type);
     }
 
 
     public function setHostname()
     {
-        return self::encryptValue($this->hostname);
+        return EncryptionCall::encryptValue($this->hostname);
     }
 
 
     public function setUsername()
     {
-        return self::encryptValue($this->username);
+        return EncryptionCall::encryptValue($this->username);
     }
 
     public function setPassword()
     {
-        return self::encryptValue($this->password);
+        return EncryptionCall::encryptValue($this->password);
     }
 
     public function setDbname()
     {
-        return self::encryptValue($this->dbname);
+        return EncryptionCall::encryptValue($this->dbname);
     }
 
 }

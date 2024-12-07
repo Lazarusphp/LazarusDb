@@ -3,7 +3,7 @@ namespace LazarusPhp\DatabaseManager;
 use App\System\Classes\Required\CustomErrorHandler;
 use LazarusPhp\DatabaseManager\ConfigWriters\PhpWriter;
 use LazarusPhp\DatabaseManager\Interfaces\ConfigInterface;
-use LazarusPhp\DatabaseManager\Traits\Encryption;
+use LazarusPhp\SecurityFramework\EncryptionCall;
 
 class DbConfig
 {
@@ -24,8 +24,6 @@ class DbConfig
     // Start again here
 
 
-use Encryption;
-
     private static function bindClass(array $class):void
     {
         class_exists($class[0]) ? self::$configInterface = new $class[0](self::$filename) : trigger_error("Class Does not exist");    
@@ -40,10 +38,9 @@ use Encryption;
         self::$dbname = self::$configInterface->setDbname();
     }
 
-    public static function Load(string $filename, array $class = [PhpWriter::class],$key):void
+    public static function load(string $filename, array $class = [PhpWriter::class]):void
     {
         // Override $key
-        self::$key = $key;
         self::$filename = $filename;
         if(is_array($class))
         {
@@ -59,27 +56,27 @@ use Encryption;
 
     protected static function GetType()
     {
-        return self::decryptValue(self::$type);
+        return EncryptionCall::decryptValue(self::$type);
     }
 
     protected static function GetHostname()
     {
-        return self::decryptValue(self::$hostname);
+        return EncryptionCall::decryptValue(self::$hostname);
     }
 
     protected static function GetUsername()
     {
-        return self::decryptValue(self::$username);
+        return EncryptionCall::decryptValue(self::$username);
     }
 
     protected static function GetPassword()
     {
-        return self::decryptValue(self::$password);
+        return EncryptionCall::decryptValue(self::$password);
     }
 
     protected static function GetDbName()
     {
-        return self::decryptValue(self::$dbname);
+        return EncryptionCall::decryptValue(self::$dbname);
     }
 
 
