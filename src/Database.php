@@ -1,23 +1,21 @@
 <?php
 
 namespace LazarusPhp\DatabaseManager;
-use LazarusPhp\DatabaseManager\Traits\DbQueries;
-
 use PDO;
 use PDOException;
 
 abstract class Database extends DbConfig
 {
-    public $config;
+    // public $config;
     
-    private $sql;
-    private  $connection;
-    public  $is_connected = false;
-    private $stmt;
+    protected $sql;
+    protected  $connection;
+    protected  $is_connected = false;
+    protected $stmt;
 
 
     // Params
-    private  $param = array();
+    protected  $param = array();
     // Db Credntials
 
     private  $type;
@@ -26,16 +24,15 @@ abstract class Database extends DbConfig
     private  $password;
     private  $dbname;
 
-    use DbQueries;
 
     public function __construct()
     {
             self::returnConfig();
      
-            $this->type = self::GetType();
-            $this->hostname = self::GetHostname();
-            $this->username = self::GetUsername();
-            $this->password = self::GetPassword();
+            $this->type = self::getType();
+            $this->hostname = self::getHostname();
+            $this->username = self::getUsername();
+            $this->password = self::getPassword();
             $this->dbname = self::GetDbName();
 
 
@@ -43,7 +40,7 @@ abstract class Database extends DbConfig
             // Manage Credentials
             if ($this->is_connected !== true) {
                 $this->is_connected = true;
-                $this->connection = new PDO($this->Dsn(), $this->username, $this->password, $this->Options());
+                $this->connection = new PDO($this->dsn(), $this->username, $this->password, $this->Options());
             }
         } catch (PDOException $e) {
             throw new PDOException($e->getMessage(), (int)$e->getCode());
@@ -51,22 +48,21 @@ abstract class Database extends DbConfig
 
 
     }
-    
 
-    public function connect()
+
+
+
+    public function connect():mixed
     {
         return $this->connection;
     }
     public function __destruct()
     {
-    }
-
-    public function CloseDb()
-    {
         $this->connection = null;
     }
 
-    public function Options()
+
+    public function Options():array
     {
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
@@ -77,7 +73,7 @@ abstract class Database extends DbConfig
         return $options;
     }
 
-    private function Dsn()
+    private function dsn():string
     {
         return $this->type . ":host=" . $this->hostname . ";dbname=" . $this->dbname;
     }
