@@ -29,7 +29,7 @@ class DbConfig
         class_exists($class[0]) ? self::$configInterface = new $class[0](self::$filename) : trigger_error("Class Does not exist");    
     }
 
-    private static function BindProperties():void
+    private static function bindProperties():void
     {
         self::$type = self::$configInterface->setType();
         self::$hostname = self::$configInterface->setHostname();
@@ -49,9 +49,9 @@ class DbConfig
         
     }
 
-    protected static function returnConfig()
+    protected static function loadConfig()
     {
-        return self::BindProperties();
+        return self::bindProperties();
     }
 
     protected static function getType()

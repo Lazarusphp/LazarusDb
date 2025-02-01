@@ -7,6 +7,7 @@ class QueryBuilder extends Database
 {
 
 
+
     
     public function sql($sql,$params=null)
     {
@@ -16,7 +17,7 @@ class QueryBuilder extends Database
     }
 
 
-    public function asQuery(string $sql=null,  array $array = []):mixed
+    public function asQuery(string $sql,$array = []):mixed
     {
         !is_null($sql) ? $this->sql = $sql : false;
         // Get the Params

@@ -18,13 +18,25 @@ abstract class Database extends DbConfig
 
     // Params
     protected  $param = array();
+    protected $params;
     // Db Credntials
 
+    public static $instance = false;
     private  $type;
     private  $hostname;
     private  $username;
     private  $password;
     private  $dbname;
+
+
+    public static function open()
+    {
+        if(!self::$instance)
+        {
+            self::$instance = true;
+            return new self();
+        }
+    }
 
 
     public function __construct()
@@ -51,14 +63,11 @@ abstract class Database extends DbConfig
 
     }
 
-    public function connect():mixed
+    protected function close()
     {
-        return $this->connection;
+        return $this->connection = null;
     }
-    public function __destruct()
-    {
-        $this->connection = null;
-    }
+   
 
 
     public function options():array
