@@ -1,93 +1,83 @@
 <?php
-
 namespace LazarusPhp\DatabaseManager;
+use App\System\Classes\Required\CustomErrorHandler;
+use LazarusPhp\DatabaseManager\ConfigWriters\PhpWriter;
+use LazarusPhp\DatabaseManager\Interfaces\ConfigInterface;
+use LazarusPhp\SecurityFramework\EncryptionCall;
 
-
-use PDO;
-use PDOException;
-
-abstract class Database extends DbConfig
+class Database
 {
-    // public $config;
-    protected $config = [];
-    protected $sql;
-    protected  $connection;
-    protected  $is_connected = false;
-    protected $stmt;
 
+    private static $config;
+    private static  $type;
+    private static $username;
+    private static $hostname;
+    private static $dbname;
+    private static $password;
+    private static ConfigInterface $configInterface;
 
-    // Params
-    protected  $param = array();
-    protected $params;
-    // Db Credntials
-
-    public static $instance = false;
-    private  $type;
-    private  $hostname;
-    private  $username;
-    private  $password;
-    private  $dbname;
-
-
-    public static function open()
-    {
-        if(!self::$instance)
-        {
-            self::$instance = true;
-            return new self();
-        }
-    }
-
-
-    public function __construct()
-    {
-            self::loadConfig();
-     
-            $this->config = [
-                "type"=>self::getType(),
-                "hostname"=>self::getHostname(),
-                "username" => self::getUsername(),
-                "password" => self::getPassword(),
-                "dbname"=>self::getDbName(),
-            ];
-
-            $this->connect();
-    }
-
-    private function connect()
-    {
-        
-        try {
-            // Manage Credentials
-            if ($this->is_connected !== true) {
-                $this->is_connected = true;
-                $this->connection = new PDO($this->dsn(), $this->config["username"], $this->config["password"], $this->options());
-            }
-        } catch (PDOException $e) {
-            throw new PDOException($e->getMessage(), (int)$e->getCode());
-        }
-    }
-
-    protected function close()
-    {
-        return $this->connection = null;
-    }
+    // get the filename;
+    private static $filename;
+    private static $class;
    
 
+    // Start again here
 
-    public function options():array
+
+    private static function bindClass(array $class):void
     {
-        $options = [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
-            PDO::ATTR_EMULATE_PREPARES   => false,
-        ];
-
-        return $options;
+        class_exists($class[0]) ? self::$configInterface = new $class[0](self::$filename) : trigger_error("Class Does not exist");    
     }
 
-    private function dsn():string
+    private static function bindProperties():void
     {
-        return $this->config["type"] . ":host=" . $this->config["hostname"] . ";dbname=" . $this->config["dbname"];
+        self::$type = self::$configInterface->setType();
+        self::$hostname = self::$configInterface->setHostname();
+        self::$username = self::$configInterface->setUsername();
+        self::$password = self::$configInterface->setPassword();
+        self::$dbname = self::$configInterface->setDbname();
     }
+
+    public static function instantiate(string $filename, array $class = [PhpWriter::class]):void
+    {
+        // Override $key
+        self::$filename = $filename;
+        if(is_array($class))
+        {
+        self::bindClass($class);
+        }
+        
+    }
+
+    protected static function loadConfig()
+    {
+        return self::bindProperties();
+    }
+
+    protected static function getType()
+    {
+        return EncryptionCall::decryptValue(self::$type);
+    }
+
+    protected static function getHostname()
+    {
+        return EncryptionCall::decryptValue(self::$hostname);
+    }
+
+    protected static function getUsername()
+    {
+        return EncryptionCall::decryptValue(self::$username);
+    }
+
+    protected static function getPassword()
+    {
+        return EncryptionCall::decryptValue(self::$password);
+    }
+
+    protected static function getDbName()
+    {
+        return EncryptionCall::decryptValue(self::$dbname);
+    }
+
+
 }
