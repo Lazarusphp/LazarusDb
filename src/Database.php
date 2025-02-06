@@ -51,6 +51,12 @@ abstract class Database extends DbConfig
                 "dbname"=>self::getDbName(),
             ];
 
+            $this->connect();
+    }
+
+    private function connect()
+    {
+        
         try {
             // Manage Credentials
             if ($this->is_connected !== true) {
@@ -60,7 +66,6 @@ abstract class Database extends DbConfig
         } catch (PDOException $e) {
             throw new PDOException($e->getMessage(), (int)$e->getCode());
         }
-
     }
 
     protected function close()
