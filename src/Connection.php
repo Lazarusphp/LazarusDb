@@ -41,7 +41,7 @@ abstract class Connection extends Database
 
     public function __construct()
     {
-            self::loadConfig();
+            self::bindProperties();
      
             $this->config = [
                 "type"=>self::getType(),

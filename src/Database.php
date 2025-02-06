@@ -29,7 +29,7 @@ class Database
         class_exists($class[0]) ? self::$configInterface = new $class[0](self::$filename) : trigger_error("Class Does not exist");    
     }
 
-    private static function bindProperties():void
+    protected static function bindProperties():void
     {
         self::$type = self::$configInterface->setType();
         self::$hostname = self::$configInterface->setHostname();
@@ -47,11 +47,6 @@ class Database
         self::bindClass($class);
         }
         
-    }
-
-    protected static function loadConfig()
-    {
-        return self::bindProperties();
     }
 
     protected static function getType()
