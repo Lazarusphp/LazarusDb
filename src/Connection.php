@@ -9,7 +9,6 @@ use PDOException;
 abstract class Connection extends Database
 {
     // public $config;
-    protected $config = [];
     protected $sql;
     protected  $connection;
     protected  $is_connected = false;
@@ -21,47 +20,19 @@ abstract class Connection extends Database
     protected $params;
     // Db Credntials
 
-    public static $instance = false;
-    private  $type;
-    private  $hostname;
-    private  $username;
-    private  $password;
-    private  $dbname;
-
-
-    public static function open()
-    {
-        if(!self::$instance)
-        {
-            self::$instance = true;
-            return new self();
-        }
-    }
-
-
     public function __construct()
     {
-            self::bindProperties();
-     
-            $this->config = [
-                "type"=>self::getType(),
-                "hostname"=>self::getHostname(),
-                "username" => self::getUsername(),
-                "password" => self::getPassword(),
-                "dbname"=>self::getDbName(),
-            ];
-
+            // self::bindProperties();
             $this->connect();
     }
 
     private function connect()
     {
-        
         try {
             // Manage Credentials
             if ($this->is_connected !== true) {
                 $this->is_connected = true;
-                $this->connection = new PDO($this->dsn(), $this->config["username"], $this->config["password"], $this->options());
+                $this->connection = new PDO($this->dsn(),self::getUsername(), self::getPassword(), $this->options());
             }
         } catch (PDOException $e) {
             throw new PDOException($e->getMessage(), (int)$e->getCode());
@@ -88,6 +59,6 @@ abstract class Connection extends Database
 
     private function dsn():string
     {
-        return $this->config["type"] . ":host=" . $this->config["hostname"] . ";dbname=" . $this->config["dbname"];
+        return self::getType() . ":host=" . self::getHostname() . ";dbname=" . self::getDbName();
     }
 }
