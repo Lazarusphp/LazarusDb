@@ -36,22 +36,26 @@ class Database
         self::set("dbname", $dbname);
     }
 
-    public static function instantiate(string|array $param)
+    public static function instantiate(string|array $param = "")
     {
-        if(is_array($param))
+        if(empty($param))
+        {
+            self::bindProperties($_ENV["type"], $_ENV["hostname"], $_ENV["username"], $_ENV["password"], $_ENV["dbname"]);
+        }
+        elseif(is_array($param))
         {
             self::bindProperties($param["type"],$param["hostname"],$param["username"],$param["password"],$param["dbname"]);
         }
         elseif(file_exists($param))
-        {       
+        {   
                 include_once($param);
-                self::bindProperties($type,$hostname,$username,$password,$dbname);
-        }
+          }
         else
         {
             trigger_error("Error Occurred : File or array data not found");
         }
 
+        
 
     }
 
