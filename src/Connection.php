@@ -32,7 +32,7 @@ abstract class Connection extends Database
             // Manage Credentials
             if ($this->is_connected !== true) {
                 $this->is_connected = true;
-                $this->connection = new PDO($this->dsn(),self::getUsername(), self::getPassword(), $this->options());
+                $this->connection = new PDO($this->dsn(),self::returnBind("username"), self::returnBind("password"), $this->options());
             }
         } catch (PDOException $e) {
             throw new PDOException($e->getMessage(), (int)$e->getCode());
@@ -59,6 +59,6 @@ abstract class Connection extends Database
 
     private function dsn():string
     {
-        return self::getType() . ":host=" . self::getHostname() . ";dbname=" . self::getDbName();
+        return self::returnBind("type") . ":host=" . self::returnBind("hostname") . ";dbname=" . self::returnBind("dbname");
     }
 }

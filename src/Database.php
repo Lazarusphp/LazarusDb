@@ -49,14 +49,13 @@ class Database
         elseif(file_exists($param))
         {   
                 include_once($param);
+                self::bindProperties($type,$hostname,$username,$password,$dbname);
+            
           }
         else
         {
             trigger_error("Error Occurred : File or array data not found");
         }
-
-        
-
     }
 
     // public static function instantiate(string $filename, array $class = [PhpWriter::class]):void
@@ -71,32 +70,9 @@ class Database
 
 
 
-    protected static function getType()
+    protected static function returnBind($name)
     {
-        return self::$config["type"];
+        return self::$config[$name];
     }
-
-    protected static function getHostname()
-    {
-        return self::$config["hostname"];
-    }
-
-    protected static function getUsername()
-    {
-        return self::$config["username"];
-    }
-
-    protected static function getPassword()
-    {
-        return self::$config["password"];
-    }
-
-    protected static function getDbName()
-    {
-        return self::$config["dbname"];
-    }
-
- 
-
 
 }
