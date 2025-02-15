@@ -36,6 +36,11 @@ class Connection
         self::set("dbname", $dbname);
     }
 
+    public static function close()
+    {
+        self::$config = [];
+    }
+
     public static function instantiate(string|array $param = "")
     {
         if($param === "env")
