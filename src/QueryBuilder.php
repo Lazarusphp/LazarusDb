@@ -3,15 +3,12 @@ namespace LazarusPhp\DatabaseManager;
 use PDO;
 use PDOException;
 
-class QueryBuilder extends Connection
+class QueryBuilder extends Database
 {
 
-    public function onConnection()
-    {
-        return $this;
-    }
+    private $name;
 
-    public function sql($sql,$params=null)
+    public function sql(?string $sql,array $params)
     {
         $this->sql = $sql;
         !is_null($params) ?  $this->param = $params : false;
