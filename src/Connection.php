@@ -68,16 +68,6 @@ class Connection
         }
     }
 
-    // public static function instantiate(string $filename, array $class = [PhpWriter::class]):void
-    // {  
-    //     // Override $key
-    //     self::$filename = $filename;
-    //     if(is_array($class))
-    //     {
-    //     self::bindClass($class);
-    //     }
-    // }
-
 
 
     protected static function returnBind($name)
