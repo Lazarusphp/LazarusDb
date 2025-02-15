@@ -4,40 +4,90 @@
 The Database Manager is an Abstract Pdo Database class designed to interact between the website and the server.
 
 ## Requirments
-* A config file.
+* A config file, an array of data or an .env File
+* a Server with support for php
 * Knowlege of php and the use of composer.
 
 ## How to install?
 it is recommended to use Composer to install 
 this package, using composer will download the required files and all dependencies.
-```
+```php
 composer require lazarusphp/databasemanager
 ```
 
-alternatively Files can be downloaded using the code dropdown menu
-![alt text](ReadmeImages/code.png)
-## Instantiating the Database.
-Making a connection between to the database can be made by calling the static mathod DbConfig::load();
-the load() method makes use of 2 parameters the first one which is required is used to pass the configuration file.
+# How to instantiate
+in order to use this database Script it must first be instantiated, Connection::instantiate() is used to pass the Credentials to the script ready to use with the Database class.
 
-the second is not required but can be used to pass to a custom ConfigWriter, If left empty it will default to use [PhpWriter::class] and will require the config file to be in .php format
+The Connection Class only needs to be used once at the beginning of the script.
+
+The Connection class requires one of three  methods of input for its parameters : a file,an array or env variables if used with an .env parser.
+
+
+> Leaving the parameter blank will trigger an error.
+
+### Example 1 : Env Parser
+
+when using an env parser such as DotEnv, The database manager uses predefinded keywords which are passed to as $_ENV variable these must be used and are as follows.
+
+* type
+    * the pdo Driver type.
+* hostname
+    * hostname of the database server
+* username
+    * username of the server
+* password
+    * password for the server
+* dbname
+    * database name for the server.
 
 ```php
-use LazarusPhp\DatabaseManager\DbConfig;
-DbConfig::load(__DIR__.'/../Configs.php");
+use Lazarusphp/DatabaseManager/Connection.php
+Connection::instantiate("env");
 ```
 
-If the config file used is in an .ini format the
- [IniWriter::class] will need to be caled in the second parameter as seen in the example below.
+> do not make credentials public as this can expose your server.
+
+### Example 2 : The Config File.
+
+the second method of passing data to the database class is by using a php based Config file.
+
+the variables in a config file must be set as follows as these keywords are predefined by the Databasemanager
 
 ```php
-use LazarusPhp\DatabaseManager\DbConfig;
-use LazarusPhp\DatabaseManager\ConfigWriters\IniWriter;
-DbConfig::load($pathtoconfigfile,[IniWriter::class]);
+// php Config file.
+<?Php 
+$type="";
+$hostname="";
+$username="";
+$password="";
+$dbname="";
+>
 ```
-> All Writer classes must be wrapped in an array inputting as a string or integer will be rejected.
 
-for more information on ConfigWriters click here.
+```php
+use Lazarusphp/DatabaseManager/Connection.php
+Connection::instantiate("/path/to/config/file.php");
+```
+### Example 3 : as an array value.
+
+the third method of passing data to the database class is using an array key pair.
+
+this array data is predefined by the class and must match the following keys.`
+
+```php
+use Lazarusphp/DatabaseManager/Connection.php
+$credentials = [
+"type"=>"mysql",
+"hostname"=>"localhost",
+"username"=>"dbuser",
+"password"=>"dbpassword",
+"dbname"=>"dbname"];
+
+Connection::instantiate($credentials);
+```
+
+
+
 
 ## Using the database Queries.
 
@@ -174,3 +224,5 @@ class Users extends Database
     }
 }
 ```
+
+> the database Manager has been tested on php version 8.3 and 8.4 and currently supported on these versions
