@@ -39,10 +39,6 @@ abstract class Database extends Connection
         }
     }
 
-    public static function close()
-    {
-        self::$config = [];
-    }
 
 
    
