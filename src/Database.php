@@ -1,78 +1,66 @@
 <?php
+
 namespace LazarusPhp\DatabaseManager;
-use App\System\Classes\Required\CustomErrorHandler;
-use LazarusPhp\DatabaseManager\ConfigWriters\PhpWriter;
-use LazarusPhp\DatabaseManager\Interfaces\ConfigInterface;
-use LazarusPhp\SecurityFramework\EncryptionCall;
 
-class Database
+
+use PDO;
+use PDOException;
+
+abstract class Database extends Connection
 {
+    // public $config;
+    protected $sql;
+    protected  $connection;
+    protected  $is_connected = false;
+    protected $stmt;
 
-    private static $config = [];
 
-    protected static function set($name, $value)
+    // Params
+    protected  $param = array();
+    protected $params;
+    // Db Credntials
+
+    public function __construct()
     {
-            self::$config[$name] = $value;
+            // self::bindProperties();
+            $this->connect();
     }
 
-    protected static function get($name)
+    private function connect()
     {
-            return self::$config[$name];
-    }
-
-
-        public static function DetectFileType($filename)
-        {
-            return pathinfo($filename,PATHINFO_EXTENSION);
-        }
-    
-
-    protected static function bindProperties($type="",$hostname="",$username="",$password="",$dbname=""):void
-    {
-        self::set("type",$type);
-        self::set("hostname",$hostname);
-        self::set("username", $username);
-        self::set("password", $password);
-        self::set("dbname", $dbname);
-    }
-
-    public static function instantiate(string|array $param = "")
-    {
-        if(empty($param))
-        {
-            self::bindProperties($_ENV["type"], $_ENV["hostname"], $_ENV["username"], $_ENV["password"], $_ENV["dbname"]);
-        }
-        elseif(is_array($param))
-        {
-            self::bindProperties($param["type"],$param["hostname"],$param["username"],$param["password"],$param["dbname"]);
-        }
-        elseif(file_exists($param))
-        {   
-                include_once($param);
-                self::bindProperties($type,$hostname,$username,$password,$dbname);
-            
-          }
-        else
-        {
-            trigger_error("Error Occurred : File or array data not found");
+        try {
+            // Manage Credentials
+            if ($this->is_connected !== true) {
+                $this->is_connected = true;
+                $this->connection = new PDO($this->dsn(),self::returnBind("username"), self::returnBind("password"), $this->options());
+            }
+        } catch (PDOException $e) {
+            throw new PDOException($e->getMessage(), (int)$e->getCode());
         }
     }
 
-    // public static function instantiate(string $filename, array $class = [PhpWriter::class]):void
-    // {  
-    //     // Override $key
-    //     self::$filename = $filename;
-    //     if(is_array($class))
-    //     {
-    //     self::bindClass($class);
-    //     }
-    // }
-
-
-
-    protected static function returnBind($name)
+    public static function close()
     {
-        return self::$config[$name];
+        self::$config = [];
     }
 
+
+   
+
+
+    public function options():array
+    {
+        $options = [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+        ];
+
+        return $options;
+    }
+
+    private function dsn():string
+    {
+        return self::returnBind("type") . ":host=" . self::returnBind("hostname") . ";dbname=" . self::returnBind("dbname");
+    }
 }
