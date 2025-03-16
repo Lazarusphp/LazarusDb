@@ -7,17 +7,24 @@ class QueryBuilder extends Database
 {
 
     private $name;
+    public $lastId;
 
-    public function sql(?string $sql,array $params)
+    public function sql(?string $sql,array $params=[])
     {
         $this->sql = $sql;
-        !is_null($params) ?  $this->param = $params : false;
+        !empty($params) ?  $this->param = $params : false;
         return $this;
     }
 
-
-    public function asQuery(string $sql,$array = []):mixed
+    public function lastId()
     {
+        $this->lastId = $this->connection->lastInsertId();
+    }
+
+
+    public function asQuery(?string $sql=null,$array = []):mixed
+    {
+     
         !is_null($sql) ? $this->sql = $sql : false;
         // Get the Params
         if (!empty($array)) $this->param = $array;
@@ -28,7 +35,9 @@ class QueryBuilder extends Database
             $this->param = [];
             $this->connection->beginTransaction();
             $this->stmt->execute();
+            $this->lastId();
             $this->connection->commit();
+
             return $this->stmt;
         } catch (PDOException $e) {
             $this->connection->rollback();
