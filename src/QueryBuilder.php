@@ -6,86 +6,31 @@ use PDOException;
 class QueryBuilder extends Database
 {
 
-    private $name;
-    public $lastId;
-
-    public function sql(?string $sql,array $params=[])
+    // Insert new values
+    public function create()
     {
-        $this->sql = $sql;
-        !empty($params) ?  $this->param = $params : false;
-        return $this;
+
     }
 
-    public function lastId()
+
+    // Select / Read Values
+    public function read()
     {
-        $this->lastId = $this->connection->lastInsertId();
+
     }
 
-
-    public function asQuery(?string $sql=null,$array = []):mixed
+    // updated Values
+    public function update()
     {
-     
-        !is_null($sql) ? $this->sql = $sql : false;
-        // Get the Params
-        if (!empty($array)) $this->param = $array;
-        // Check there is a connection
-        try {
-            $this->stmt = $this->connection->prepare($this->sql);
-            if (!empty($this->param)) $this->bindParams();
-            $this->param = [];
-            $this->connection->beginTransaction();
-            $this->stmt->execute();
-            $this->lastId();
-            $this->connection->commit();
 
-            return $this->stmt;
-        } catch (PDOException $e) {
-            $this->connection->rollback();
-            throw $e;
-        }
     }
 
-     private function bindParams():void
+    // Delete Selected values
+    public function delete()
     {
-        if (!empty($this->param)) {
-            // Prepare code
-            foreach ($this->param as $key => $value) {
-                $type = $this->getParamType($value);
-                $this->stmt->bindValue($key, $value,$type);
-            }
-        }
+        $sql = "Select * from users";
+        $this->save($sql);
     }
 
-     private function getParamType($value):mixed
-{
-    switch ($value) {
-        case is_bool($value):
-            return PDO::PARAM_BOOL;
-        case is_null($value):
-            return PDO::PARAM_NULL;
-        case is_int($value):
-            return PDO::PARAM_INT;
-        case is_string($value):
-            return PDO::PARAM_STR;
-        default;
-            break;
-    }
-}
-    public function one($type=PDO::FETCH_OBJ):mixed
-    {
-        $stmt =  $this->asQuery($this->sql,$this->params);
-        return $stmt->fetch($type);
-    }
-
-    public function all($type=PDO::FETCH_OBJ)
-    {
-        $stmt = $this->asQuery();
-        return $stmt->fetchAll($type);
-    }
-
-    public function rows():int
-    {
-        $stmt = $this->asQuery();
-        return $stmt->rowCount();
-    }
+    
 }
