@@ -10,17 +10,14 @@ use RuntimeException;
 abstract class Database extends Connection
 {
     // public $config;
-    protected $sql;
     protected  $connection;
     protected  $is_connected = false;
     protected $stmt;
-    protected $name;
     public $lastId;
 
 
     // Params
-    protected  $param = array();
-    protected $params;
+    protected  $param = [];
     // Db Credntials
 
     public function __construct()
@@ -28,6 +25,20 @@ abstract class Database extends Connection
             // self::bindProperties();
             $this->connect();
     }
+
+    public function __set($name, $value)
+    {
+        $this->param[$name] = $value;
+    }
+
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->param)) {
+            return $this->param[$name];
+        }
+    }
+
+
 
     // Instantiate the Initial Connection
     private function connect()
@@ -58,19 +69,32 @@ abstract class Database extends Connection
     // Begin transaction
     protected function beginTransaction()
     {
-        $this->getConnection()->beginTransaction();
+        try {
+            $this->getConnection()->beginTransaction();
+        } catch (PDOException $e) {
+            throw new RuntimeException("Failed to begin transaction: " . $e->getMessage(), (int)$e->getCode());
+        }
     }
+        // $this->getConnection()->beginTransaction();
 
     // Commit transactoin
     protected function commit()
     {
-        $this->getConnection()->commit();
+        try {
+            $this->getConnection()->commit();
+        } catch (PDOException $e) {
+            throw new RuntimeException("Failed to commit transaction: " . $e->getMessage(), (int)$e->getCode());
+        }
     }
 
     // RollBack a transaction if failed
     protected function rollback()
     {
-        return $this->getConnection()->rollback();
+        try {
+            $this->getConnection()->rollback();
+        } catch (PDOException $e) {
+            throw new RuntimeException("Failed to rollback transaction: " . $e->getMessage(), (int)$e->getCode());
+        }
     }
 
     // Set Prepare Statement
@@ -79,28 +103,7 @@ abstract class Database extends Connection
         return $this->connection->prepare($sql);
     }
 
-    // Build and process the Database Query
-    public function save(?string $sql = null, $array = []): mixed
-    { 
-        !is_null($sql) ? $this->sql = $sql : false;
-        // Get the Params
-        if (!empty($array)) $this->param = $array;
-        // Check there is a connection
-        try {
-            $this->stmt = $this->prepare($this->sql);
-            if (!empty($this->param)) $this->bindParams();
-            $this->param = [];
-            $this->beginTransaction();
-            $this->stmt->execute();
-            $this->lastId();
-            $this->commit();
 
-            return $this->stmt;
-        } catch (PDOException $e) {
-            $this->rollback();
-            throw $e;
-        }
-    }
 
     // Return the last id the inserted value;
 
