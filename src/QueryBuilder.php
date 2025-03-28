@@ -10,6 +10,7 @@ class QueryBuilder extends Database
 
     // Set Current Table Name
     public $table;
+    public $where = [];
     // Set Current Modifier
     private $currentModifier;
     // Supported Modifiers
@@ -70,7 +71,7 @@ class QueryBuilder extends Database
         $this->sql .= " ($keys) ";
         $this->sql .= "VALUES($placeholders)";
         // Save and submit to the database.
-        return$this->save($this->sql,$this->param);
+        return $this->save($this->sql,$this->param);
 
         
  
@@ -95,6 +96,20 @@ class QueryBuilder extends Database
   
     }
 
+   public function where(string $key,int|string $value,?string $operator=null)
+   {
+        $operator = $operator ?? "=";
+        $params = uniqid("where_");
+         $condition = $key.$operator.":$params";
+          if(count($this->where))
+          {
+              $condition = " AND " . $condition;
+          }
+          $this->where[] = $condition;
+          $this->param[$params] = $value;
+          return $this;
+   }
+
     // Currently only supports 
     public function delete(callable $rawsql)
     {
@@ -114,17 +129,7 @@ class QueryBuilder extends Database
      * @param [type] $sql
      * @return void
      */
-    public function sql($sql)
-    {
-        if(in_array($this->currentModifier,$this->supportedModifiers)){
-        $this->sql .= $sql;
-        return $this;
-        }
-        else
-        {
-            throw new Exception($this->currentModifier . "is an Unsupported Modifier");
-        }
-    }
+   
     
         /**
      * Saves a raw sql query without param binding.
@@ -160,13 +165,11 @@ class QueryBuilder extends Database
             if (!empty($this->param)) $this->bindParams();
             $this->beginTransaction();
             $this->stmt->execute();
-            $this->lastId();
+            $this->lastId = $this->lastId();
             $this->commit();
-            $this->saveStatus = true;
             return $this->stmt;
         } catch (PDOException $e) {
             $this->rollback();
-            $this->saveStatus = false;
             throw $e->getMessage();
         }
     }
