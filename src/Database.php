@@ -110,7 +110,7 @@ abstract class Database extends Connection
        
     public function lastId()
     {
-        $this->lastId = $this->getConnection()->lastInsertId();
+        return $this->getConnection()->lastInsertId();
     }
 
     // Param Binding
