@@ -1,78 +1,50 @@
 <?php
 namespace LazarusPhp\DatabaseManager;
-use App\System\Classes\Required\CustomErrorHandler;
-use LazarusPhp\DatabaseManager\ConfigWriters\PhpWriter;
-use LazarusPhp\DatabaseManager\Interfaces\ConfigInterface;
-use LazarusPhp\SecurityFramework\EncryptionCall;
+use LazarusPhp\DatabaseManager\CoreFiles\Database;
 
-class Connection
+class Connection 
 {
 
+    // Set the Persistant connection property.
+    protected static $isPersistant = false;
+    // Set the path property
+    private static $path;
+    // set config property
     private static $config = [];
 
-    protected static function set($name, $value)
+    // Static setters and Getters
+
+    protected static function set(string $name, int|string $value)
     {
             self::$config[$name] = $value;
     }
 
-    protected static function get($name)
+    protected static function bind(string $name)
     {
             return self::$config[$name];
     }
 
+    // End Static Setters and Getters.
 
-        public static function DetectFileType($filename)
-        {
-            return pathinfo($filename,PATHINFO_EXTENSION);
-        }
+    public static function file(string $path)
+    {
+        self::$path = $path;
+    }
     
-
-    protected static function bindProperties($type="",$hostname="",$username="",$password="",$dbname=""):void
+    public static function activate(bool $persistent=true)
     {
-        self::set("type",$type);
-        self::set("hostname",$hostname);
-        self::set("username", $username);
-        self::set("password", $password);
-        self::set("dbname", $dbname);
-    }
+        // Validate wether persistant connection is made.
+        ($persistent===true) ? self::$isPersistant = true : self::$isPersistant = false;
+        
+        // Detect the file exists.
+        (!empty(self::$path) && file_exists(self::$path) && is_readable(self::$path)) ? include(self::$path) : false;
+        
+        isset($type) ? self::set("type", $type) : self::set("type", $_ENV["type"]);
+        isset($hostname) ? self::set("hostname", $hostname) : self::set("hostname", $_ENV["hostname"]);
+        isset($username) ? self::set("username", $username) : self::set("username", $_ENV["username"]);
+        isset($password) ? self::set("password", $password) : self::set("password", $_ENV["password"]);
+        isset($dbname) ? self::set("dbname", $dbname) : self::set("dbname", $_ENV["dbname"]);
 
-    public static function close()
-    {
-        self::$config = [];
-    }
-
-    public static function instantiate(string|array $param = "")
-    {
-        if($param === "env")
-        {
-            self::bindProperties($_ENV["type"], $_ENV["hostname"], $_ENV["username"], $_ENV["password"], $_ENV["dbname"]);
-        }
-        elseif(is_array($param))
-        {
-            self::bindProperties($param["type"],$param["hostname"],$param["username"],$param["password"],$param["dbname"]);
-        }
-        elseif(file_exists($param))
-        {   
-            if(self::DetectFileType($param) === "php"){
-                include_once($param);
-                self::bindProperties($type,$hostname,$username,$password,$dbname);
-            }
-            else
-            {
-                trigger_error("File detected is not a php file");
-            }
-          }
-        else
-        {
-            trigger_error("Error Occurred : File or array data not found");
-        }
-    }
-
-
-
-    protected static function returnBind($name)
-    {
-        return self::$config[$name];
     }
 
 }
