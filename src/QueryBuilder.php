@@ -4,72 +4,103 @@ namespace LazarusPhp\DatabaseManager;
 use Exception;
 use PDO;
 use PDOException;
-use LazarusPhp\DatabaseManager\CoreFiles\Database;
+use LazarusPhp\DatabaseManager\CoreFiles\QueryBuilderCore;
 
-class QueryBuilder extends Database
+class QueryBuilder extends QueryBuilderCore
 {
 
-    // Set Current Table Name
-    public $table;
-    public $where = [];
-    // Set Current Modifier
-    private $currentModifier;
-    // Supported Modifiers
-    private $supportedModifiers = ["read", "update", "delete"];
-    // Set save Status
-    public $saveStatus = false;
-    // Set the Sql path;
-    public $sql;
-
-    protected $stmt;
-    public $lastId;
-
-
-    // Params
-    protected  $param = [];
-
-    public function __construct(?string $table = null)
+    public function __construct(string $table = "")
     {
-        // Call the parent constructor to get the connection
         parent::__construct();
-        // table can now also be set in the constructor
-        $table ? $this->table = $table : false;
+        empty($table) ? $this->generateTable() : $this->table = $table;
+    }
+
+ // get Table
+
+    public static function table($table)
+    {
+        return new self($table);
+    }
+
+    public function raw(string $sql,array $params)
+    {
+        $this->sql = $sql;
+        $this->param = $params;
+        return $this;
+    }
+
+    // Pull and count data
+
+    
+    public function get($fetch = \PDO::FETCH_OBJ)
+    {
+        $query = $this->save();
+        return $query->fetchAll($fetch);
+    }
+
+    public  function countRows()
+    {
+        return $this->save()->rowCount();
     }
 
 
-    public function __set($name, $value)
+    public function validateFilters()
     {
-        $this->param[$name] = $value;
-    }
-
-    public function __get($name)
-    {
-        if (array_key_exists($name, $this->param)) {
-            return $this->param[$name];
+        if (count($this->allowed) > 0) {
+            $allowed = array_diff($this->allowed, $this->filtered);
+            return implode(", ", $allowed);
+        } else {
+            return "*";
         }
     }
-    
 
-    public function save(?string $sql = null, $array = []): mixed
-    { 
+    public function toSql()
+    {
+        echo $this->sql;
+    }
+
+    public function first($fetch = \PDO::FETCH_OBJ)
+    {
+        
+        return $this->save()->fetch($fetch);
+    }
+
+    public function asJson()
+    {
+        $query = $this->save();
+        $count = $query->rowCount();
+        if($count == 1)
+        {
+           $json = $query->fetch();
+        }
+        if($count > 1)
+        {
+           $json = $query->fetchAll();
+        }
+
+        header("content-type:application/json");
+        return json_encode($json,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+
+    }
+
+    public function save(?string $sql = null, $array = [])
+    {
+
         !is_null($sql) ? $this->sql = $sql : false;
         // Get the Params
         if (!empty($array)) $this->param = $array;
-        // Check there is a connection
-        try {
-            $this->stmt = $this->prepare($this->sql);
-            if (!empty($this->param)) $this->bindParams();
-            $this->beginTransaction();
-            $this->stmt->execute();
-            $this->lastId = $this->lastId();
-            $this->commit();
-            return $this->stmt;
-        } catch (PDOException $e) {
-            $this->rollback();
-            throw $e->getMessage();
-        }
-    }
 
+        $this->fetchJoins();
+        $this->fetchWhere();
+        $this->fetchGroupBy();
+        $this->fetchHaving();
+        $this->fetchOrderBy();
+        $this->fetchLimit();
+        return $this->store();
+    }
+    
+
+    
 
     
 }
