@@ -5,6 +5,7 @@ namespace LazarusPhp\DatabaseManager\CoreFiles;
 use LazarusPhp\DatabaseManager\Connection;
 use PDO;
 use PDOException;
+use RuntimeException;
 
 class Database extends Connection
 {
@@ -37,7 +38,6 @@ class Database extends Connection
             throw new PDOException($e->getMessage(), (int)$e->getCode());
         }
     }
-
 
     protected function getConnection()
     {
@@ -97,35 +97,7 @@ class Database extends Connection
         return $this->getConnection()->lastInsertId();
     }
 
-    // Param Binding
 
-    protected function bindParams(): void
-    {
-        if (!empty($this->param)) {
-            // Prepare code
-            foreach ($this->param as $key => $value) {
-                $type = $this->getParamType($value);
-                $this->stmt->bindValue($key, $value, $type);
-            }
-        }
-    }
-
-    // Get the Param Type
-    protected function getParamType($value)
-    {
-        switch ($value) {
-            case is_bool($value):
-                return PDO::PARAM_BOOL;
-            case is_null($value):
-                return PDO::PARAM_NULL;
-            case is_int($value):
-                return PDO::PARAM_INT;
-            case is_string($value):
-                return PDO::PARAM_STR;
-            default;
-                break;
-        }
-    }
 
     // Dsn Options
 
