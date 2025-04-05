@@ -1,5 +1,5 @@
 <?php
-namespace LazarusPhp\DatabaseManager\QueryBuilder\Traits\Clauses;
+namespace LazarusPhp\LazarusDb\QueryBuilder\Traits\Clauses;
 
 trait Where
 {

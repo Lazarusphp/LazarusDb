@@ -1,6 +1,6 @@
 <?php
-namespace LazarusPhp\DatabaseManager;
-use LazarusPhp\DatabaseManager\CoreFiles\Database;
+namespace LazarusPhp\LazarusDb;
+use LazarusPhp\LazarusDb\CoreFiles\Database;
 
 class Connection 
 {

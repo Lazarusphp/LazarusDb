@@ -1,8 +1,8 @@
 <?php
 
-namespace LazarusPhp\DatabaseManager\CoreFiles;
+namespace LazarusPhp\LazarusDb\CoreFiles;
 
-use LazarusPhp\DatabaseManager\Connection;
+use LazarusPhp\LazarusDb\Connection;
 use PDO;
 use PDOException;
 use RuntimeException;

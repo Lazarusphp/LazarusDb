@@ -1,16 +1,16 @@
 <?php
 
-namespace LazarusPhp\DatabaseManager\CoreFiles;
-use LazarusPhp\DatabaseManager\QueryBuilder\Traits\Controllers\Insert;
-use LazarusPhp\DatabaseManager\QueryBuilder\Traits\Controllers\Delete;
-use LazarusPhp\DatabaseManager\QueryBuilder\Traits\Controllers\Update;
-use LazarusPhp\DatabaseManager\QueryBuilder\Traits\Controllers\Select;
-use LazarusPhp\DatabaseManager\QueryBuilder\Traits\Clauses\Grouping;
-use LazarusPhp\DatabaseManager\QueryBuilder\Traits\Clauses\Having;
-use LazarusPhp\DatabaseManager\QueryBuilder\Traits\Clauses\Joins;
-use LazarusPhp\DatabaseManager\QueryBuilder\Traits\Clauses\Limit;
-use LazarusPhp\DatabaseManager\QueryBuilder\Traits\Clauses\Order;
-use LazarusPhp\DatabaseManager\QueryBuilder\Traits\Clauses\Where;
+namespace LazarusPhp\LazarusDb\CoreFiles;
+use LazarusPhp\LazarusDb\QueryBuilder\Traits\Controllers\Insert;
+use LazarusPhp\LazarusDb\QueryBuilder\Traits\Controllers\Delete;
+use LazarusPhp\LazarusDb\QueryBuilder\Traits\Controllers\Update;
+use LazarusPhp\LazarusDb\QueryBuilder\Traits\Controllers\Select;
+use LazarusPhp\LazarusDb\QueryBuilder\Traits\Clauses\Grouping;
+use LazarusPhp\LazarusDb\QueryBuilder\Traits\Clauses\Having;
+use LazarusPhp\LazarusDb\QueryBuilder\Traits\Clauses\Joins;
+use LazarusPhp\LazarusDb\QueryBuilder\Traits\Clauses\Limit;
+use LazarusPhp\LazarusDb\QueryBuilder\Traits\Clauses\Order;
+use LazarusPhp\LazarusDb\QueryBuilder\Traits\Clauses\Where;
 use ReflectionClass;
 
 use PDO;

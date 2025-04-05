@@ -1,5 +1,5 @@
 <?php
-namespace LazarusPhp\DatabaseManager\QueryBuilder\Traits\Controllers;
+namespace LazarusPhp\LazarusDb\QueryBuilder\Traits\Controllers;
 
 
 trait Select

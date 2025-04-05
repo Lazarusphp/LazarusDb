@@ -1,10 +1,10 @@
 <?php
-namespace LazarusPhp\DatabaseManager;
+namespace LazarusPhp\LazarusDb;
 
 use Exception;
 use PDO;
 use PDOException;
-use LazarusPhp\DatabaseManager\CoreFiles\QueryBuilderCore;
+use LazarusPhp\LazarusDb\CoreFiles\QueryBuilderCore;
 
 class QueryBuilder extends QueryBuilderCore
 {
