@@ -7,8 +7,10 @@ class Connection
 
     // Set the Persistant connection property.
     protected static $isPersistant = false;
+
     // Set the path property
     private static $path;
+    protected static $isConnected;
     // set config property
     private static $config = [];
 
@@ -29,6 +31,11 @@ class Connection
     public static function file(string $path)
     {
         self::$path = $path;
+    }
+
+    public static function isConnected()
+    {
+        return self::$isConnected ? true : false;
     }
     
     public static function activate(bool $persistent=true)

@@ -11,7 +11,6 @@ class Database extends Connection
 {
     // Class implementation goes here
     protected  $connection;
-    protected  $is_connected = false;
     protected $stmt;
     public $lastId;
 
@@ -30,8 +29,8 @@ class Database extends Connection
         // check for Connection
         try {
             // Manage Credentials
-            if(!$this->is_connected){
-                $this->is_connected = true;
+            if(!self::$isConnected){
+                self::$isConnected = true;
                 $this->connection = new PDO($this->dsn(),self::bind("username"), self::bind("password"), $this->options());
             }
         } catch (PDOException $e) {
@@ -41,7 +40,7 @@ class Database extends Connection
 
     protected function getConnection()
     {
-        if($this->is_connected){
+        if(self::$isConnected){
         return $this->connection;
         }
         else
