@@ -1,6 +1,6 @@
 {
     "name": "lazarusphp/lazarusdb",
-    "description": "Database connection mnager for LazarusPhp framework",
+    "description": "Database connection manager for LazarusPhp framework",
     "type": "library",
     "license": "MIT",
     "autoload": {
