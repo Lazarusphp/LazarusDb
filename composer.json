@@ -1,5 +1,5 @@
 {
-    "name": "lazarusphp/databasemanager",
+    "name": "lazarusphp/lazarusdb",
     "description": "Database connection mnager for LazarusPhp framework",
     "type": "library",
     "license": "MIT",
