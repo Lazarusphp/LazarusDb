@@ -18,10 +18,7 @@ abstract class Database extends Connection
     public function __construct()
     {
         // check if connection is perisitant if so run $this connect
-        if(self::$isPersistant)
-        {
             $this->connect();
-        }
     }
 
 

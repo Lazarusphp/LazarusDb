@@ -33,16 +33,11 @@ class Connection
         self::$path = $path;
     }
 
-    public static function isConnected()
-    {
-        return self::$isConnected ? true : false;
-    }
+
     
-    public static function activate(bool $persistent=true)
+    public static function activate()
     {
-        // Validate wether persistant connection is made.
-        ($persistent===true) ? self::$isPersistant = true : self::$isPersistant = false;
-        
+
         // Detect the file exists.
         (!empty(self::$path) && file_exists(self::$path) && is_readable(self::$path)) ? include(self::$path) : false;
         
