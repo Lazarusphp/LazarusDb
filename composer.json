@@ -13,6 +13,6 @@
             "name": "Martin Bamber"
         }
     ],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "require": {}
 }
