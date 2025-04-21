@@ -21,17 +21,14 @@ in order to instantiate a Connection between any website/system and its database
 ```php
 Connection::activate();
 ```
-**Persistant connection and non Persistant connection**
-as part of the new v1.1.1 update, the database class now supports both persistant and non persistant connection
 
-in order to disable a persistant connection simply add false into the activate parameter like so.
 
 ```php
-Connection::activate(false);
+Connection::activate();
 ```
 **Env and php config files**
 
-new to version V1.1.1, .env format is supported by default, if a php config file is the prefferred option this can be accomplished by simply adding the file method above activate will override the env format.
+new to version V1.1.1, .env format is supported by default, if a php config file is the prefferred option this can be accomplished by simply adding the file method above activate will override the env format Arrays are not currently supported.
 
 ```php
 Connection::file("/path/of/Config.php");
