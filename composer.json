@@ -5,7 +5,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "LazarusPhp\\DatabaseManager\\": "src/"      
+            "LazarusPhp\\lazarusdb\\": "src/"      
         }
     },
     "authors": [
@@ -13,6 +13,6 @@
             "name": "Martin Bamber"
         }
     ],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "require": {}
 }
