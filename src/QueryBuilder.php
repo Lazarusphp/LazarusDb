@@ -46,10 +46,14 @@ class QueryBuilder extends QueryBuilderCore
 
     public function countRows()
     {
-        $query = $this->save();
-        if($query->rowCount() === 0)
+        $count = $this->save()->rowCount();
+        if($count === 0)
         {  
             return false;
+        }
+        else
+        {
+            return $count;
         }
     }
 
