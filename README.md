@@ -111,25 +111,55 @@ within the querybuilder there are 4 methods of saving these include save() get()
 
 2. get(): this method is used to pull multiple records and is recommened to be used with a foreach Loop like so
     ```php
-    $users = QueryBuilder::table("users")->select()->where("id",1,">")->first();
-
-    foreach($users as $user)
+    $users = QueryBuilder::table("users")->select()->where("id",1,">")->get();
+    // doing a count check is not required, a warning error will be outputted itself naturally
+    if($users)
     {
-        echo $user->username . "<br>";
+        foreach($users as $user)
+        {
+            echo $user->username . "<br>";
+        }
     }
+    else
+    {
+        echo "no users found";
+    }
+ 
     ```
 
 3. first(): as the method name states this will pull the data from the first record chosen from the sql statement and should be used with a where clause
 
     ```php
     $users = QueryBuilder::table("users")->select()->where("id",1)->first();
-    echo $users->username;
+    //Simply output the user values
+    echo $users->username.
+    //check if users exist, this will do a count on the results;
+    if($users)
+    {
+        echo $users->username
+    }
+    else
+    {
+        echo "no users found";
+    }
+
     ```
  4. countRows(): this method like the first and get is used to simply get how many rows have been found
 
     ```php
-    $users = QueryBuilder::table("users")->select()->where("id",1);
-    echo $users->CountRows();
+    //By default no results will return in false
+    $users = QueryBuilder::table("users")->select()->where("id",1)->count();
+    //use if else to return results
+    if(!$users)
+    {
+        // this will return an error
+    }
+    else
+    {
+        // return the amount of users
+        echo $users;
+    }
+        
     ```
 
 [click here](./src/QueryBuilder/QueryBuilder.md) for more indepth options of the QueryBuilder controllers and clauses.
