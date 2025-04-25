@@ -35,12 +35,26 @@ class QueryBuilder extends QueryBuilderCore
     public function get($fetch = \PDO::FETCH_OBJ)
     {
         $query = $this->save();
+        if($query->rowCount() >= 1){
         return $query->fetchAll($fetch);
+        }
+        else
+        {
+            trigger_error("Users cannot be found");
+        }
     }
 
-    public  function countRows()
+    public function countRows()
     {
-        return $this->save()->rowCount();
+        $query = $this->save();
+        if($query->rowCount() > 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
 
@@ -61,8 +75,12 @@ class QueryBuilder extends QueryBuilderCore
 
     public function first($fetch = \PDO::FETCH_OBJ)
     {
-        
-        return $this->save()->fetch($fetch);
+        $query = $this->save();
+        if($query->rowCount() === 1)
+        {
+            return $query->fetch($fetch);
+        }
+        return false;
     }
 
     public function asJson()
