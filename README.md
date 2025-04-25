@@ -163,7 +163,7 @@ within the querybuilder there are 4 methods of saving these include save() get()
     ```
 **Note**
 
-each method is designed to do a count as an error will be thrown if the use of first get or count are done in the same code block.
+each method (get, count and first) all do a count on the value on execution as the script will throw an error if these methods are used inconjuction with each other.
 
 [click here](./src/QueryBuilder/QueryBuilder.md) for more indepth options of the QueryBuilder controllers and clauses.
 
