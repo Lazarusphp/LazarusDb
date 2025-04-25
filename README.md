@@ -161,6 +161,8 @@ within the querybuilder there are 4 methods of saving these include save() get()
     }
         
     ```
+**Note**
+each method is designed to do a count as an error will be thrown if the use of first get or count are done in the same code block.
 
 [click here](./src/QueryBuilder/QueryBuilder.md) for more indepth options of the QueryBuilder controllers and clauses.
 
