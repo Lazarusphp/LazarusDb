@@ -5,48 +5,87 @@ namespace LazarusPhp\LazarusDb\QueryBuilder\Traits\Clauses;
 trait Joins
 {
     protected  $joins  = [];
-    public  function innerJoin($table,$alias=null)
+    // Renamed innerjoin to join for consistency
+    public  function join(string $table,string $key, string|int $value, ?string $alias=null)
     {
+
         $this->joins[] = " INNER JOIN $table ";
+
         if(!is_null($alias))
         {
          $this->joins[] = " $alias ";
         }
+
+        $this->on($key,$value);
+
         return $this;
     }
 
-    public  function rightJoin($table,$alias)
+    public  function rightJoin(string $table,string $key, string|int $value, ?string $alias=null)
     {
-        $this->joins[] = " RIGHT JOIN $table $alias ";
-        return $this;
 
+        $this->joins[] = " RIGHT JOIN $table ";
+
+        if(!is_null($alias))
+        {
+         $this->joins[] = " $alias ";
+        }
+
+        $this->on($key,$value);
+
+        return $this;
     }
 
-    public  function crossJoin($table,$alias)
+    public  function crossJoin(string $table,string $key, string|int $value, ?string $alias=null)
     {
-        $this->joins[] = " CROSS JOIN $table $alias ";
-        return $this;
 
+        $this->joins[] = " CROSS JOIN $table ";
+
+        if(!is_null($alias))
+        {
+         $this->joins[] = " $alias ";
+        }
+
+        $this->on($key,$value);
+
+        return $this;
     }
 
-    public  function leftJoin($table,$alias)
+    public  function leftJoin(string $table,string $key, string|int $value, ?string $alias=null)
     {
-        $this->joins[] = " RIGHT JOIN  $table $alias ";
+
+        $this->joins[] = " LEFT JOIN $table ";
+
+        if(!is_null($alias))
+        {
+         $this->joins[] = " $alias ";
+        }
+
+        $this->on($key,$value);
+
         return $this;
     }
 
-    public  function fullJoin($table,$alias)
+    public  function fullJoin(string $table,string $key, string|int $value, ?string $alias=null)
     {
-        $this->joins[] = " FULL JOIN  $table $alias ";
+
+        $this->joins[] = " FULL JOIN $table ";
+
+        if(!is_null($alias))
+        {
+         $this->joins[] = " $alias ";
+        }
+
+        $this->on($key,$value);
+
         return $this;
     }
 
 
-    public  function  on($key,$value)
+    private  function  on($key,$value)
     {
         $condition = "$key=$value";
         $this->joins[] = "ON $condition";
-        return $this;
     }
 
     public  function fetchJoins()
