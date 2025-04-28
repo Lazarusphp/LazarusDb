@@ -59,6 +59,19 @@ abstract class QueryBuilderCore extends Database
    
     // End Table Management.
 
+
+    
+
+    protected  function processQuery()
+    {
+        $this->fetchJoins();
+        $this->fetchWhere();
+        $this->fetchGroupBy();
+        $this->fetchHaving();
+        $this->fetchOrderBy();
+        $this->fetchLimit();
+    }
+
     // Magic Setters and Getters
 
 

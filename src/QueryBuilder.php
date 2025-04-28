@@ -76,6 +76,21 @@ class QueryBuilder extends QueryBuilderCore
     public function first($fetch = \PDO::FETCH_OBJ)
     {
         $query = $this->save();
+        echo "Helo";
+        if ($query->rowCount() === 1) {
+            $this->result = $query->fetch($fetch); // Store the result for chaining
+            return $this;
+        }
+        $this->result = false; // Store false if no result
+        return $this;
+    }
+
+    public function getResult()
+    {
+        return $this->result;
+    }
+    {
+        $query = $this->save();
         if($query->rowCount() === 1)
         {
             return $query->fetch($fetch);
