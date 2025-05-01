@@ -34,7 +34,7 @@ class QueryBuilder extends QueryBuilderCore
     
     public function get($fetch = \PDO::FETCH_OBJ)
     {
-        $query = $this->save();
+        $query = $this->store();
      
 
         if($query->rowCount() >= 1){
@@ -48,7 +48,7 @@ class QueryBuilder extends QueryBuilderCore
 
     public function countRows()
     {
-        $count = $this->save()->rowCount();
+        $count = $this->store();->rowCount();
         if($count === 0)
         {  
             return false;
@@ -78,7 +78,7 @@ class QueryBuilder extends QueryBuilderCore
 
     public function first($fetch = \PDO::FETCH_OBJ)
     {
-        $query = $this->save();
+        $query = $this->store();
         if($query->rowCount() === 1)
         {
             return $query->fetch($fetch);
@@ -88,7 +88,7 @@ class QueryBuilder extends QueryBuilderCore
 
     public function asJson()
     {
-        $query = $this->save();
+        $query = $this->store();
         $count = $query->rowCount();
         if($count == 1)
         {
@@ -99,28 +99,13 @@ class QueryBuilder extends QueryBuilderCore
            $json = $query->fetchAll();
         }
 
-        header("content-type:application/json");
         return json_encode($json,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
 
     }
 
 
-    public function saveUpdate()
-    {
-        $sql = $this->sql;
-        echo $this->sql;
-    }
 
 
-    public function save(?string $sql = null, $array = [])
-    {
-
-        !is_null($sql) ? $this->sql = $sql : false;
-        // Get the Params
-        if (!empty($array)) $this->param = $array;
-        $this->processQuery();
-        return $this->store();
-    }
     
 
     
