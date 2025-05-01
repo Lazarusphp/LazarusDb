@@ -62,6 +62,7 @@ abstract class QueryBuilderCore extends Database
 
     
 
+    // New ProcessQUery Will Store the Passed Values.
     protected  function processQuery()
     {
         $this->fetchJoins();
@@ -75,15 +76,38 @@ abstract class QueryBuilderCore extends Database
     // Magic Setters and Getters
 
 
+    /**
+     * @mehtod __set
+     * @param string $name , $name of the array
+     * @param mixed $value , value of array can be int for string
+     * @description : method is used to store values into an array using magic methods.
+     */
     public function __set($name, $value)
     {
+        // Check if no array exists with the same name.
+        if(!array_key_exists($name,$this->param){
+            // Store the value to the array with the $name parameter.
         $this->param[$name] = $value;
+        }else{
+            // Throw an exception stating the error doesnt exist
+            throw new \Exception("The parameter $name already exists in the query builder.");
+        }
     }
 
     public function __get($name)
     {
         if (array_key_exists($name, $this->param)) {
-            return $this->param[$name];
+            if(is_scalar($this->param[$name]) && !is_null($this->param[$name]))
+            {
+                return $this->param[$name];
+            }
+            else
+            {
+                throw new \Exception("The parameter $name is an invalud type or is null");
+            }
+        }
+        else {
+            throw new \Exception("The parameter $name does not exist in the query builder.");
         }
     }
 
@@ -120,6 +144,11 @@ abstract class QueryBuilderCore extends Database
         }
     }
 
+    private function unbind()
+    {
+        $this->param = [];
+    }
+
     // End Param Binding
 
 
@@ -132,6 +161,7 @@ abstract class QueryBuilderCore extends Database
             $this->beginTransaction();
             $this->stmt->execute();
             $this->commit();
+            $this->unbind();
             return $this->stmt;
         } catch (PDOException $e) {
             $this->rollback();
