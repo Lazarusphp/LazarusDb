@@ -85,7 +85,7 @@ abstract class QueryBuilderCore extends Database
     public function __set($name, $value)
     {
         // Check if no array exists with the same name.
-        if(!array_key_exists($name,$this->param){
+        if(!array_key_exists($name,$this->param)){
             // Store the value to the array with the $name parameter.
         $this->param[$name] = $value;
         }else{
@@ -152,9 +152,16 @@ abstract class QueryBuilderCore extends Database
     // End Param Binding
 
 
+
+
+
+
     // Store or request data from database
     public function store(): mixed
     {
+
+        // Process Query 
+        $this->processQuery();
         try {
             $this->stmt = $this->prepare($this->sql);
             if (!empty($this->param)) $this->bindParams();
