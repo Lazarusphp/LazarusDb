@@ -147,4 +147,16 @@ trait Joins
         }
         return $joins;
     }
+
+    // Predefined Joins
+
+    public function hasOne($table,$key,$value)
+    {
+        try{
+            return $this->join($table,$key,$value);
+        }
+        catch(\Exception $e){
+            throw new \Exception("The table $table does not exist in the database.");
+        }
+    }
 }
