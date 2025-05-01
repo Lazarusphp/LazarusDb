@@ -18,7 +18,8 @@ trait Insert
         $this->sql .= "INSERT INTO " . $this->table ;
         $this->sql .= " ($keys) ";
         $this->sql .= "VALUES($placeholders)";
-        return $this->save($this->sql,$this->param);
+        $this->processQuery();
+        return $this->store();
     }
 
     public function replace(array $data = [])
@@ -36,6 +37,7 @@ trait Insert
         $this->sql .= "REPLACE INTO " . $this->table ;
         $this->sql .= " ($keys) ";
         $this->sql .= "VALUES($placeholders)";
-        return $this->save($this->sql,$this->param);
+        $this->processQuery();
+        return $this->store();
     }
 }
