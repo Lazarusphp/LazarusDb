@@ -36,7 +36,6 @@ class QueryBuilder extends QueryBuilderCore
     {
         $query = $this->store();
      
-
         if($query->rowCount() >= 1){
         return $query->fetchAll($fetch);
         }
@@ -48,7 +47,7 @@ class QueryBuilder extends QueryBuilderCore
 
     public function countRows()
     {
-        $count = $this->store();->rowCount();
+        $count = $this->store()->rowCount();
         if($count === 0)
         {  
             return false;
@@ -102,6 +101,7 @@ class QueryBuilder extends QueryBuilderCore
         return json_encode($json,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
 
     }
+
 
 
 
