@@ -4,8 +4,16 @@ namespace LazarusPhp\LazarusDb\QueryBuilder\Traits\Clauses;
 
 trait Joins
 {
+    
     protected  $joins  = [];
     // Renamed innerjoin to join for consistency
+
+     /**
+     * @method join
+     * @param string $table : table name to join
+     * @param string $key : key is the name of the table/alias, this is passed to @method on 
+     * @return $this
+     */
     public  function join(string $table,string $key, string|int $value, ?string $alias=null)
     {
 
@@ -17,10 +25,16 @@ trait Joins
         }
 
         $this->on($key,$value);
-
         return $this;
     }
 
+
+     /**
+     * @method rightJoin
+     * @param string $table : table name to join
+     * @param string $key : key is the name of the table/alias, this is passed to @method on 
+     * @return $this
+     */
     public  function rightJoin(string $table,string $key, string|int $value, ?string $alias=null)
     {
 
@@ -36,6 +50,12 @@ trait Joins
         return $this;
     }
 
+     /**
+     * @method crossJoin
+     * @param string $table : table name to join
+     * @param string $key : key is the name of the table/alias, this is passed to @method on 
+     * @return $this
+     */
     public  function crossJoin(string $table,string $key, string|int $value, ?string $alias=null)
     {
 
@@ -51,6 +71,12 @@ trait Joins
         return $this;
     }
 
+    /**
+     * @method leftJoin
+     * @param string $table : table name to join
+     * @param string $key : key is the name of the table/alias, this is passed to @method on 
+     * @return $this
+     */
     public  function leftJoin(string $table,string $key, string|int $value, ?string $alias=null)
     {
 
@@ -66,6 +92,13 @@ trait Joins
         return $this;
     }
 
+    /**
+     *  @method fullJoin
+     *  @param string $table : table name to join
+     *  @param string $key : key is the name of the table/alias, this is passed to @method on
+     *  @param string|int $value : value of the join clause
+     *  @param string|null $alias : alias for the table
+     */
     public  function fullJoin(string $table,string $key, string|int $value, ?string $alias=null)
     {
 
@@ -82,20 +115,36 @@ trait Joins
     }
 
 
+    /**
+     *  @method on
+     *  @param string $key : key is the name of the table/alias
+     *  @param string|int $value : value of the join clause
+     *  @description : This method is used to set the join condition for the query builder.
+     *  @access private
+     *  @return void
+     */
     private  function  on($key,$value)
     {
         $condition = "$key=$value";
         $this->joins[] = "ON $condition";
     }
 
-    public  function fetchJoins()
+    /**
+     * *  @method fetchJoins
+     * *  @return array $joins : returns the joins array
+     * *  @description : This method fetches the joins from the query builder and appends them to the SQL string.
+     * *  @access protected
+     */
+    protected  function fetchJoins()
     {
         $joins = [];
         if(count($this->joins)) {
             foreach ($this->joins as $join) {
                 $joins[] = $join;
             }
-            $this->sql .= implode(" ", $joins);
+            
+            $this->sql .= implode(" ", $this->joins);
         }
+        return $joins;
     }
 }
