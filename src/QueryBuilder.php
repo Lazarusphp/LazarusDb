@@ -35,6 +35,8 @@ class QueryBuilder extends QueryBuilderCore
     public function get($fetch = \PDO::FETCH_OBJ)
     {
         $query = $this->save();
+     
+
         if($query->rowCount() >= 1){
         return $query->fetchAll($fetch);
         }
@@ -70,25 +72,11 @@ class QueryBuilder extends QueryBuilderCore
 
     public function toSql()
     {
-        echo $this->sql;
+        $this->processQuery();
+        return $this->sql;
     }
 
     public function first($fetch = \PDO::FETCH_OBJ)
-    {
-        $query = $this->save();
-        echo "Helo";
-        if ($query->rowCount() === 1) {
-            $this->result = $query->fetch($fetch); // Store the result for chaining
-            return $this;
-        }
-        $this->result = false; // Store false if no result
-        return $this;
-    }
-
-    public function getResult()
-    {
-        return $this->result;
-    }
     {
         $query = $this->save();
         if($query->rowCount() === 1)
@@ -116,19 +104,21 @@ class QueryBuilder extends QueryBuilderCore
 
     }
 
+
+    public function saveUpdate()
+    {
+        $sql = $this->sql;
+        echo $this->sql;
+    }
+
+
     public function save(?string $sql = null, $array = [])
     {
 
         !is_null($sql) ? $this->sql = $sql : false;
         // Get the Params
         if (!empty($array)) $this->param = $array;
-
-        $this->fetchJoins();
-        $this->fetchWhere();
-        $this->fetchGroupBy();
-        $this->fetchHaving();
-        $this->fetchOrderBy();
-        $this->fetchLimit();
+        $this->processQuery();
         return $this->store();
     }
     
