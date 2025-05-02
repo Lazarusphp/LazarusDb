@@ -36,6 +36,7 @@ class QueryBuilder extends QueryBuilderCore
     {
         $query = $this->store();
      
+
         if($query->rowCount() >= 1){
         return $query->fetchAll($fetch);
         }
@@ -47,7 +48,7 @@ class QueryBuilder extends QueryBuilderCore
 
     public function countRows()
     {
-        $count = $this->store()->rowCount();
+        $count =  $this->store()->rowCount();
         if($count === 0)
         {  
             return false;
@@ -87,7 +88,7 @@ class QueryBuilder extends QueryBuilderCore
 
     public function asJson()
     {
-        $query = $this->store();
+        $query = $this->save();
         $count = $query->rowCount();
         if($count == 1)
         {
@@ -98,11 +99,17 @@ class QueryBuilder extends QueryBuilderCore
            $json = $query->fetchAll();
         }
 
+        header("content-type:application/json");
         return json_encode($json,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
 
     }
 
 
+    public function saveUpdate()
+    {
+        $sql = $this->sql;
+        echo $this->sql;
+    }
 
 
 

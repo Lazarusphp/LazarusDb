@@ -150,13 +150,38 @@ trait Joins
 
     // Predefined Joins
 
-    public function hasOne($table,$key,$value)
+    /**
+     * @method hasOne
+     * @param string $table, Child table name.
+     * @param string $child_key, Child table key.
+     * @param string $parent_key, Parent table key.
+     * @description : This method is used to join the child table with the parent table using the hasOne relationship.
+     * order of parameters is important. child table required to join child table coloum, and parent column.
+     * @access public
+     * @return $this->join
+     * @throws \Exception
+     * @example $this->hasOne('users','id','user_id',1) =
+     *  $this->join('users','users.id','user_id')->where("users.id,1)->first();
+     */
+    public function hasOne($table,$child_key,$parent_key,$id)
     {
         try{
-            return $this->join($table,$key,$value);
+            return $this->join($table,$table.".$child_key",$this->table.".$parent_key")->where($this->table.".$parent_key",$id)->first();
         }
         catch(\Exception $e){
             throw new \Exception("The table $table does not exist in the database.");
         }
     }
+
+    public function belongsTo($table,$child_key,$parent_key,$id)
+    {
+        try{
+            return $this->rightJoin($table,$table.".$child_key",$this->table.".$parent_key")->where($this->table.".$parent_key",$id,">=");
+        }
+        catch(\Exception $e){
+            throw new \Exception("The table $table does not exist in the database.");
+        }
+    }
+
+    
 }
