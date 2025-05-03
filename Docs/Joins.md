@@ -7,7 +7,13 @@
 4. [Full Joins](#full-joins)  
 5. [Left Join](#left-join)  
 6. [Right Join](#right-join)  
-7. [Cross Join](#cross-join)  
+
+8. [Predefined Join Methods](#predefined-join-methods)  
+    - [hasOne](#hasone)  
+    - [belongsTo](#belongsto)  
+    - [oneToMany](#onetomany)  
+    - [manyToMany](#manytomany)  
+
 
 
 ## Join
