@@ -22,13 +22,6 @@ class QueryBuilder extends QueryBuilderCore
         return new self($table);
     }
 
-    public function raw(string $sql,array $params)
-    {
-        $this->sql = $sql;
-        $this->param = $params;
-        return $this;
-    }
-
     // Pull and count data
 
     
@@ -70,10 +63,16 @@ class QueryBuilder extends QueryBuilderCore
         }
     }
 
+    public function save()
+    {
+        return $this->store();
+    }
+
     public function toSql()
     {
+        // Escape special characters for safe output
         $this->processQuery();
-        return $this->sql;
+        return htmlspecialchars($this->sql, ENT_QUOTES, 'UTF-8');
     }
 
     public function first($fetch = \PDO::FETCH_OBJ)
