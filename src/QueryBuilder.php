@@ -9,6 +9,13 @@ use LazarusPhp\LazarusDb\CoreFiles\QueryBuilderCore;
 class QueryBuilder extends QueryBuilderCore
 {
 
+    /**
+     * @method __construct
+     * @param string $table
+     * @description This method is used to initialize the QueryBuilder class.
+     * It sets the table name for the query builder. If no table name is provided,
+     * it generates a default table name based on the extended class name
+     */
     public function __construct(string $table = "")
     {
         parent::__construct();
@@ -17,6 +24,15 @@ class QueryBuilder extends QueryBuilderCore
 
  // get Table
 
+ /**
+  * @method table
+    * @param string $table
+    * @return QueryBuilder
+    * @description This method is used to set the table name for the query builder.
+    * It creates a new instance of the QueryBuilder class with the specified table name.
+    * This allows you to chain methods for building SQL queries on the specified table.
+    * @example QueryBuilder::table('users')->select()->where('id', 1)->get();
+  */
     public static function table($table)
     {
         return new self($table);
@@ -25,10 +41,16 @@ class QueryBuilder extends QueryBuilderCore
     // Pull and count data
 
     
+    /**
+     * @method get
+     * @param int $fetch
+     * @return array|false
+     * @description This method is used to execute the SQL query and fetch the results.
+     * It returns an array of results or false if no results are found. 
+     */#
     public function get($fetch = \PDO::FETCH_OBJ)
     {
         $query = $this->store();
-     
 
         if($query->rowCount() >= 1){
         return $query->fetchAll($fetch);
@@ -38,6 +60,33 @@ class QueryBuilder extends QueryBuilderCore
             trigger_error("Users cannot be found");
         }
     }
+
+    public function toJson($fetch = \PDO::FETCH_OBJ)
+    {
+        $query = $this->store();
+        if($query->rowCount() >= 1){
+            echo "Hello";
+            return json_encode($query, JSON_PRETTY_PRINT);
+          
+        }
+        elseif($query->rowCount() === 1)
+        {
+            $query = $query->first($fetch);
+            return json_encode($query($fetch), JSON_PRETTY_PRINT);
+        }
+        else
+        {
+            trigger_error("Users cannot be found");
+        }
+    }
+
+
+    /**
+     * @method countRows
+     * @return int|false
+     * @description This method is used to count the number of rows returned by the query.
+     * It returns the row count or false if no rows are found.
+     */
 
     public function countRows()
     {
@@ -53,21 +102,20 @@ class QueryBuilder extends QueryBuilderCore
     }
 
 
-    public function validateFilters()
-    {
-        if (count($this->allowed) > 0) {
-            $allowed = array_diff($this->allowed, $this->filtered);
-            return implode(", ", $allowed);
-        } else {
-            return "*";
-        }
-    }
-
+    // temporary method for supporing Sessions Class
     public function save()
     {
         return $this->store();
     }
 
+
+
+
+    /**
+     * @method store
+     * @return string @property $this->toSql
+     * @description Method returns string format of sql query including params
+     */
     public function toSql()
     {
         // Escape special characters for safe output
@@ -75,6 +123,14 @@ class QueryBuilder extends QueryBuilderCore
         return htmlspecialchars($this->sql, ENT_QUOTES, 'UTF-8');
     }
 
+    /**
+     * @method first
+     * @param int $fetch
+     * @return object|false
+     * @description method is used to return a single row based on the query.
+     * 
+     * object return if true else trigger an error message
+     */
     public function first($fetch = \PDO::FETCH_OBJ)
     {
         $query = $this->store();
@@ -84,35 +140,6 @@ class QueryBuilder extends QueryBuilderCore
         }
         return false;
     }
-
-    public function asJson()
-    {
-        $query = $this->save();
-        $count = $query->rowCount();
-        if($count == 1)
-        {
-           $json = $query->fetch();
-        }
-        if($count > 1)
-        {
-           $json = $query->fetchAll();
-        }
-
-        header("content-type:application/json");
-        return json_encode($json,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
-
-    }
-
-
-    public function saveUpdate()
-    {
-        $sql = $this->sql;
-        echo $this->sql;
-    }
-
-
-
-    
 
     
 
