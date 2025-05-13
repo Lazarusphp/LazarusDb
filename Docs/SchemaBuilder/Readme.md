@@ -2,9 +2,27 @@
 * Version 1.0
 
 
+## Table of Contents
+
+- [What is the Scheme QueryBuilder](#what-is-the-scheme-querybuilder)
+- [Instantiation](#instantiation)
+- [Current supported data types](#current-supported-data-types)
+- [Supported indexes](#supported-indexes)
+- [Other features](#other-features)
+- [Foreign Key Support](#foreign-key-support)
+- [Example code structure](#example-code-structure)
+    - [Create Method](#create-method)
+    - [Example code for Dropping a table](#example-code-for-dropping-a-table)
+    - [Example code for Renaming a table](#example-code-for-renaming-a-table)
+    - [Creating indexes](#creating-indexes)
+    - [Unique Indexes](#unique-indexes)
+    - [Checking a table exists](#checking-a-table-exists)
+
+
+
 ## What is the Scheme QueryBuilder
 
-LazarusDb Scheme builder is an object based Database Creation class.
+LazarusDb Schema builder is an object based Database Creation class.
 
 ## Instantiation
 in order to use the schema builder class an instantiation must be first made, the class offers both both an object based and static based instantiation process.
@@ -94,13 +112,12 @@ Schema::table("users")->rename("members");
 
 ```
 
-## Creating indexes
 
 ```php
 
 Schema::table("users")->index("username");
 
-// can also bve accomplishes like so
+// can also bve accomplished like so
 
 Schema::table("users")->create(function($table)
 {
@@ -120,7 +137,7 @@ Schema::table("users")->create(function($table)
 
 Schema::table("users")->unique("username");
 
-// can also bve accomplishes like so
+// can also bve accomplished like so
 
 Schema::table("users")->create(function($table)
 {
