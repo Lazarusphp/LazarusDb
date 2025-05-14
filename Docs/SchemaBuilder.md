@@ -41,11 +41,22 @@ Schema::table("users")->create(function($table)
  
  **Supported colum datatypes**
 
-* integer
-* bigint;
-* string
-* text 
-* largetext
+* tinyint()
+    * a small number based value
+* int()
+    * a number based value
+* bigint()
+    * A big number based value
+* string() 
+    * varchar datatype supports various charcaters supports character lengh upto 255.
+* text()
+    * a text based datatype recommended for paragraphs.
+* mediumText()
+    * a Medium Text datatype ideal for making content with paragraphs with a larger capacity support than text().
+* longLext()
+    * a Long Text datatype ideal for making content with paragraphs with a larger capacity support than text() and mediumText().
+* date();
+* dateTime();
 
 # Modifier Methods.
 
@@ -57,11 +68,15 @@ schema::table("users2")->rename("users2");
 The Alter Method is used to change or rename the value of a colum and its datatype.
 
 **Supported datatypes**
-* integer
-* bigint;
-* string
-* text 
-* largetext
+* tinyint()
+* int()
+* bigint()
+* string()
+* text()
+* mediumText()
+* longLext()
+* date();
+* dateTime();
 
 # Deletion tools
 ## Delete method
