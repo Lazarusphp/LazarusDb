@@ -88,7 +88,6 @@ Schema::table("users")->create(function($table)
     $table->varchar("username",100)->store();
     $table->varchar("password")->store()
     $table->priimaryKey("id")->store();
-    $table->build();
 })
 ```
 
@@ -126,7 +125,6 @@ Schema::table("users")->create(function($table)
     $table->varchar("password")->store()
     $table->index("username")->store();
     $table->priimaryKey("id")->store();
-    $table->build();
 })
 ```
 
@@ -146,7 +144,6 @@ Schema::table("users")->create(function($table)
     $table->varchar("password")->store()
     $table->unique("username")->store();
     $table->priimaryKey("id")->store();
-    $table->build();
 })
 
 ```
