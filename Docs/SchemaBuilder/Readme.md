@@ -162,3 +162,27 @@ else
 }
 
 ```
+
+## Altering and Modifying Tables
+
+it is possible to add and remove coloums from a table without the need for backing up and recreating the entire table structure and its data this is done using the alter() method.
+
+### Example alter code.
+```php
+Scheme::table("users")->alter(function($table))
+{
+    $table->add()->varchar("postcode",8)->store();
+});
+```
+
+ALter method supports 4 callable methods which work in conjuction with the exisitng datatypes foreign keys and indexes listed above
+
+
+* add
+    * adds a new colum
+* modify
+    * Modify an exsiting colums datatype
+* drop
+    * drop a column
+* rename
+    * rename a coloumn
