@@ -32,7 +32,7 @@ as part of the new structuring the class categories ie Database Querybuilder and
 Shared Assets Will contain methods that will be used between all the Classes these will be created as traits and interfaces.
 
 
-Complete : [x]
+- [x] Codebase Restructure completed
 
 Start Date : 18/05/2025
 
@@ -45,6 +45,7 @@ The next plan is to make a universal Database Management Package Making all clas
 2. Restructure the QueryBuilder to support new Changes from the Database Class
 3. Restructure the SchemaBuilder class to support new changes with the database as well as a new codebase structure for the schemaBuilder itself.
 
-Completed : [];
+- [ ] Restructure completed on 
+
 Started on : 18/05/2025
 Completed on :
