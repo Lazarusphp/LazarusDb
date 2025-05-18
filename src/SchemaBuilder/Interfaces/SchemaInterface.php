@@ -1,6 +1,6 @@
 <?php
 
-namespace LazarusPhp\LazarusDb\Interfaces;
+namespace LazarusPhp\LazarusDb\SchemaBuilder\Interfaces;
 
 interface SchemaInterface
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace LazarusPhp\LazarusDb\CoreFiles;
+namespace LazarusPhp\LazarusDb\Database\CoreFiles;
 
-use LazarusPhp\LazarusDb\Connection;
+use LazarusPhp\LazarusDb\Database\Connection;
 use PDO;
 use PDOException;
 use RuntimeException;
@@ -78,11 +78,19 @@ abstract class Database extends Connection
         }
     }
 
-    // Set Prepare Statement
+    // Set Prepare Statement using prepart
     protected function prepare(string $sql)
     {
         return $this->connection->prepare($sql);
     }
+
+    // Set prepare statements using query
+        protected function query(string $sql)
+    {
+    
+        return $this->connection->query($sql);
+    }
+
 
 
 

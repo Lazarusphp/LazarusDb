@@ -2,7 +2,7 @@
 
 namespace LazarusPhp\LazarusDb\SchemaBuilder;
 
-use LazarusPhp\LazarusDb\Interfaces\SchemaLoaderInterface;
+use LazarusPhp\LazarusDb\SchemaBuilder\Interfaces\SchemaLoaderInterface;
 use Reflection;
 use ReflectionClass;
 
@@ -11,6 +11,19 @@ class SchemaLoader
     public $table;
     public $classname;
     private SchemaLoaderInterface $schemaLoaderInterface;
+
+    public static function load(string $dir)
+    {
+        $scandir = scandir($dir);
+        foreach($scandir as $directory)
+        {
+            if($directory !== "." && $directory !== "..")
+            {
+                $filename = pathinfo($directory,PATHINFO_FILENAME);
+                new SchemaLoader("Schemas\\$filename");
+            }
+        }
+    }
 
     private function hasbody($schema,$methodname)
     {
@@ -47,15 +60,12 @@ class SchemaLoader
         $this->schemaLoaderInterface = new $schema();
         if(class_exists($schema))
         {
-                   
-            if($this->hasbody($schema,"modify"))
+       
+            if(method_exists($this->schemaLoaderInterface,"drop") && $this->hasbody($this->schemaLoaderInterface,"drop"))
             {
-                 $this->schemaLoaderInterface->modify($this->table);
+                $this->schemaLoaderInterface->drop($this->table);
             }
-            else
-            {
                 $this->schemaLoaderInterface->create($this->table);
-            }
    
         }
     }

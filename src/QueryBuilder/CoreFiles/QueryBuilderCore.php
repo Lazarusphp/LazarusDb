@@ -1,6 +1,8 @@
 <?php
 
-namespace LazarusPhp\LazarusDb\CoreFiles;
+namespace LazarusPhp\LazarusDb\QueryBuilder\CoreFiles;
+
+use LazarusPhp\LazarusDb\Database\CoreFiles\Database;
 use LazarusPhp\LazarusDb\QueryBuilder\Traits\Controllers\Insert;
 use LazarusPhp\LazarusDb\QueryBuilder\Traits\Controllers\Delete;
 use LazarusPhp\LazarusDb\QueryBuilder\Traits\Controllers\Update;
@@ -12,6 +14,7 @@ use LazarusPhp\LazarusDb\QueryBuilder\Traits\Clauses\Limit;
 use LazarusPhp\LazarusDb\QueryBuilder\Traits\Clauses\Order;
 use LazarusPhp\LazarusDb\QueryBuilder\Traits\Clauses\Where;
 use ReflectionClass;
+
 
 use PDO;
 

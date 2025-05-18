@@ -2,8 +2,8 @@
 
 namespace LazarusPhp\LazarusDb\SchemaBuilder;
 
-use LazarusPhp\LazarusDb\Interfaces\SchemaInterface;
-use LazarusPhp\LazarusDb\CoreFiles\SchemaCore;
+use LazarusPhp\LazarusDb\SchemaBuilder\Interfaces\SchemaInterface;
+use LazarusPhp\LazarusDb\SchemaBuilder\CoreFiles\SchemaCore;
 use LazarusPhp\LazarusDb\SchemaBuilder\Traits\DataTypes;
 use LazarusPhp\LazarusDb\SchemaBuilder\Traits\Fk;
 use LazarusPhp\LazarusDb\SchemaBuilder\Traits\Indexes;
@@ -24,26 +24,6 @@ class Build extends SchemaCore implements SchemaInterface
      * @param string $name
      * @return void
      */
-    private function obtainMethod(string $name)
-    {
-        // Convert to lower.
-        $name = strtolower($name);
-        switch($name)
-        {
-            case "add":
-                $this->query .= " ADD ";
-                break;
-            case "modify":
-                $this->query .= " MODIFY ";
-                break;
-            case "drop":
-                $this->query .= " DROP ";
-                break;
-        }
-        return $this;
-    }
-
-    
 
     public function defaultDate()
     {
@@ -68,6 +48,9 @@ class Build extends SchemaCore implements SchemaInterface
         }
         return $this;
     }
+
+
+
 
     public function store()
     {
@@ -97,12 +80,6 @@ class Build extends SchemaCore implements SchemaInterface
     // Constraint
 
 
-    // On delete
-
-    public function query()
-    {
-        return $this->query;
-    }
 
 
     public function build()

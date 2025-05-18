@@ -1,7 +1,7 @@
 <?php
 
 namespace LazarusPhp\LazarusDb\SchemaBuilder;
-use LazarusPhp\LazarusDb\CoreFiles\SchemaCore;
+use LazarusPhp\LazarusDb\SchemaBuilder\CoreFiles\SchemaCore;
 
 class Schema extends SchemaCore
 {
@@ -32,7 +32,7 @@ class Schema extends SchemaCore
     public function hasTable()
     {
         $query = "SHOW TABLES LIKE '" . self::$table . "'";
-        $result = $this->save($query);
+        $result = $this->query($query);
         if ($result && $result->rowCount() >= 1) {
            return true;
         }
@@ -43,6 +43,36 @@ class Schema extends SchemaCore
     }
 
 
+    public function allColumns()
+    {
+        $query = "SHOW COLUMNS FROM `" . self::$table . "`";
+        // Use a direct PDO query to avoid interfering with self::$sql
+        $stmt = $this->query($query);
+        if ($stmt && $stmt->rowCount() > 0) {
+            $column = [];
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                $column[] = $row;
+            }
+
+        return $column;
+        }
+        return false;
+    }
+
+    public function hasColumns($key,$value)
+    {
+        foreach($this->allColumns() as $column)
+        {
+            if(isset($column[$key]) && $column[$key] === $value)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
 
 
     public function create(callable $table)
@@ -56,6 +86,7 @@ class Schema extends SchemaCore
         }
 
         self::$sql .= ")";
+        
        $result = $this->save();
         return $result ? true : false ;
     }
@@ -69,7 +100,6 @@ class Schema extends SchemaCore
             $table($class);
             self::$sql .= $class->build();
         }
-        echo self::$sql;
     $result = $this->save();
     return $result ? true : false;
 

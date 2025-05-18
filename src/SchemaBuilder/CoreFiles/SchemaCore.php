@@ -1,8 +1,8 @@
 <?php
-namespace LazarusPhp\LazarusDb\CoreFiles;
+namespace LazarusPhp\LazarusDb\SchemaBuilder\CoreFiles;
 
 use Exception;
-use LazarusPhp\LazarusDb\CoreFiles\Database;
+use LazarusPhp\LazarusDb\Database\CoreFiles\Database;
 use PDO;
 use PDOException;
 
@@ -15,7 +15,7 @@ abstract class SchemaCore extends Database
     protected $name;
     protected static $table;
     // Sql Statement
-    protected static  $sql;
+    protected static  $sql = "";
 
     // Constructor
 
@@ -37,6 +37,11 @@ abstract class SchemaCore extends Database
 
     
 
+    // protected function query($sql)
+    // {
+    //     $pdo = $this->getConnection();
+    //     return $pdo->query($sql);
+    // }
 
     protected function save(string $sql = "")
     {
