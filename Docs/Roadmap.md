@@ -36,4 +36,15 @@ Complete : [x]
 
 Start Date : 18/05/2025
 
-Completion Date : 
+Completion Date : 18/05/2025
+
+## Codebase Restructure
+The next plan is to make a universal Database Management Package Making all classes work seamlessly with each other, this task will be done in three parts
+
+1. Restructure the Database Class, allowing for support for both persistant and non persistant classes.
+2. Restructure the QueryBuilder to support new Changes from the Database Class
+3. Restructure the SchemaBuilder class to support new changes with the database as well as a new codebase structure for the schemaBuilder itself.
+
+Completed : [];
+Started on : 18/05/2025
+Completed on :
