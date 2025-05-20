@@ -116,9 +116,6 @@ class QueryBuilder extends QueryBuilderCore
         return $this->store();
     }
 
-
-
-
     /**
      * @method store
      * @return string @property $this->toSql
