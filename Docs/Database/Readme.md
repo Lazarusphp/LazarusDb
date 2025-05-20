@@ -69,6 +69,16 @@ public function index(Users $users)
 }
 ```
 
+**OnConnection**
+
+The Database class now supports a onConnection method, this cannot be used directly but is put in place for use with QueryBuilder, this allows the query to change database name before execution.
+
+
+```php
+QueryBuilder::onConnection("lphpdb2")->table("users")->select()->save();
+```
+ note that when using onConnection table can be chained as both static (::) and object (->) based.
+
 **Reading Data from the Database**
 
 ```php
