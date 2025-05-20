@@ -2,6 +2,7 @@
 namespace LazarusPhp\LazarusDb\QueryBuilder;
 
 use Exception;
+use LazarusPhp\LazarusDb\Database\Connection;
 use PDO;
 use PDOException;
 use LazarusPhp\LazarusDb\QueryBuilder\CoreFiles\QueryBuilderCore;
@@ -38,8 +39,13 @@ class QueryBuilder extends QueryBuilderCore
         return new self($table);
     }
 
-    // Pull and count data
+    /**
+     * Clone the current QueryBuilder instance with a different database connection.
+     * @param Connection $connection
+     * @return static
+     */
 
+    // Pull and count data
     
     /**
      * @method get
@@ -88,6 +94,8 @@ class QueryBuilder extends QueryBuilderCore
      * It returns the row count or false if no rows are found.
      */
 
+
+
     public function countRows()
     {
         $count =  $this->store()->rowCount();
@@ -122,6 +130,8 @@ class QueryBuilder extends QueryBuilderCore
         $this->processQuery();
         return htmlspecialchars($this->sql, ENT_QUOTES, 'UTF-8');
     }
+
+
 
     /**
      * @method first
