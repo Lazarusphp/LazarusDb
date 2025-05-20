@@ -2,6 +2,7 @@
 
 namespace LazarusPhp\LazarusDb\QueryBuilder\CoreFiles;
 
+use LazarusPhp\LazarusDb\Database\Connection;
 use LazarusPhp\LazarusDb\Database\CoreFiles\Database;
 use LazarusPhp\LazarusDb\QueryBuilder\Traits\Controllers\Insert;
 use LazarusPhp\LazarusDb\QueryBuilder\Traits\Controllers\Delete;
@@ -14,6 +15,7 @@ use LazarusPhp\LazarusDb\QueryBuilder\Traits\Clauses\Limit;
 use LazarusPhp\LazarusDb\QueryBuilder\Traits\Clauses\Order;
 use LazarusPhp\LazarusDb\QueryBuilder\Traits\Clauses\Where;
 use ReflectionClass;
+use PDOException;
 
 
 use PDO;
@@ -150,6 +152,7 @@ abstract class QueryBuilderCore extends Database
     private function unbind()
     {
         $this->param = [];
+        Connection::resetConnection();
     }
 
     // End Param Binding
