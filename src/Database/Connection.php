@@ -90,7 +90,7 @@ class Connection
         return new static;
     }
 
-    protected function resetConnection()
+    protected static function resetConnection()
     {
         self::set("dbname",$_ENV["dbname"]);
     }
