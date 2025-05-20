@@ -9,34 +9,21 @@ use RuntimeException;
 
 abstract class Database extends Connection
 {
+
     // Class implementation goes here
-    protected  $connection;
-    protected  $is_connected = false;
+
     protected $stmt;
     public $lastId;
 
     public function __construct()
     {
-        // check if connection is perisitant if so run $this connect
-           return  $this->connect();
+        $this->connect();
     }
 
 
-    private function connect()
-    {
-        // check for Connection
-        try {
-            // Manage Credentials
-            if(!$this->is_connected){
-                $this->is_connected = true;
-                $this->connection = new PDO($this->dsn(),self::bind("username"), self::bind("password"), $this->options());
-            }
-        } catch (PDOException $e) {
-            throw new PDOException($e->getMessage(), (int)$e->getCode());
-        }
-    }
 
-    protected function getConnection()
+
+    private function getConnection()
     {
         if($this->is_connected){
         return $this->connection;
@@ -81,19 +68,15 @@ abstract class Database extends Connection
     // Set Prepare Statement using prepart
     protected function prepare(string $sql)
     {
-        return $this->connection->prepare($sql);
+        return $this->getConnection()->prepare($sql);
     }
 
     // Set prepare statements using query
         protected function query(string $sql)
     {
-    
-        return $this->connection->query($sql);
+        return $this->getConnection()->query($sql);
     }
-
-
-
-
+    
     // Return the last id the inserted value;
 
        
@@ -103,23 +86,4 @@ abstract class Database extends Connection
     }
 
 
-
-    // Dsn Options
-
-    
-    public function options():array
-    {
-        $options = [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
-            PDO::ATTR_EMULATE_PREPARES   => false,
-        ];
-
-        return $options;
-    }
-
-    private function dsn():string
-    {
-        return self::bind("type") . ":host=" . self::bind("hostname") . ";dbname=" . self::bind("dbname");
-    }
 }

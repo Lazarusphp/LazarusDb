@@ -1,20 +1,21 @@
 <?php
 namespace LazarusPhp\LazarusDb\Database;
 
+use LazarusPhp\LazarusDb\QueryBuilder\QueryBuilder;
+use PDO;
+use PDOException;
+
 class Connection 
 {
-
     // Set the Persistant connection property.
-    protected static $isPersistant = false;
-
-    // Set the path property
-    private static $path;
-    protected static $isConnected;
+    // Validate if connection is Live
+    protected $is_connected = false;
+    // Attach connection
+    protected  $connection;
     // set config property
     private static $config = [];
 
     // Static setters and Getters
-
     protected static function set(string $name, int|string $value)
     {
             self::$config[$name] = $value;
@@ -24,28 +25,73 @@ class Connection
     {
             return self::$config[$name];
     }
-
-    // End Static Setters and Getters.
-
-    public static function file(string $path)
+     protected function connect()
     {
-        self::$path = $path;
+        // check for Connection
+        try {
+            // Manage Credentials
+            if(!$this->is_connected){
+                $this->is_connected = true;
+                $this->connection = new PDO($this->dsn(),self::bind("username"), self::bind("password"), $this->options());
+            }
+        } catch (PDOException $e) {
+            throw new PDOException($e->getMessage(), (int)$e->getCode());
+        }
     }
-
 
     
-    public static function activate()
+    // Dsn Options
+
+    
+    protected function options():array
     {
+        $options = [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+        ];
 
-        // Detect the file exists.
-        (!empty(self::$path) && file_exists(self::$path) && is_readable(self::$path)) ? include(self::$path) : false;
-        
-        isset($type) ? self::set("type", $type) : self::set("type", $_ENV["type"]);
-        isset($hostname) ? self::set("hostname", $hostname) : self::set("hostname", $_ENV["hostname"]);
-        isset($username) ? self::set("username", $username) : self::set("username", $_ENV["username"]);
-        isset($password) ? self::set("password", $password) : self::set("password", $_ENV["password"]);
-        isset($dbname) ? self::set("dbname", $dbname) : self::set("dbname", $_ENV["dbname"]);
-
+        return $options;
     }
 
+    private function dsn():string
+    {
+        return self::bind("type") . ":host=" . self::bind("hostname") . ";dbname=" . self::bind("dbname");
+    }
+
+
+
+    /**
+     * Activate
+     *
+     * @param boolean $isPersistant
+     * @return void
+     */
+    public static function activate()
+    {
+        $type = $_ENV["type"] ?? null;
+        $username = $_ENV["username"] ?? null;
+        $hostname = $_ENV["hostname"] ?? null;
+        $password = $_ENV["password"] ?? null;
+        $dbname = $_ENV["dbname"] ?? null;
+        // Detect the file exists.
+        isset($type) ? self::set("type", $type) : trigger_error("Connection driver invalid or missing");
+        isset($hostname) ? self::set("hostname", $hostname) : trigger_error("Hostname invalid or missing");
+        isset($username) ? self::set("username", $username) : trigger_error("Username invalid or missing");
+        isset($password) ? self::set("password", $password) : trigger_error("Password invalid or missing");
+        isset($dbname) ? self::set("dbname", $dbname) : trigger_error("Database name invalid or missing");
+        
+    }
+
+    public static function onConnection($value)
+    {
+        // Return the called class for chainloading
+        self::set("dbname",$value);
+        return new static;
+    }
+
+    protected function resetConnection()
+    {
+        self::set("dbname",$_ENV["dbname"]);
+    }
 }
