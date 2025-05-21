@@ -36,7 +36,8 @@ Setting up and using the querybuilder can be done with three different approache
 ```php
 
 namespace App\System\Http\Model;
-use Lazarusphp\LazarusDb\QueryBuilder;
+use Lazarusphp\LazarusDb\QueryBuilder\QueryBuilder;
+
 class Users Extends QueryBuilder
 {
 
