@@ -120,7 +120,7 @@ $users = new Users();
 $user = $users->select("username")->save();
 echo $user->fetch()->username;
 ```
-find out more about restricting data by clicking [Here]("Select.md") 
+find out more about restricting data by clicking [Here](Select.md) 
 
 
 
