@@ -32,6 +32,13 @@ trait Select
       return $this;
   }
 
+    public function unionAll($table)
+  {
+      $this->table = $table;
+      $this->sql .= " UNION ALL ";
+      return $this;
+  }
+
     /**
      * Find or fail
      *
