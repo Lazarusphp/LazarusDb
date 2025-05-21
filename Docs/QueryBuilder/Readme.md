@@ -1,10 +1,23 @@
 # LazarusDb : Query Builder
 
+## Table of Contents
+
+- [What is lazarus db QueryBuilder](#what-is-lazarus-db-querybuilder)
+- [Downloading and installing](#downloading-and-installingf)
+- [Instantiation](#instantiation)
+    - [Extending the Querybuilder](#instantiation)
+    - [Directly Calling the QueryBuilder](#instantiation)
+    - [Statically calling QueryBuilder](#instantiation)
+- [Using a different database name](#using-a-different-database-name)
+- [Selecting Specific Data](#selecting-specific-data)
+- [Restricting Data](Select.md)
+
 ## What is lazarus db QueryBuilder
  QueryBuilder is an object orientated Sql Query Builder, the sql statement is built up in fragments and merged and binded using named parameters.
 
 
-## Downloading and installingf
+
+## Downloading and installing
 
 ```php
 composer require lazarusphp/lazarusdb
