@@ -111,7 +111,16 @@ $users->onConnection("dbname2")->select()->save();
 dd($users->fetchAll());
 ```
 
-## More Query Builder functions.
+## Selecting Specific Data
+the QueryBuilder select method allows the ability to target specific data.
+leaving the select method empty will display everything.
 
-[Joins]("./Joins.md")
+```php
+$users = new Users();
+$user = $users->select("username")->save();
+echo $user->fetch()->username;
+```
+find out more about restricting data by clicking [Here]("Select.md") 
+
+
 
