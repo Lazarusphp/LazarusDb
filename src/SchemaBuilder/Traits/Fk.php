@@ -4,40 +4,55 @@ namespace LazarusPhp\LazarusDb\SchemaBuilder\Traits;
 
 trait Fk
 {
-        public function constraint()
-    {
-        $this->query .= "CONSTRAINT ";
-        return $this;
-    }
-    
-    // Foreign Key
 
-    public function foreignKey($column)
-    {
-        $this->query .= " FOREIGN KEY fk_". self::$table. "($column) ";
-        return $this;
-    }
-    //FK Reference
+    protected $fk = [];
+    protected $fkCol;
+    protected $refTable = [];
+    protected $refCol = [];
 
-    public function references(string $table,string $column)
+    protected $ondelete = false;
+    protected $delete = [];
+    protected $onupdate = false;
+    protected $update = [];
+
+    protected $constraint = false;
+
+    public function constraint(string $column)
     {
-        $this->query .= " REFERENCES $table($column)";
-        return $this;
-    }
-    // use cascade no action restrict and set null.
-    //  on update
-    public function onUpdate(string $action="restrict")
-    {
-        $action = strtoupper($action);
-        $this->query .= " ON UPDATE $action ";
+        $this->constraint = true;
+        $this->fkCol = $column;
         return $this;
     }
 
-    public function onDelete(string $action="restrict")
+    public function foreignKey(string $column = "")
     {
-          $action = strtoupper($action);
-        $this->query .= " ON DELETE $action ";
+        if(!isset($this->constraint) && $this->constraint === false && !empty($column))
+        {
+             $this->fkCol = $column;
+        }
+        $this->fk[$this->fkCol] = $column;
         return $this;
     }
+
+    public function references($table,$column)
+    {
+        $this->refTable[$this->fkCol] = $table;
+        $this->refCol[$this->fkCol] = $column;
+        return $this;
+    }
+
+    public function loadFk()
+    {
+        foreach($this->fk as $key => $fk)
+        {
+            
+            $constraints = $this->constraint === true ? " CONSTRAINT fk_".$fk." ": " ";
+            $delete = array_ex? " ON DELETE $option"         $this->query["fk"] = $constraints . "FOREIGN KEY fk_".$fk." (".$fk.") REFERENCES " . $this->refTable[$key] . "(" . $this->refCol[$key] . ") ";
+            
+        }
+
+        return implode(",", $this->query);
+    }
+
 
 }

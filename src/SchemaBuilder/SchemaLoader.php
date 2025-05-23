@@ -63,9 +63,9 @@ class SchemaLoader
        
             if(method_exists($this->schemaLoaderInterface,"drop") && $this->hasbody($this->schemaLoaderInterface,"drop"))
             {
-                $this->schemaLoaderInterface->drop($this->table);
+                $this->schemaLoaderInterface->down($this->table);
             }
-                $this->schemaLoaderInterface->create($this->table);
+                $this->schemaLoaderInterface->up($this->table);
    
         }
     }

@@ -2,107 +2,62 @@
 
 namespace LazarusPhp\LazarusDb\SchemaBuilder;
 use LazarusPhp\LazarusDb\SchemaBuilder\CoreFiles\SchemaCore;
+use LazarusPhp\LazarusDb\SharedAssets\Traits\TableControl;
 
 class Schema extends SchemaCore
 {
-    public function __construct(string|array $table)
+    use TableControl;
+
+    public static function table($table)
     {
-        parent::__construct();
-        // Leaving $table empty will require static instantiation using schema::table("tablename");
-        if (!(is_array($table) || is_string($table)))
-        {
-            trigger_error("Must be an array or string");
-        }
-        else
-        {
-            self::$table = is_array($table) ? implode(", ",$table) : $table;
-        }
+        self::$table = $table;
+        return new static;
     }
 
-    // Can be called statically with table.
-    public static function table(string|array $table)
-    {
-   
-        return new self($table);
+    // public function create(callable $table)
+    // {    
+    //     self::$sql = "CREATE TABLE IF NOT EXISTS " . self::$table . " (";
+    //     if(is_callable($table))
+    //     {
+    //         $class = new Build();
+    //         $table($class);
+    //         self::$sql .= $class->build();
+    //     }
+
+    //     self::$sql .= ")";
         
-    }
+    //    $result = $this->save();
+    //     return $result ? true : false ;
+    // }
 
-  
+    //     public function alter(callable $table)
+    // {
+    //     self::$sql = "ALTER TABLE " . self::$table;
+    //     if(is_callable($table))
+    //     {
+    //         $class = new AlterTable();
+    //         $table($class);
+    //         self::$sql .= $class->build();
+    //     }
+    // $result = $this->save();
+    // return $result ? true : false;
 
-    public function hasTable()
+    // }
+
+    public function test(callable $table)
     {
-        $query = "SHOW TABLES LIKE '" . self::$table . "'";
-        $result = $this->query($query);
-        if ($result && $result->rowCount() >= 1) {
-           return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-
-    public function allColumns()
-    {
-        $query = "SHOW COLUMNS FROM `" . self::$table . "`";
-        // Use a direct PDO query to avoid interfering with self::$sql
-        $stmt = $this->query($query);
-        if ($stmt && $stmt->rowCount() > 0) {
-            $column = [];
-            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-                $column[] = $row;
-            }
-
-        return $column;
-        }
-        return false;
-    }
-
-    public function hasColumns($key,$value)
-    {
-        foreach($this->allColumns() as $column)
-        {
-            if(isset($column[$key]) && $column[$key] === $value)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-    }
-
-
-    public function create(callable $table)
-    {    
         self::$sql = "CREATE TABLE IF NOT EXISTS " . self::$table . " (";
         if(is_callable($table))
         {
-            $class = new Build();
+            $class = new Table();
             $table($class);
-            self::$sql .= $class->build();
+            $class->getPrimaryKey();
+            $class->loadFk();
+            self::$sql .= $class->buildSql();
+            echo self::$sql;
         }
-
         self::$sql .= ")";
-        
-       $result = $this->save();
-        return $result ? true : false ;
-    }
-
-        public function alter(callable $table)
-    {
-        self::$sql = "ALTER TABLE " . self::$table;
-        if(is_callable($table))
-        {
-            $class = new AlterTable();
-            $table($class);
-            self::$sql .= $class->build();
-        }
-    $result = $this->save();
-    return $result ? true : false;
-
+        $this->save();
     }
 
     // public function index(string|array $column)
@@ -118,6 +73,7 @@ class Schema extends SchemaCore
      {
       self::$sql = "RENAME TABLE " . self::$table . " TO $table2";
       $result = $this->save();
+
         return $result ? true : false ;
 
      }

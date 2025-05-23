@@ -2,7 +2,7 @@
 
 namespace LazarusPhp\LazarusDb\SchemaBuilder\Interfaces;
 
-interface SchemaInterface
+interface TableInterface
 {
     // Define your method signatures here
 
@@ -13,6 +13,6 @@ interface SchemaInterface
     public function text(string $name);
     public function mediumText(string $name);
     public function longText(string $name);
-    public function date($name);
-    public function dateTime($name);
+    public function date(string $name);
+    public function dateTime(string $name);
 }

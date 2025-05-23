@@ -4,7 +4,7 @@ namespace LazarusPhp\LazarusDb\SchemaBuilder\Interfaces;
 interface SchemaLoaderInterface
 {
 
-    public function create(string $table):void;
-    public function drop(string $table):void;
+    public function up(string $table):void;
+    public function down(string $table):void;
 
 }

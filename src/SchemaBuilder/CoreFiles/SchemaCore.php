@@ -10,9 +10,10 @@ abstract class SchemaCore extends Database
 {
 
     protected $data = [];
-    protected $query = "";
     protected $errors = [];
     protected $name;
+    protected $query = [];
+    public $method = [];
     protected static $table;
     // Sql Statement
     protected static  $sql = "";
@@ -23,25 +24,6 @@ abstract class SchemaCore extends Database
     {
         parent::__construct();
     }
-
-
-// Check if chain exisit;
-    protected function validChain()
-    {
-        if(!empty($this->query))
-        {
-            trigger_error("Previous Chained query has not been stored");
-        }
-        return true;
-    }
-
-    
-
-    // protected function query($sql)
-    // {
-    //     $pdo = $this->getConnection();
-    //     return $pdo->query($sql);
-    // }
 
     protected function save(string $sql = "")
     {
