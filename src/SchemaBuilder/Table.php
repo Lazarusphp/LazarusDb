@@ -17,12 +17,11 @@ class Table extends SchemaCore implements TableInterface
     use Fk;
     use ArrayControl;
 
+    protected static $flags = [];
+
         public function tinyInt(string $name)
     {
-        
           $this->keyExists($name,$this->query,"Column $name already exists");
-
-         
         $this->name = $name;
         $this->query[$name] = " $name  TINY INT(1) ";
         return $this;
@@ -32,6 +31,7 @@ class Table extends SchemaCore implements TableInterface
     public function int(string $name)
     {
 
+        Schema::$migrationFailed = true;
         $this->keyExists($name,$this->query,"Column $name already exists");
 
         $this->name = $name;
@@ -156,11 +156,19 @@ class Table extends SchemaCore implements TableInterface
         return $this;
     }
 
+     public function unsigned()
+    {
+        $this->query[$this->name] .= " UNSIGNED ";
+        return $this;
+    }
 
+    public function nullable($bool=true)
+    {
+        ($bool===false) ? $this->query[$this->name] .= " NOT NULL " : $this->query[$this->name] .= " NULL ";
+        return $this;
+    }
 
-
-    
-    public function buildSql()
+    public function build()
     {
    
         $column = [];
