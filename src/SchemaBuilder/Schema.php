@@ -7,7 +7,7 @@ use LazarusPhp\LazarusDb\SharedAssets\Traits\TableControl;
 class Schema extends SchemaCore
 {
     use TableControl;
-    public static $progress;
+    public static $progress = false;
 
     public static function table($table)
     {
@@ -54,13 +54,10 @@ class Schema extends SchemaCore
             $table($class);
             $class->getPrimaryKey();
             $class->loadFk();
-            self::$sql .= $class->buildSql();
+            self::$sql .= $class->build();
         }
         self::$sql .= ")";
-        if(!$this->save())
-        {
-            self::$progress = false;
-        }
+        !$this->save() ? self::$migrationFailed = true : self::$migrationFailed = false;
     }
 
     // public function index(string|array $column)

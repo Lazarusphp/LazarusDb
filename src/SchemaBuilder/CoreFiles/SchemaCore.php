@@ -16,6 +16,9 @@ abstract class SchemaCore extends Database
     public $method = [];
     protected static $table;
     // Sql Statement
+
+    public static $migrationFailed = false;
+    protected static $migrationError = [];
     protected static  $sql = "";
 
     // Constructor
@@ -23,6 +26,18 @@ abstract class SchemaCore extends Database
     public function __construct()
     {
         parent::__construct();
+    }
+
+    public static function migrationFailed()
+    {
+        if(self::$migrationFailed)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     protected function save(string $sql = "")

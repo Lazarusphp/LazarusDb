@@ -11,6 +11,8 @@ class SchemaLoader
     public $table;
     public $classname;
     private SchemaLoaderInterface $schemaLoaderInterface;
+   
+
 
     public static function load(string $dir)
     {
@@ -66,13 +68,19 @@ class SchemaLoader
         if(class_exists($schema))
         {
        
+      
             $this->schemaLoaderInterface->up($this->table);
-            
+
             if(method_exists($this->schemaLoaderInterface,"down") && $this->hasbody($this->schemaLoaderInterface,"down"))
             {
-                $this->schemaLoaderInterface->down($this->table);
+                if(Schema::migrationFailed())
+                {
+                    echo "Rolling back migration for table: " . $this->table . PHP_EOL;
+                   $this->schemaLoaderInterface->down($this->table);
+                }
+              
             }
-      
+            
                 
    
         }
