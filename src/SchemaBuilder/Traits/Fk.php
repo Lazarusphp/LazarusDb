@@ -30,6 +30,9 @@ trait Fk
         {
              $this->fkCol = $column;
         }
+
+        $this->keyExists($this->fkCol, $this->fk, "Foreign key column $this->fkCol already exists");
+
         $this->fk[$this->fkCol] = $column;
         return $this;
     }
@@ -43,15 +46,16 @@ trait Fk
 
     public function loadFk()
     {
-        foreach($this->fk as $key => $fk)
+        if(count($this->fk) >= 1)
         {
-            
-            $constraints = $this->constraint === true ? " CONSTRAINT fk_".$fk." ": " ";
-            $delete = array_ex? " ON DELETE $option"         $this->query["fk"] = $constraints . "FOREIGN KEY fk_".$fk." (".$fk.") REFERENCES " . $this->refTable[$key] . "(" . $this->refCol[$key] . ") ";
-            
-        }
+            foreach($this->fk as $key => $fk)
+            {
+                $constraints = $this->constraint === true ? " CONSTRAINT fk_".$fk." ": " ";
+                $this->query[] = "FOREIGN KEY ".$constraints."(".$fk.") REFERENCES ".$this->refTable[$key]."(".$this->refCol[$key].")";
+            }
 
         return implode(",", $this->query);
+        }
     }
 
 
