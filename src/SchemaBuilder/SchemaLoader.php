@@ -14,6 +14,11 @@ class SchemaLoader
 
     public static function load(string $dir)
     {
+        if(is_dir($dir) === false)
+        {
+            throw new \Exception("Directory not found");
+        }   
+        
         $scandir = scandir($dir);
         foreach($scandir as $directory)
         {
@@ -61,11 +66,14 @@ class SchemaLoader
         if(class_exists($schema))
         {
        
-            if(method_exists($this->schemaLoaderInterface,"drop") && $this->hasbody($this->schemaLoaderInterface,"drop"))
+            $this->schemaLoaderInterface->up($this->table);
+            
+            if(method_exists($this->schemaLoaderInterface,"down") && $this->hasbody($this->schemaLoaderInterface,"down"))
             {
                 $this->schemaLoaderInterface->down($this->table);
             }
-                $this->schemaLoaderInterface->up($this->table);
+      
+                
    
         }
     }
