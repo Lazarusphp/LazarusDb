@@ -7,13 +7,14 @@ use LazarusPhp\LazarusDb\SharedAssets\Traits\TableControl;
 class Schema extends SchemaCore
 {
     use TableControl;
+    public static $progress;
 
     public static function table($table)
     {
         self::$table = $table;
+    
         return new static;
     }
-
     // public function create(callable $table)
     // {    
     //     self::$sql = "CREATE TABLE IF NOT EXISTS " . self::$table . " (";
@@ -54,10 +55,12 @@ class Schema extends SchemaCore
             $class->getPrimaryKey();
             $class->loadFk();
             self::$sql .= $class->buildSql();
-            echo self::$sql;
         }
         self::$sql .= ")";
-        $this->save();
+        if(!$this->save())
+        {
+            self::$progress = false;
+        }
     }
 
     // public function index(string|array $column)
@@ -88,8 +91,8 @@ class Schema extends SchemaCore
      public function drop()
      {
         self::$sql = "DROP TABLE IF EXISTS " .self::$table ;
-        $this->save();
-        
+        return $this->save() ? true : false ;
+
      }
 
      /**
