@@ -8,7 +8,7 @@ use Exception;
 trait ArrayControl
 {
 
-    protected $error = [];
+    public $error = [];
 
 
     public function keyExists($key,$array,$message)
@@ -19,7 +19,9 @@ trait ArrayControl
             $this->error[] = $message;
             return true;
         }
-        return false;
+        else{
+         Schema::$progress = true;
+        }
     }
 
     public function loadErrors()
@@ -32,9 +34,16 @@ trait ArrayControl
     {
         if(!in_array($key,$array))
         {
-             trigger_error($message);
-            exit();
+            trigger_error($message);
+            Schema::$progress = false;
+            $this->error[] = $message;
+            return true;
         }
+        else{
+               schema::$progress = true;
+                return false;
+        }
+ 
     }  
 
     public function isArray($array,$message)
