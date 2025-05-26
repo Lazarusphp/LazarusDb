@@ -68,14 +68,14 @@ class SchemaLoader
         if(class_exists($schema))
         {
        
-      
+            if(!Schema::table($this->table)->hasTable()){
             $this->schemaLoaderInterface->up($this->table);
+            }
 
             if(method_exists($this->schemaLoaderInterface,"down") && $this->hasbody($this->schemaLoaderInterface,"down"))
             {
                 if(Schema::migrationFailed())
                 {
-                    echo "Rolling back migration for table: " . $this->table . PHP_EOL;
                    $this->schemaLoaderInterface->down($this->table);
                 }
               
