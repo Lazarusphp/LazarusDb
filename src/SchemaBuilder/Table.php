@@ -19,22 +19,26 @@ class Table extends SchemaCore implements TableInterface
 
     public $buildFailed = false;
     protected static $flags = [];
+    protected $datatype = [];
 
     public function tinyInt(string $name)
     {
+         $this->name = $name;
+        $this->datatype[$this->name] = "tinyint";
         $this->keyExists($name, $this->query, "Column $name already exists");
-        $this->name = $name;
+       
         $this->query[$name] = " $name  TINY INT(1) ";
         return $this;
     }
 
     public function int(string $name)
     {
+         $this->name = $name;
+        $this->datatype[$this->name] = "int";
         if (self::keyExists($name, $this->query)) {
             $this->buildFailed = true;
             Schema::$migrationError[] = "Cannot use $name multiple times";
         } else {
-            $this->name = $name;
             $this->query[$this->name] = " $name  INT ";
             return $this;
         }
@@ -42,11 +46,13 @@ class Table extends SchemaCore implements TableInterface
 
     public function bigInt(string $name)
     {
+
         if (self::keyExists($name, $this->query)) {
             $this->buildFailed = true;
             Schema::$migrationError[] = "Cannot use $name multiple times";
         } else {
             $this->name = $name;
+            $this->datatype[$this->name] = "bigint";
             $this->query[$name] = " $name  BIG INT ";
             return $this;
         }
@@ -60,6 +66,7 @@ class Table extends SchemaCore implements TableInterface
         } else {
             $this->keyExists($name, $this->query, "Column $name already exists");
             $this->name = $name;
+            $this->datatype[$this->name] = "varchar";
             $this->query[$name] = " $name  VARCHAR($value) ";
             return $this;
         }
@@ -72,6 +79,7 @@ class Table extends SchemaCore implements TableInterface
             Schema::$migrationError[] = "Cannot use $name multiple times";
         } else {
             $this->name = $name;
+            $this->datatype[$this->name] = "text";
             $this->query[$this->name] = " $name TEXT ";
             return $this;
         }
@@ -84,6 +92,7 @@ class Table extends SchemaCore implements TableInterface
             Schema::$migrationError[] = "Cannot use $name multiple times";
         } else {
             $this->name = $name;
+            $this->datatype[$this->name] = "mediumtext";
             $this->query[$this->name] = "$name MEDIUMTEXT ";
             return $this;
         }
@@ -96,6 +105,7 @@ class Table extends SchemaCore implements TableInterface
             Schema::$migrationError[] = "Cannot use $name multiple times";
         } else {
             $this->name = $name;
+            $this->datatype[$this->name] = "longtext";
             $this->query[$this->name] = "$name LONGTEXT ";
             return $this;
         }
@@ -108,6 +118,7 @@ class Table extends SchemaCore implements TableInterface
             Schema::$migrationError[] = "Cannot use $name multiple times";
         } else {
             $this->name = $name;
+            $this->datatype[$this->name] = "date";
             $this->query[$this->name] = "$name DATE ";
             return $this;
         }
@@ -120,6 +131,7 @@ class Table extends SchemaCore implements TableInterface
             Schema::$migrationError[] = "Cannot use $name multiple times";
         } else {
             $this->name = $name;
+            $this->datatype[$this->name] = "datetime";
             $this->query[$this->name] = "$name DATETIME ";
             return $this;
         }
@@ -134,11 +146,13 @@ class Table extends SchemaCore implements TableInterface
 
     public function drop()
     {
+        $this->datatype[$this->name] = "drop";
         $this->method[$this->name] = " DROP COLUMN ";
     }
 
     public function rename($original, $new)
     {
+        $this->datatype[$this->name] = "rename";
         $this->query[$this->name] .= " RANAME $original to $new ";
     }
 
@@ -153,6 +167,7 @@ class Table extends SchemaCore implements TableInterface
 
     public function now($astimestamp = false)
     {
+        $this->datatype[$this->name] = "now";
         if ($astimestamp) {
             $this->query[$this->name] .= " DEFAULT (CURRENT_TIMESTAMP) ";
         } else {
@@ -164,6 +179,7 @@ class Table extends SchemaCore implements TableInterface
 
     public function default(string|int $value)
     {
+        $this->datatype[$this->name] = "default";
         if (is_string($value)) {
             // Escape single quotes for SQL and wrap in single quotes
             $escaped = str_replace("'", "''", $value);
@@ -176,6 +192,7 @@ class Table extends SchemaCore implements TableInterface
 
     public function unsigned()
     {
+        $this->datatype[$this->name] = "unsigned";
         // Check if the current column type supports UNSIGNED
         $columnDef = $this->query[$this->name] ?? '';
         // Only allow UNSIGNED for numeric types
@@ -186,6 +203,7 @@ class Table extends SchemaCore implements TableInterface
 
     public function nullable(bool $bool = true)
     {
+        $this->datatype[$this->name] = "nullable";
         ($bool === false) ? $this->query[$this->name] .= " NOT NULL " : $this->query[$this->name] .= " NULL ";
         return $this;
     }
