@@ -7,7 +7,6 @@ use LazarusPhp\LazarusDb\SharedAssets\Traits\TableControl;
 class Schema extends SchemaCore
 {
     use TableControl;
-    public static $progress = false;
 
     public static function table($table)
     {
@@ -15,49 +14,20 @@ class Schema extends SchemaCore
     
         return new static;
     }
-    // public function create(callable $table)
-    // {    
-    //     self::$sql = "CREATE TABLE IF NOT EXISTS " . self::$table . " (";
-    //     if(is_callable($table))
-    //     {
-    //         $class = new Build();
-    //         $table($class);
-    //         self::$sql .= $class->build();
-    //     }
 
-    //     self::$sql .= ")";
-        
-    //    $result = $this->save();
-    //     return $result ? true : false ;
-    // }
-
-    //     public function alter(callable $table)
-    // {
-    //     self::$sql = "ALTER TABLE " . self::$table;
-    //     if(is_callable($table))
-    //     {
-    //         $class = new AlterTable();
-    //         $table($class);
-    //         self::$sql .= $class->build();
-    //     }
-    // $result = $this->save();
-    // return $result ? true : false;
-
-    // }
-
-    public function test(callable $table)
-    {
+    public function create(callable $table)
+    {    
         self::$sql = "CREATE TABLE IF NOT EXISTS " . self::$table . " (";
         if(is_callable($table))
         {
             $class = new Table();
             $table($class);
-            $class->getPrimaryKey();
-            $class->loadFk();
             self::$sql .= $class->build();
         }
         self::$sql .= ")";
+        echo self::$sql;
         !$this->save() ? self::$migrationFailed = true : self::$migrationFailed = false;
+
     }
 
     // public function index(string|array $column)
