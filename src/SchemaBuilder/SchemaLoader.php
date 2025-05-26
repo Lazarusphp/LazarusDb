@@ -27,7 +27,7 @@ class SchemaLoader
             if($directory !== "." && $directory !== "..")
             {
                 $filename = pathinfo($directory,PATHINFO_FILENAME);
-                new SchemaLoader("Schemas\\$filename");
+                new SchemaLoader("Migrations\\Schemas\\$filename");
             }
         }
     }
@@ -95,6 +95,6 @@ class SchemaLoader
     {
         $this->classname = $this->classname($schema)->getShortname();
         $this->table = strtolower($schema);
-    
+
     }
 }
