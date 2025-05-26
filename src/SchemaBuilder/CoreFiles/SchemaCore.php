@@ -18,7 +18,7 @@ abstract class SchemaCore extends Database
     // Sql Statement
 
     public static $migrationFailed = false;
-    protected static $migrationError = [];
+    public static $migrationError = [];
     protected static  $sql = "";
 
     // Constructor
