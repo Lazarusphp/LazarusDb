@@ -1,92 +1,90 @@
 <?php
 
 namespace LazarusPhp\LazarusDb\SchemaBuilder\Traits;
+use LazarusPhp\LazarusDb\SchemaBuilder\Schema;
+use LazarusPhp\LazarusDb\SharedAssets\Traits\ArrayControl;
 
 trait Indexes
 {
-
     public static $primaryKey = [];
+    public static $index = [];
+    public static $unique = [];
 
-    public function ai()
+    public function ai($name)
     {
-       $this->query[$this->name] .= " AUTO_INCREMENT ";
+       $this->query[$name] .= " AUTO_INCREMENT ";
        return $this;
     }
 
     public function getPrimaryKey()
-    {
-    
-        if(!array_key_exists("pk",$this->query)){
-        if(count(self::$primaryKey) >= 1)
-        {
-            $pk = implode(", ",self::$primaryKey);
-        }
-         $this->query["pk"] = " PRIMARY KEY ($pk)";
-        }
-        else
-        {
-            trigger_error("Cannot find primary key please create one");
-        }
+    {   
+        // Check if the pk has been set in primary key and if not default to id;
+        $pk = isset(self::$primaryKey["pk"]) ? self::$primaryKey["pk"] : "id";
+        //Set the primary key based on $pk
+        $this->query[$pk] .= " AUTO_INCREMENT ";
+        // Return the results;
+        $this->query["pk"] = "PRIMARY KEY (".$pk.") ";
+        return;
     }
 
 
-    public function primaryKey(array | string $columns= "")
-    {
+    // Changed name from primaryKey to primary
+    public function primary()
+    {  
+        // set the primary key 
+        self::$primaryKey["pk"] = $this->name;
+    }
 
-      
+    public function index()
+    {
+        if(self::keyExists($this->name,self::$index))
+        {
+            Schema::$migrationError[] = "Duplicate index given";
+            $this->buildFailed = true;
+        }
+        else{
+        self::$index[$this->name] = $this->name;
+        return $this;
+        }
+    }
+
+    public function getIndexes()
+    {
+        if(count(self::$index) >= 1){
+        $columns = [];
+        foreach(self::$index as $key => $index)
+        {
+            $columns[] = $index;
+        }
         
-
-        if(is_array($columns) && count($columns) >= 1)
-        {
-            foreach($columns as $column)
-            {
-                if(!$this->keyExists($column, self::$primaryKey, "Primary key column $column already exists"))
-                {
-                    self::$primaryKey[$column] = $column;
-                }
-                else
-                {
-                    trigger_error("Primary key column $column already exists");
-                    exit();
-                }
-            }
-        }
-        elseif(is_string($columns) && !empty($columns))
-        {
-            if(!$this->keyExists($columns, self::$primaryKey, "Primary key column $columns already exists"))
-            {
-                self::$primaryKey[$columns] = $columns;
-            }
-            else
-            {
-                trigger_error("Primary key column $columns already exists");
-                exit();
-            }
-        }
-        else
-        {
-            if(!$this->keyExists($this->name, self::$primaryKey, "Primary key column $this->name already exists"))
-            {
-                self::$primaryKey[$this->name] = $this->name;
-            }
-            else
-            {
-                trigger_error("Primary key column $this->name already exists");
-                exit();
-            }
-            return $this;
+        $this->query["indexes"] =  "INDEX indexes (".implode(',',$columns).") ";
         }
     }
 
-    // public function index(string $name)
-    // {
-    //     $this->query .= "INDEX ($name) ";
-    //     return $this;
-    // }
+        public function getUniques()
+    {
+        if(count(self::$unique) >= 1){
+            if(self::keyExists($this->name,self::$index))
+        {
+            Schema::$migrationError[] = "Duplicate index given"; 
+            $this->buildFailed = true;
+        }
+        else{
+        $columns = [];
+        foreach(self::$unique as $key => $unique)
+        {
+    
+            $column[] = $unique;
+        }
 
-    // public function unique($name)
-    // {
-    //     $this->query .= "UNIQUE ($name) ";
-    //     return $this;
-    // }
+        $this->query["unique"] = "CONSTRAINT unique_keys  UNIQUE (".implode(',', $column).") ";
+        }
+        }
+    }
+
+    public function unique()
+    {
+        self::$unique[$this->name] = $this->name;
+        return $this;
+    }
 }
