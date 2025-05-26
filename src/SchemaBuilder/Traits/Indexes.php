@@ -6,24 +6,41 @@ use LazarusPhp\LazarusDb\SharedAssets\Traits\ArrayControl;
 
 trait Indexes
 {
-    public static $primaryKey = [];
-    public static $index = [];
-    public static $unique = [];
+    protected static $primaryKey = [];
+    protected static $index = [];
+    protected static $unique = [];
+    protected $ai = true;
 
-    public function ai($name)
+
+    public function AutoIncrement($ai=true)
     {
-       $this->query[$name] .= " AUTO_INCREMENT ";
-       return $this;
+        $this->ai = ($ai === true)  ? true : false;
+        return $this;
     }
 
-    public function getPrimaryKey()
+        private function setAutoIncrement($name)
+    {
+        $supported = ["int", "bigint", "tinyint"];
+        if(in_array($this->datatype[$name][0], $supported))
+        {
+            return " AUTO_INCREMENT ";
+        }
+        else{
+            Schema::$migrationError[] = "Auto Increment is not supported for ".$this->datatype[$name][0];
+            $this->buildFailed = true;
+            return "";
+        }   
+       
+    }
+
+    public function loadPrimaryKey()
     {   
         // Check if the pk has been set in primary key and if not default to id;
-        $pk = isset(self::$primaryKey["pk"]) ? self::$primaryKey["pk"] : "id";
+        $id = isset(self::$primaryKey["pk"]) ? self::$primaryKey["pk"] : "id";
         //Set the primary key based on $pk
-        $this->query[$pk] .= " AUTO_INCREMENT ";
+        $this->query[$id] .= ($this->ai===true) ?  $this->setAutoIncrement($id) : " ";
         // Return the results;
-        $this->query["pk"] = "PRIMARY KEY (".$pk.") ";
+        $this->query["pk"] = "PRIMARY KEY ($id) ";
         return;
     }
 
@@ -31,12 +48,39 @@ trait Indexes
     // Changed name from primaryKey to primary
     public function primary()
     {  
+        if(self::keyExists("pk", self::$primaryKey))
+        {
+            Schema::$migrationError[] = "Primary key has already been set at column ".self::$primaryKey["pk"];
+            $this->buildFailed = true;
+            return;
+        }
+        else{
+        $this->datatype[$this->name][] = "primary";
+        // $this->ai = $ai;
+        $unsupported = ["default"];
+        foreach($this->datatype as $key => $value)
+{
+    foreach($unsupported as $un)
+    {
+        // $value is an array, so check each element
+        foreach ($value as $v) {
+            if(strpos($v, $un) !== false)
+            {
+                Schema::$migrationError[] = "Primary key cannot be set with $un";
+                $this->buildFailed = true;
+            }
+        }
+    }
+}
         // set the primary key 
         self::$primaryKey["pk"] = $this->name;
+        return $this;
+     }
     }
 
     public function index()
     {
+        $this->datatype[$this->name][] .= "index";
         if(self::keyExists($this->name,self::$index))
         {
             Schema::$migrationError[] = "Duplicate index given";
@@ -48,7 +92,7 @@ trait Indexes
         }
     }
 
-    public function getIndexes()
+    public function loadIndexes()
     {
         if(count(self::$index) >= 1){
         $columns = [];
@@ -61,7 +105,7 @@ trait Indexes
         }
     }
 
-        public function getUniques()
+        public function loadUniques()
     {
         if(count(self::$unique) >= 1){
             if(self::keyExists($this->name,self::$index))
@@ -84,6 +128,7 @@ trait Indexes
 
     public function unique()
     {
+        $this->datatype[$this->name][] .= "unique";
         self::$unique[$this->name] = $this->name;
         return $this;
     }
