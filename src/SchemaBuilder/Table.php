@@ -10,102 +10,119 @@ use LazarusPhp\LazarusDb\SharedAssets\Traits\TableControl;
 use LazarusPhp\LazarusDb\SchemaBuilder\Traits\Fk;
 use LazarusPhp\LazarusDb\SharedAssets\Traits\ArrayControl;
 
-class Table extends SchemaCore implements TableInterface 
+class Table extends SchemaCore implements TableInterface
 {
     use TableControl;
     use Indexes;
     use Fk;
     use ArrayControl;
 
+    public $buildFailed = false;
     protected static $flags = [];
 
-        public function tinyInt(string $name)
+    public function tinyInt(string $name)
     {
-          $this->keyExists($name,$this->query,"Column $name already exists");
+        $this->keyExists($name, $this->query, "Column $name already exists");
         $this->name = $name;
         $this->query[$name] = " $name  TINY INT(1) ";
         return $this;
-        
     }
 
     public function int(string $name)
     {
-
-        Schema::$migrationFailed = true;
-        $this->keyExists($name,$this->query,"Column $name already exists");
-
-        $this->name = $name;
-        $this->query[$this->name] = " $name  INT ";
-        return $this;
-        
+        if (self::keyExists($name, $this->query)) {
+            $this->buildFailed = true;
+            Schema::$migrationError[] = "Cannot use $name multiple times";
+        } else {
+            $this->name = $name;
+            $this->query[$this->name] = " $name  INT ";
+            return $this;
+        }
     }
 
-        public function bigInt(string $name)
+    public function bigInt(string $name)
     {
-               $this->keyExists($name,$this->query,"Column $name already exists");
-
-        $this->name = $name;
-        $this->query[$name] = " $name  BIG INT ";
-        return $this;
-        
+        if (self::keyExists($name, $this->query)) {
+            $this->buildFailed = true;
+            Schema::$migrationError[] = "Cannot use $name multiple times";
+        } else {
+            $this->name = $name;
+            $this->query[$name] = " $name  BIG INT ";
+            return $this;
+        }
     }
 
-        public function varchar(string $name, int $value=100)
+    public function varchar(string $name, int $value = 100)
     {
-        $this->keyExists($name,$this->query,"Column $name already exists");
-        $this->name = $name;
-        $this->query[$name] = " $name  VARCHAR($value) ";
-        return $this;
-
+        if (self::keyExists($name, $this->query)) {
+            $this->buildFailed = true;
+            Schema::$migrationError[] = "Cannot use $name multiple times";
+        } else {
+            $this->keyExists($name, $this->query, "Column $name already exists");
+            $this->name = $name;
+            $this->query[$name] = " $name  VARCHAR($value) ";
+            return $this;
+        }
     }
 
     public function text(string $name)
     {
-        $this->keyExists($name,$this->query,"Column $name already exists");
-
-        $this->name = $name;
-        $this->query[$this->name] = " $name TEXT ";
-        return $this;
-
+        if (self::keyExists($name, $this->query)) {
+            $this->buildFailed = true;
+            Schema::$migrationError[] = "Cannot use $name multiple times";
+        } else {
+            $this->name = $name;
+            $this->query[$this->name] = " $name TEXT ";
+            return $this;
+        }
     }
 
-       public function mediumText(string $name)
-        {
-        $this->keyExists($name,$this->query,"Column $name already exists");
-
+    public function mediumText(string $name)
+    {
+        if (self::keyExists($name, $this->query)) {
+            $this->buildFailed = true;
+            Schema::$migrationError[] = "Cannot use $name multiple times";
+        } else {
             $this->name = $name;
             $this->query[$this->name] = "$name MEDIUMTEXT ";
             return $this;
-        
         }
-
-        public function longText(string $name)
-        {
-        $this->keyExists($name,$this->query,"Column $name already exists");
-    
-        $this->name = $name;
-        $this->query[$this->name] = "$name LONGTEXT ";
-        return $this;
-        
     }
 
-       public function date(string $name)
+    public function longText(string $name)
     {
-        $this->keyExists($name,$this->query,"Column $name already exists");
+        if (self::keyExists($name, $this->query)) {
+            $this->buildFailed = true;
+            Schema::$migrationError[] = "Cannot use $name multiple times";
+        } else {
+            $this->name = $name;
+            $this->query[$this->name] = "$name LONGTEXT ";
+            return $this;
+        }
+    }
 
-        $this->name = $name;
-        $this->query[$this->name] = "$name DATE ";
-        return $this;
-
+    public function date(string $name)
+    {
+        if (self::keyExists($name, $this->query)) {
+            $this->buildFailed = true;
+            Schema::$migrationError[] = "Cannot use $name multiple times";
+        } else {
+            $this->name = $name;
+            $this->query[$this->name] = "$name DATE ";
+            return $this;
+        }
     }
 
     public function dateTime(string $name)
     {
-        $this->keyExists($name,$this->query,"Column $name already exists");
-        $this->name = $name;
-        $this->query[$this->name] = "$name DATETIME ";
-        return $this;
-
+        if (self::keyExists($name, $this->query)) {
+            $this->buildFailed = true;
+            Schema::$migrationError[] = "Cannot use $name multiple times";
+        } else {
+            $this->name = $name;
+            $this->query[$this->name] = "$name DATETIME ";
+            return $this;
+        }
     }
 
     public function modify()
@@ -113,36 +130,37 @@ class Table extends SchemaCore implements TableInterface
         $this->method[$this->name] = " MODIFY COLUMN ";
     }
 
+
+
     public function drop()
     {
         $this->method[$this->name] = " DROP COLUMN ";
     }
 
-    public function rename($original,$new)
+    public function rename($original, $new)
     {
         $this->query[$this->name] .= " RANAME $original to $new ";
     }
 
     private function modifier($name)
     {
-        return array_key_exists($name,$this->method) ? $this->method[$name] : " ";
+        return array_key_exists($name, $this->method) ? $this->method[$name] : " ";
     }
 
 
     // Defaults
 
-    
-    public function now()
+
+    public function now($astimestamp = false)
     {
-        $this->query[$this->name] .= " DEFAULT (CURRENT_DATE) ";
+        if ($astimestamp) {
+            $this->query[$this->name] .= " DEFAULT (CURRENT_TIMESTAMP) ";
+        } else {
+            $this->query[$this->name] .= " DEFAULT (CURRENT_DATE) ";
+        }
         return $this;
     }
 
-    public function timestamp()
-    {
-        $this->query[$this->name] .= " DEFAULT (CURRENT_TIMESTAMP) ";
-        return $this;
-    }
 
     public function default(string|int $value)
     {
@@ -156,29 +174,36 @@ class Table extends SchemaCore implements TableInterface
         return $this;
     }
 
-     public function unsigned()
+    public function unsigned()
     {
-        $this->query[$this->name] .= " UNSIGNED ";
+        // Check if the current column type supports UNSIGNED
+        $columnDef = $this->query[$this->name] ?? '';
+        // Only allow UNSIGNED for numeric types
+          $this->query[$this->name] .= " UNSIGNED ";
+        
         return $this;
     }
 
-    public function nullable($bool=true)
+    public function nullable(bool $bool = true)
     {
-        ($bool===false) ? $this->query[$this->name] .= " NOT NULL " : $this->query[$this->name] .= " NULL ";
+        ($bool === false) ? $this->query[$this->name] .= " NOT NULL " : $this->query[$this->name] .= " NULL ";
         return $this;
     }
 
     public function build()
     {
-   
-        $column = [];
-        foreach($this->query as $key => $value)
-        {
-            $column[] = $this->modifier($key) . $value;
+        if (!$this->buildFailed) {
+            $this->getPrimaryKey();
+            $this->getIndexes();
+            $this->getUniques();
+            $this->loadFk();
+            $column = [];
+            foreach ($this->query as $key => $value) {
+                $column[] = $this->modifier($key) . $value;
+            }
+            return implode(",", $column);
+        } else {
+            echo "Build Faild";
         }
-        return implode(",",$column);
-
     }
-
-
 }
