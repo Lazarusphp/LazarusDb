@@ -13,7 +13,6 @@ trait ArrayControl
     public static function keyExists($key, $array)
     {
         if (array_key_exists($key, $array)) {
-            Schema::$migrationError[] = "Key '$key' exists in the array.";
             return true;
         } else {
             return false;
