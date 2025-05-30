@@ -2,6 +2,7 @@
 
 namespace LazarusPhp\LazarusDb\SchemaBuilder;
 use LazarusPhp\LazarusDb\SchemaBuilder\CoreFiles\SchemaCore;
+use LazarusPhp\LazarusDb\SchemaBuilder\Table;
 use LazarusPhp\LazarusDb\SharedAssets\Traits\TableControl;
 
 class Schema extends SchemaCore
@@ -15,6 +16,24 @@ class Schema extends SchemaCore
         return new static;
     }
 
+    public static function MigrationFailed()
+    {
+        if(isset(self::$migrationFailed[self::$table]) && self::$migrationFailed[self::$table] === true)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+        public static  function getTable()
+    {
+        return self::$table;
+    }
+
+
     public function create(callable $table)
     {    
         self::$sql = "CREATE TABLE IF NOT EXISTS " . self::$table . " (";
@@ -25,9 +44,9 @@ class Schema extends SchemaCore
             self::$sql .= $class->build();
         }
         self::$sql .= ")";
-        echo self::$sql;
+        // echo self::$sql;
         !$this->save() ? self::$migrationFailed = true : self::$migrationFailed = false;
-
+      
     }
 
     // public function index(string|array $column)

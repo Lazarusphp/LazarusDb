@@ -9,6 +9,7 @@ interface TableInterface
     public function tinyInt(string $name);
     public function int(string $name);
     public function bigInt(string $name);
+    public function string(string $name,int $value);
     public function varchar(string $name,int $value);
     public function text(string $name);
     public function mediumText(string $name);

@@ -2,52 +2,69 @@
 
 namespace LazarusPhp\LazarusDb\SchemaBuilder\Traits;
 
+use LazarusPhp\LazarusDb\SchemaBuilder\Schema;
+
 trait Fk
 {
 
-    protected $fk = [];
-    protected $fkCol;
-    protected $refTable = [];
-    protected $refCol = [];
 
-    protected $constraint = false;
-    protected $delete = [];
-    protected $update = [];
+    protected static $fk = [];
+    protected static $refTable = [];
+    protected static $refcol = [];
+    protected static $action = [];
 
-    public function constraint(string $column)
+
+
+    public function processFk()
     {
-        $this->constraint = true;
-        $this->fkCol = $column;
+        $table = Schema::getTable();
+      if(!isset(self::$fk[$table]))
+      {
+        // Supports refcol reftable and column
+        self::$fk[$table] = [];
+        // Delete and update and constraint = true or false;
+        self::$action[$table] = [];
+      }
+
+      return true;
+    }
+
+
+    public function constraint($refTable,$refColumn)
+    {
+        $table = Schema::getTable();
+        self::$action[$table]["constraint"] = true;
+        $this->fk($refTable,$refColumn); 
         return $this;
     }
 
-    public function foreignKey(string $column = "")
+        public function onUpdate($action)
     {
-        if(!isset($this->constraint) && $this->constraint === false && !empty($column))
-        {
-             $this->fkCol = $column;
-        }
-
-        $this->keyExists($this->fkCol, $this->fk, "Foreign key column $this->fkCol already exists");
-
-        $this->fk[$this->fkCol] = $column;
+        $table = Schema::getTable();
+        $action = $this->actions($action);
+        self::$action[$table]["update"] = $action;
         return $this;
     }
 
-    public function references($table,$column)
+    public function onDelete($action)
     {
-        if(!$this->keyExists($this->fkCol, $this->refTable, "Reference table for foreign key $this->fkCol already exists"))
-        {
-             $this->refTable[$this->fkCol] = $table;
-             $this->refCol[$this->fkCol] = $column;
-            return $this;
-        }
-        echo "Reference table for foreign key $this->fkCol already exists";
-        return false;
-
+        $table = Schema::getTable();
+        $action = $this->actions($action);
+        self::$action[$table]["delete"] = $action;
+        return $this;
     }
 
-    protected function actions(string $action)
+
+    public function fk($refTable,$refColumn){
+        $this->processFk();
+        $table = Schema::getTable();
+        self::$fk[$table]["column"] = $this->name;
+        self::$fk[$table]["refTable"] = $refTable;
+        self::$fk[$table]["refColumn"] = $refColumn;
+        return $this;
+    }
+
+    private function actions(string $action)
     {
         $action = strtoupper($action);
 
@@ -60,9 +77,8 @@ trait Fk
         ];
 
 
-        $this->inArray($action,$supportedActions,"Action $action is not supported");
-
-        switch($action)
+        if(in_array($action,$supportedActions))
+        {switch($action)
         {
             case 'CASCADE':
                 return "CASCADE";
@@ -74,44 +90,33 @@ trait Fk
                 return "NO ACTION";
             case 'DEFAULT':
                 return "SET DEFAULT";
-        }   
-    }
-    public function onDelete($action="RESTRICT")
-    {
-        $action = $this->actions($action);
-        $this->keyExists($this->fkCol, $this->delete, "Foreign key column $this->fkCol already exists");
-        $this->delete[$this->fkCol] = $action;
-        return $this;
-    }
-
-    public function onUpdate($action="RESTRICT")
-    {
-        $action = $this->actions($action);
-        $this->keyExists($this->fkCol, $this->update, "Foreign key column $this->fkCol already exists");
-        $this->update[$this->fkCol] = $action;
-        // echo $this->update[$this->fkCol];
-        return $this;
-    }
-
-    public function loadFk()
-    {
-        if(count($this->fk) >= 1)
-        {
-            foreach($this->fk as $key => $fk)
-            {
-                $constraints = $this->constraint === true ? " CONSTRAINT fk_".$fk." ": " ";
-                $delete = isset($this->delete[$key]) ? $this->delete[$key] : " RESTRICT ";
-                // echo $delete;
-                $update = isset($this->update[$key]) ? $this->update[$key] : " RESTRICT ";
-        
-                $reference = isset($this->refTable[$key]) ? $this->refTable[$key] : exit("Reference table for foreign key $fk does not exist");
-                // echo $update;
-                $this->query[] = "FOREIGN KEY ".$constraints."(".$fk.") REFERENCES  $reference (".$this->refCol[$key].") ON DELETE $delete  ON UPDATE $update";
-            }
-
-        return implode(",", $this->query);
         }
     }
+        else
+        {
+            echo "Unsupported Action $action";
+        }
+         
+    }
 
+
+public function loadFk()
+{
+    $table = Schema::getTable();
+    if (isset(self::$fk[$table]) && !empty(self::$fk[$table])) {
+        $fkSql = [];
+        $fk = self::$fk[$table];
+        if (isset($fk['column'], $fk['refTable'], $fk['refColumn'])) {
+            $constraint = (isset(self::$action[$table]["constraint"]) && self::$action[$table]["constraint"] === true)
+                ? "CONSTRAINT fk_{$table}_{$fk['column']} "
+                : "";
+            $update = isset(self::$action[$table]["update"]) ? self::$action[$table]["update"] : "RESTRICT";
+            $delete = isset(self::$action[$table]["delete"]) ? self::$action[$table]["delete"] : "RESTRICT";
+            $fkSql[] = "{$constraint} FOREIGN KEY (`{$fk['column']}`) REFERENCES `{$fk['refTable']}`(`{$fk['refColumn']}`) ON DELETE $delete ON UPDATE $update";
+        }
+        $data = implode(", ", $fkSql);
+        $this->query["fk"] = $data;
+    }
+}
 
 }
