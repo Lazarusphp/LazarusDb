@@ -1,6 +1,7 @@
 <?php
 
 namespace LazarusPhp\LazarusDb\SharedAssets\Traits;
+use LazarusPhp\LazarusDb\SchemaBuilder\Schema;
 
 trait TableControl
 {
@@ -9,7 +10,7 @@ trait TableControl
 
     public function hasTable()
     {
-        $query = "SHOW TABLES LIKE '" . self::$table . "'";
+        $query = "SHOW TABLES LIKE '" . Schema::getTable(). "'";
         $result = $this->query($query);
         if ($result && $result->rowCount() >= 1) {
            return true;
@@ -31,7 +32,7 @@ trait TableControl
 
     public function allColumns()
     {
-        $query = "SHOW COLUMNS FROM `" . self::$table . "`";
+        $query = "SHOW COLUMNS FROM `" . Schema::getTable() . "`";
         // Use a direct PDO query to avoid interfering with self::$sql
         $stmt = $this->query($query);
         if ($stmt && $stmt->rowCount() > 0) {
