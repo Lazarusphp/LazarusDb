@@ -30,32 +30,51 @@ trait TableControl
         return false;
     }
 
-    public function allColumns()
+    public function allColumns($fieldname)
     {
-        $query = "SHOW COLUMNS FROM `" . Schema::getTable() . "`";
+        $query = "SELECT * ";
+        $query .= " FROM INFORMATION_SCHEMA.COLUMNS ";
+        $query .= " WHERE TABLE_SCHEMA='".$_ENV['dbname']."' ";
+        $query .= " AND TABLE_NAME = '".self::$table."'";
+        $query .= " AND COLUMN_NAME='{$fieldname}' ";
+
+        echo $query;
         // Use a direct PDO query to avoid interfering with self::$sql
         $stmt = $this->query($query);
         if ($stmt && $stmt->rowCount() > 0) {
-            $column = [];
-            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-                $column[] = $row;
-            }
-
-        return $column;
+            return $stmt->fetch();
         }
         return false;
     }
 
-    public function hasColumns($value)
+    public function hasColumns($field,$key,$value)
     {
-        foreach($this->allColumns() as $column)
+        $fetch = $this->allColumns($field);     
+        $constraint = strtoupper($key);
+        if($fetch->$constraint === $value)
         {
-            if(isset($column["Field"]) && $column["Field"] === $value)
-            {
-                return true;
-            }
+            echo "WE found it $constraint $value";
         }
-        return false;
+        else
+        {
+            echo "failed";
+        }
+        // return false;
     }
+
+
+    
+
+        public function isPrimary($value)
+        {
+            $query = "SELECT * FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA='".$_ENV['dbname']."' AND TABLE_NAME='".self::$table."' AND CONSTRAINT_NAME='PRIMARY'";
+            $stmt = $this->query($query);
+            if($stmt && $stmt->rowCount())
+            {
+                $result = $stmt->fetch();
+                return $result->COLUMN_NAME === $value ? true : false;
+            }
+            return false;
+        }
 
 }
