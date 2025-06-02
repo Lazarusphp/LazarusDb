@@ -8,6 +8,8 @@ trait Datatypes
 {
 
     private $datatype = [];
+    // Type will be used to reference the type  ie int varchar 
+    protected $type = [];
 
     private function ProcessRequest($name, $command)
     {
@@ -17,6 +19,7 @@ trait Datatypes
         // Set a new datatype if it doesnt exist;
         if (!isset($this->datatype[$table])) {
             $this->datatype[$table] = [];
+            $this->type[$table] = [];
         }
         
         if (!array_key_exists($this->name, $this->datatype[$table])) {
@@ -33,24 +36,27 @@ trait Datatypes
 
     public function string($name,$value=24)
     {
+        $table = Schema::getTable();
+        $this->type[$table][$name] = "char";
         $this->ProcessRequest($name,"  VARCHAR($value) ");
         return $this;
     }
 
     public function varchar($name,$value=24)
-    {
+    {   $this->type[$table][$name] = "varchar";
         $this->ProcessRequest($name,"  VARCHAR($value) ");
         return $this;
     }
 
     public function tinyint($name)
     {
+        $this->type[$table][$name] = "tinyint";
         $this->ProcessRequest($name," TINYINT(1) ");
         return $this;
     }
 
     public function int($name)
-    {
+    {$this->type[$table][$name] = "int";
         $this->ProcessRequest($name," INT ");
         return $this;
     }
@@ -58,6 +64,7 @@ trait Datatypes
 
     public function bigint($name)
     {
+        $this->type[$table][$name] = "bigint";
         $this->ProcessRequest($name," BIGINT ");
         return $this;
     }
@@ -65,30 +72,33 @@ trait Datatypes
 
     public function text($name)
     {
+        $this->type[$table][$name] = "text";
         $this->ProcessRequest($name," TEXT ");
         return $this;
     }
 
     public function mediumText($name)
-    {
+    {$this->type[$table][$name] = "mediumtext";
         $this->ProcessRequest($name," MEDIUMTEXT ");
         return $this;
     }
 
     public function longText($name)
-    {
+    {$this->type[$table][$name] = "longtext";
         $this->ProcessRequest($name," LongText ");
         return $this;
     }
 
     public function date($name)
     {
+        $this->type[$table][$name] = "date";
         $this->ProcessRequest($name," DATE ");
         return $this;
     }
 
     public function dateTime($name)
     {
+        $this->type[$table][$name] = "datetime";
         $this->ProcessRequest($name," DATETIME ");
         return $this;
     }

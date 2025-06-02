@@ -68,10 +68,23 @@ class SchemaLoader
         if(class_exists($schema))
         {
        
+        
+          
+
             if(!Schema::table($this->table)->hasTable()){
             $this->schemaLoaderInterface->up($this->table);
             }
+            else
+            {
+                echo " Table : {$this->table} Already install no need to create";
+            }
 
+            if(Schema::table($this->table)->hasTable()){
+            $this->schemaLoaderInterface->alter($this->table);
+            }
+
+
+          
             if(method_exists($this->schemaLoaderInterface,"down") && $this->hasbody($this->schemaLoaderInterface,"down"))
             {
                 if(Schema::migrationFailed())

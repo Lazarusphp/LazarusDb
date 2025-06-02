@@ -26,16 +26,34 @@ class Table extends SchemaCore implements TableInterface
     // use ArrayControl;
 
     public $buildFailed = false;
+    
+   
 
     public function modify()
     {
-        $this->method[$this->name] = " MODIFY COLUMN ";
+        $table = Schema::getTable();
+
+            if(!isset(self::$method[$table]))
+            {
+                self::$method[$table] = [];
+            }
+
+
+            self::$method[$table][$this->name] = " MODIFY ";
+        
     }
 
+    
     public function drop()
     {
-        $this->datatype[$this->name][] = "drop";
-        $this->method[$this->name] = " DROP COLUMN ";
+        $table = Schema::getTable();
+        
+        if(!isset(self::$method[$table]))
+        {
+            self::$method[$table] = [];
+        }
+
+        self::$method[$table][$this->name] = " DROP COLUMN ";
     }
 
     public function rename($original, $new)
@@ -44,18 +62,37 @@ class Table extends SchemaCore implements TableInterface
         $this->query[$this->name][] = " RENAME $original TO $new ";
     }
 
-    private function modifier($name)
+
+    private function unsetData()
     {
-        return array_key_exists($name, $this->method) ? $this->method[$name] : " ";
+            unset(self::$fk[self::$table]);
+            unset(self::$primaryKey[self::$table]);
+            unset(self::$action[self::$table]);
+            unset($this->attributes[self::$table]);
+            unset($this->datatype[self::$table]);
+            unset($this->null[self::$table]);
+            unset($this->ai[self::$table]);
+            unset($this->defaults[self::$table]);
+            unset($this->query);
+
+            self::$fk = [];
+            self::$primaryKey = [];
+            self::$action = [];
+            $this->attributes = [];
+            $this->datatype = [];
+            // self::$method = [];
+            $this->null = [];
+            $this->ai = [];
+            $this->defaults = [];
+            $this->query = [];
+
     }
-
-
-
  
 
     public function fragmentBuilder()
     {
         
+
         //$this->extras ie primary key, index, unique, foreign key
         $columns=[];
 
@@ -67,59 +104,52 @@ class Table extends SchemaCore implements TableInterface
             if(isset(self::$migrationFailed[$key]) && self::$migrationFailed[$key] === true)
             {
                 echo "Failed to save table $key";
-                dd(self::$migrationError[$key]);
             }
             else
             {
-                echo "We will save table : $key ";
-                
                foreach($value as $section => $value)
                 {
                     $null = isset($this->null[$key][$section]) ? $this->null[$key][$section] : " NOT NULL ";
                     $ai = isset($this->ai[$key][$section]) ? $this->ai[$key][$section] : " ";
                     $attributes = isset($this->attributes[$key][$section]) ? $this->attributes[$key][$section] : " ";
                     $defaults = isset($this->defaults[$key][$section]) ? $this->defaults[$key][$section] : " ";
-                    $columns[] = "$value $attributes $null $defaults $ai";
+                    $modifier = isset(self::$method[$key][$section]) ? self::$method[$key][$section] : '';
+                    $columns[] = trim("$modifier $value $attributes $null $defaults $ai");
                 }
             }
-        // unset($this->datatype[$key]);
+
         }
 
         $this->query["datatypes"] = $columns;
-        return;
         }
 
     public function build()
     {
+
         // Return as a string.
             $this->fragmentBuilder();
             $this->loadPrimaryKey();
             $this->processIndexes();
             $this->loadFk();
+
             $columns = [];
             foreach($this->query as $key => $value)
             {
                 // Check if Load Primary key and indexes are in an array
                 if (is_array($value)) {
                     foreach ($value as $item) {
-                        $columns[] = $item;
+                        $columns[] =   $item;
                     }
                     // output data as normal;
                 } else {
                     $columns[] = $value;
                 }
             }
-            dd(Schema::$migrationError);
-            unset(self::$fk[self::$table]);
-            unset(self::$action[self::$table]);
-            unset($this->attributes[self::$table]);
-            unset($this->datatype[self::$table]);
-            unset($this->method[self::$table]);
-            unset($this->null[self::$table]);
-            unset($this->ai[self::$table]);
-            unset($this->defaults[self::$table]);
-            unset($this->query[self::$table]);
+
             // implode the array to text with a trailing comma
+            // Apply $this->modifier to each column at the beginning
+
+            $this->unsetData();
             return implode(",", $columns);
-    }
+        }
 }

@@ -8,7 +8,12 @@ use LazarusPhp\LazarusDb\SharedAssets\Traits\TableControl;
 class Schema extends SchemaCore
 {
     use TableControl;
+    protected static $function;
 
+    public static function getMethod()
+    {
+        return self::$function;
+    }
     public static function table($table)
     {
         self::$table = $table;
@@ -36,6 +41,7 @@ class Schema extends SchemaCore
 
     public function create(callable $table)
     {    
+        self::$function = __FUNCTION__;
         self::$sql = "CREATE TABLE IF NOT EXISTS " . self::$table . " (";
         if(is_callable($table))
         {
@@ -44,9 +50,25 @@ class Schema extends SchemaCore
             self::$sql .= $class->build();
         }
         self::$sql .= ")";
-        // echo self::$sql;
+        echo self::$sql;
         !$this->save() ? self::$migrationFailed = true : self::$migrationFailed = false;
-      
+     
+        dd(self::$migrationError);
+    }
+
+    public function alter(callable $table)
+    {
+        self::$function = __FUNCTION__;
+        self::$sql = "ALTER TABLE " . self::$table . " ";
+        if(is_callable($table))
+        {
+            $class = new Table();
+            $table($class);
+            self::$sql .= $class->build();
+        }
+        echo self::$sql;
+        !$this->save() ? self::$migrationFailed = true : self::$migrationFailed = false;
+        dd(self::$migrationError);
     }
 
     // public function index(string|array $column)

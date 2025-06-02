@@ -12,6 +12,7 @@ trait Indexes
     protected static $indexKey = [];
     protected static $indexType = []; // index or unique
     protected $ai = [];
+    protected $requirePrimary = false;
 
     private function processAi()
     {
@@ -36,6 +37,7 @@ trait Indexes
             }
             else{
              $this->ai[$table][$this->name] = " AUTO_INCREMENT ";
+             $this->primary();
             
             }
             
@@ -77,9 +79,20 @@ trait Indexes
     public function loadPrimaryKey()
     {   
          $table = Schema::getTable();
+         if($this->requirePrimary === false){
         // Check if the pk has been set in primary key and if not default to id;
         $id = isset(self::$primaryKey[$table]["pk"]) ? self::$primaryKey[$table]["pk"] : "id";
-        $this->query["pk"] = " PRIMARY KEY ($id) ";
+        
+            if(isset(self::$primaryKey[$table]["pk"]))
+            {
+                $this->query["pk"] = " PRIMARY KEY ($id) ";
+            }
+        }
+        else
+        {
+            self::$migrationError[$table] = "Primary key is required when adding auto increment";
+            self::$migrationFailed[$table] = true;
+        }
         
     }
 
@@ -87,14 +100,16 @@ trait Indexes
     // Changed name from primaryKey to primary
     public function primary()
     {
+        
         // set the primary key      
         $table = Schema::getTable();
         if(!isset(self::$primaryKey[$table]))
         {
             self::$primaryKey[$table] = [];
+            self::$primaryKey[$table]["pk"] = $this->name;
         }
 
-        self::$primaryKey[$table]["pk"] = $this->name;
+        
         return $this;
     }
 
