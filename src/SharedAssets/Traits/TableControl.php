@@ -30,36 +30,47 @@ trait TableControl
         return false;
     }
 
-    public function allColumns($fieldname)
+    private function validKeys($key)
+    {
+        $validKeys = ["COLUMN_NAME","TABLE_NAME","TABLE_SCHEMA","COLUMN_KEY","DATA_TYPE","IS_NULLABLE","COLUMN_DEFAULT","COLUMN_DEFAULT"];
+        return in_array($key,$validKeys) ? true : false;
+    }
+
+    public function allColumns($fieldname,$all=false)
     {
         $query = "SELECT * ";
         $query .= " FROM INFORMATION_SCHEMA.COLUMNS ";
         $query .= " WHERE TABLE_SCHEMA='".$_ENV['dbname']."' ";
         $query .= " AND TABLE_NAME = '".self::$table."'";
         $query .= " AND COLUMN_NAME='{$fieldname}' ";
-
-        echo $query;
         // Use a direct PDO query to avoid interfering with self::$sql
         $stmt = $this->query($query);
         if ($stmt && $stmt->rowCount() > 0) {
-            return $stmt->fetch();
+            return ($all === false) ? $stmt->fetch() : $stmt->fetchAll();
         }
         return false;
     }
 
     public function hasColumns($field,$key,$value)
-    {
+    {   $constraint = strtoupper($key);
+        if($this->validKeys($constraint)){
         $fetch = $this->allColumns($field);     
-        $constraint = strtoupper($key);
         if($fetch->$constraint === $value)
         {
-            echo "WE found it $constraint $value";
+            return true;
         }
         else
         {
-            echo "failed";
+            return false;
         }
-        // return false;
+        }
+        else
+        {
+            Schema::$migrationError[self::$table][] = "Selected Key is not valid in database";
+            Schema::$migrationFailed[self::$table] = true;
+        }
+        return false;
+       
     }
 
 
