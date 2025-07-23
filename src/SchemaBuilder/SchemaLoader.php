@@ -63,6 +63,11 @@ class SchemaLoader
         $this->schemaLoaderInterface = new $schema();
         if (class_exists($schema)) {
 
+
+            
+            if( TableControl::table($this->table)->hasTable())
+            {
+
             if (!empty($method) && $method === "alter") {
                 if (method_exists($this->schemaLoaderInterface, "alter") && TableControl::table($this->table)->hasTable()) {
 
@@ -70,6 +75,7 @@ class SchemaLoader
                         $this->schemaLoaderInterface->alter($this->table);
                     }
                 }
+            }
             }
 
 
@@ -82,13 +88,6 @@ class SchemaLoader
                 }
             }
 
-
-                 if (method_exists($this->schemaLoaderInterface, "alter") && TableControl::table($this->table)->hasTable()) {
-
-                    if ($this->hasbody($this->schemaLoaderInterface, "alter")) {
-                        $this->schemaLoaderInterface->alter($this->table);
-                    }
-                }
 
             if (Schema::MigrationFailed() && method_exists($this->schemaLoaderInterface, "down") && $this->hasbody($this->schemaLoaderInterface, "down")) {
                 $this->schemaLoaderInterface->down($this->table);
