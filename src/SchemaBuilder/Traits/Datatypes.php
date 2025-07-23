@@ -1,107 +1,152 @@
 <?php
 
 namespace LazarusPhp\LazarusDb\SchemaBuilder\Traits;
+
 use LazarusPhp\LazarusDb\SchemaBuilder\CoreFiles\SchemaCore;
 use LazarusPhp\LazarusDb\SchemaBuilder\Schema;
+use LazarusPhp\LazarusDb\SchemaBuilder\SchemaActions;
+use LazarusPhp\LazarusDb\SchemaBuilder\Table;
+use LazarusPhp\LazarusDb\TableManagement\CoreFiles\TableCore;
+use LazarusPhp\LazarusDb\TableManagement\TableControl;
 
 trait Datatypes
 {
 
-    private $datatype = [];
-    // Type will be used to reference the type  ie int varchar 
-    protected $type = [];
-
-    private function ProcessRequest($name, $command)
+    private function sendRequest($name,$type, $actions)
     {
-        // Define new Array#
-        $table = Schema::getTable();
-        $this->name = $name;
-        // Set a new datatype if it doesnt exist;
-        if (!isset($this->datatype[$table])) {
-            $this->datatype[$table] = [];
-            $this->type[$table] = [];
-        }
-        
-        if (!array_key_exists($this->name, $this->datatype[$table])) {
-           $this->datatype[$table][$this->name] = $this->name . $command;
-            return true;
-            
-        } else {
-            Schema::$migrationError[$table] = "Cannot use Duplicate $name on table $table";
-            Schema::$migrationFailed[$table] = true;
-            return false;
-        }
+        $this->processRequest($name, $type, $actions);
     }
 
+    private $type = "datatype";
 
-    public function string($name,$value=24)
+    /**
+     * nameMatch
+     *
+     * @param [type] $name
+     * @description "matches column name with Database Information Schema"
+     * @return true|false
+     */
+
+ 
+
+    public function string($name, $value = 100)
     {
-        $table = Schema::getTable();
-        $this->type[$table][$name] = "char";
-        $this->ProcessRequest($name,"  VARCHAR($value) ");
+        $actions = [
+            "function" => __FUNCTION__,
+            "value" => $value,
+            "command" => "$name CHAR($value)",
+        ];
+
+       $this->sendRequest($name, $this->type, $actions);
         return $this;
     }
 
-    public function varchar($name,$value=24)
-    {   $this->type[$table][$name] = "varchar";
-        $this->ProcessRequest($name,"  VARCHAR($value) ");
+    public function varchar($name, $value = 255)
+    {
+
+       
+        $actions = [
+            "function" => __FUNCTION__,
+            "value" => $value,
+            "command" => "$name VARCHAR($value)",
+        ];
+
+       $this->sendRequest($name, $this->type, $actions);
         return $this;
     }
 
     public function tinyint($name)
     {
-        $this->type[$table][$name] = "tinyint";
-        $this->ProcessRequest($name," TINYINT(1) ");
+        $actions = [
+            "function" => __FUNCTION__,
+            "command" => "$name TINYINT ",
+        ];
+
+       $this->sendRequest($name, $this->type, $actions);
         return $this;
     }
 
     public function int($name)
-    {$this->type[$table][$name] = "int";
-        $this->ProcessRequest($name," INT ");
+    {
+
+        $actions = [
+            "function" => __FUNCTION__,
+            "command" => "$name INT ",
+        ];
+
+       $this->sendRequest($name, $this->type, $actions);
         return $this;
     }
 
 
     public function bigint($name)
     {
-        $this->type[$table][$name] = "bigint";
-        $this->ProcessRequest($name," BIGINT ");
+        $actions = [
+            "function" => __FUNCTION__,
+            "command" => "$name BIGINT ",
+        ];
+
+       $this->sendRequest($name, $this->type, $actions);
         return $this;
     }
-    
+
 
     public function text($name)
     {
-        $this->type[$table][$name] = "text";
-        $this->ProcessRequest($name," TEXT ");
+
+        $actions = [
+            "function" => __FUNCTION__,
+            "command" => "$name TEXT ",
+        ];
+
+       $this->sendRequest($name, $this->type, $actions);
         return $this;
     }
 
     public function mediumText($name)
-    {$this->type[$table][$name] = "mediumtext";
-        $this->ProcessRequest($name," MEDIUMTEXT ");
+    {
+
+        $actions = [
+            "function" => __FUNCTION__,
+            "command" => "$name MEDIUMTEXT ",
+        ];
+
+       $this->sendRequest($name, $this->type, $actions);
         return $this;
     }
 
     public function longText($name)
-    {$this->type[$table][$name] = "longtext";
-        $this->ProcessRequest($name," LongText ");
+    {
+
+        $actions = [
+            "function" => __FUNCTION__,
+            "command" => "$name LONGTEXT ",
+        ];
+
+       $this->sendRequest($name, $this->type, $actions);
         return $this;
     }
 
     public function date($name)
     {
-        $this->type[$table][$name] = "date";
-        $this->ProcessRequest($name," DATE ");
+        $actions = [
+            "function" => __FUNCTION__,
+            "command" => "$name DATE ",
+        ];
+
+        $this->sendRequest($name, $this->type,$actions);
         return $this;
     }
 
     public function dateTime($name)
     {
-        $this->type[$table][$name] = "datetime";
-        $this->ProcessRequest($name," DATETIME ");
+
+        $actions = [
+            "function" => __FUNCTION__,
+            "command" => "$name DATETIME ",
+        ];
+
+       $this->sendRequest($name, $this->type, $actions);
         return $this;
     }
-
-
 }

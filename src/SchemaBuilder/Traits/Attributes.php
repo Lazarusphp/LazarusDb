@@ -2,41 +2,34 @@
 namespace LazarusPhp\LazarusDb\SchemaBuilder\Traits;
 
 use LazarusPhp\LazarusDb\SchemaBuilder\Schema;
+use LazarusPhp\LazarusDb\SchemaBuilder\SchemaActions;
 
 trait Attributes
 {
-    private $attributes = [];
-    private function processAttribute($command)
-    {
-      $table = Schema::getTable();
-      if(!isset($this->attributes[$table]))
-      {
-        $this->attributes[$table] = [];
-      }
-
-      if(!array_key_exists($this->name,$this->attributes[$table])){
-        $this->attributes[$table][$this->name] = $command;
-      }
-      else
-      {
-            Schema::$migrationError[$table] = "multiple attributes cannot be applid to {$this->name}";
-            Schema::$migrationFailed[$table] = true;
-            return false;
-      }
-
-    }
-
     public function unsigned()
     {
-      
-        // Only allow UNSIGNED for numeric types
-        $this->processAttribute(" UNSIGNED ");
+            $this->processRequest($this->name,"attributes",[
+            "requiredDatatype" => "int|bigint|tinyint",
+            "command"=>" UNSIGNED "
+            ]);
         return $this;
     }
 
         public function binary()
     {
-        $this->processAttribute(" BINARY ");
+        $this->processRequest($this->name,"attributes",[
+            "requiredDatatype" => "char|varchar|text|mediumtext|longtext",
+            "command"=>" BINARY "
+        ]);
+        return $this;
+    }
+
+    public function currentTimestamp()
+    {
+        $this->processRequest($this->name,"attributes",[
+            "requiredDatatype" => "timestamp|datetime",
+            "command"=>" on update CURRENT_TIMESTAMP "
+        ]);
         return $this;
     }
 }

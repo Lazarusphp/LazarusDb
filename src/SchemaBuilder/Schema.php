@@ -2,12 +2,10 @@
 
 namespace LazarusPhp\LazarusDb\SchemaBuilder;
 use LazarusPhp\LazarusDb\SchemaBuilder\CoreFiles\SchemaCore;
-use LazarusPhp\LazarusDb\SchemaBuilder\Table;
-use LazarusPhp\LazarusDb\SharedAssets\Traits\TableControl;
+use LazarusPhp\LazarusDb\TableManagement\Table;
 
 class Schema extends SchemaCore
 {
-    use TableControl;
     protected static $function;
 
     public static function getMethod()
@@ -41,7 +39,7 @@ class Schema extends SchemaCore
 
     public function create(callable $table)
     {    
-        self::$function = __FUNCTION__;
+        SchemaActions::method(__FUNCTION__);
         self::$sql = "CREATE TABLE IF NOT EXISTS " . self::$table . " (";
         if(is_callable($table))
         {
@@ -50,15 +48,23 @@ class Schema extends SchemaCore
             self::$sql .= $class->build();
         }
         self::$sql .= ")";
-        echo self::$sql;
         !$this->save() ? self::$migrationFailed = true : self::$migrationFailed = false;
      
-        dd(self::$migrationError);
+        // Display Errors if any occur
+        if(count(self::$migrationError)){
+            // Output as sql statement
+        // echo self::$sql;
+        // Dump the migration errors as a var dump
+        foreach(self::$migrationError as $error)
+        {
+            echo "<br><h1>Error</h1>";
+        }
+        }
     }
 
     public function alter(callable $table)
     {
-        self::$function = __FUNCTION__;
+         SchemaActions::method(__FUNCTION__);
         self::$sql = "ALTER TABLE " . self::$table . " ";
         if(is_callable($table))
         {
@@ -66,19 +72,27 @@ class Schema extends SchemaCore
             $table($class);
             self::$sql .= $class->build();
         }
-        echo self::$sql;
+        // echo self::$sql;
         !$this->save() ? self::$migrationFailed = true : self::$migrationFailed = false;
-        dd(self::$migrationError);
+        // Count Migrations Errors
+
+       if(count(self::$migrationError)){
+        // Dump the migration errors as a var dump
+        echo self::$sql;
+        echo "<br><h1>Errors found</h1>";
+        echo '<pre>' . json_encode(self::$migrationError, JSON_PRETTY_PRINT) . '</pre>';
+     
+    }
     }
 
-    // public function index(string|array $column)
-    // {
-    //     $key = is_array($column) ? implode(",",$column) : "idx_$column";
-    //     $column = is_array($column) ? implode(", ",$column) : $column;
-    //     self::$sql = "CREATE INDEX $key ON ". self::$table."($column)";
-    //     echo "<br>".self::$sql;
-    //     $this->save();
-    // }
+    public function index(string|array $column)
+    {
+        $key = is_array($column) ? implode(",",$column) : "idx_$column";
+        $column = is_array($column) ? implode(", ",$column) : $column;
+        self::$sql = "CREATE INDEX $key ON ". self::$table."($column)";
+        echo "<br>".self::$sql;
+        $this->save();
+    }
 
      public function rename($table2)
      {

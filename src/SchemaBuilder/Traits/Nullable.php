@@ -1,35 +1,32 @@
 <?php
 namespace LazarusPhp\LazarusDb\SchemaBuilder\Traits;
 use LazarusPhp\LazarusDb\SchemaBuilder\Schema;
+use LazarusPhp\LazarusDb\SchemaBuilder\SchemaActions;
+use LazarusPhp\LazarusDb\TableManagement\TableControl;
 
 trait Nullable
 {
 
     protected $null = [];
+    private $nullvalue;
 
-    private function processNull()
+   
+    
+    public function nullable()
     {
-        $table = Schema::getTable();
-        if(!isset($this->null[$table]))
-        {
-            $this->null[$table] = [];
-        }
-
-        if(!array_key_exists($this->name,$this->null[$table]))
-        {
-             $this->null[$table][$this->name] = " NULL ";
-        }
-        else
-        {
-            Schema::$migrationError[$table] = "you cannot set nullable to $this->name more than once";
-            Schema::$migrationFailed[$table] = true;
-            return false;
-        }
+      
+        $this->processRequest($this->name,"nullable",[
+            "isActive" => true,
+            "command"=>" NULL "
+        ]);    
+        return $this;
     }
 
-       public function nullable()
+    public function notNullable()
     {
-        $this->processNull();    
+         $this->processRequest($this->name,"nullable",[
+            "command"=>" NOT NULL "
+        ]);
         return $this;
     }
 }

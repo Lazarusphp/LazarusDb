@@ -3,6 +3,7 @@
 namespace LazarusPhp\LazarusDb\SchemaBuilder\Traits;
 
 use LazarusPhp\LazarusDb\SchemaBuilder\Schema;
+use LazarusPhp\LazarusDb\SchemaBuilder\SchemaActions;
 use LazarusPhp\LazarusDb\SharedAssets\Traits\ArrayControl;
 
 trait Indexes
@@ -16,36 +17,15 @@ trait Indexes
 
     private function processAi()
     {
-        $table = Schema::getTable();
-        if(!isset($this->ai[$table]))
-        {
-            $this->ai[$table] = [];
-        }
-
-            if(array_key_exists($this->name,$this->ai[$table]))
-            {
-                  Schema::$migrationError[$table] = "Cannot Apply Auto increment  to the same column : {$this->name}";
-                    Schema::$migrationFailed[$table] = true;
-                return false;
-            }
-            
-            if(count($this->ai[$table]) > 1)
-            {
-                Schema::$migrationError[$table] = "Cannot apply Auto increment to multiple colums";
-                Schema::$migrationFailed[$table] = true;
-                return false;
-            }
-            else{
-             $this->ai[$table][$this->name] = " AUTO_INCREMENT ";
-             $this->primary();
-            
-            }
-            
+            $this->processRequest($this->name,"ai",[
+            "command"=>" AUTO_INCREMENT "
+        ]);
+            $this->primary();       
     }
 
     public function processIndexes()
     {
-        $table = Schema::getTable();
+        $table = $this->getTable();
         
         if(isset(self::$index[$table]))
         {  
@@ -78,7 +58,7 @@ trait Indexes
 
     public function loadPrimaryKey()
     {   
-         $table = Schema::getTable();
+         $table = $this->getTable();
          if($this->requirePrimary === false){
         // Check if the pk has been set in primary key and if not default to id;
         $id = isset(self::$primaryKey[$table]["pk"]) ? self::$primaryKey[$table]["pk"] : "id";
@@ -90,19 +70,36 @@ trait Indexes
         }
         else
         {
-            self::$migrationError[$table] = "Primary key is required when adding auto increment";
-            self::$migrationFailed[$table] = true;
+            Schema::$migrationError[$table] = "Primary key is required when adding auto increment";
+            Schema::$migrationFailed[$table] = true;
         }
         
     }
 
+    public function setPrimary()
+    {
+        $this->processRequest($this->name,"primary",[
+            "command"=>" PRIMARY KEY ({$this->name}) "]);
+            return $this;
+    }
+
+
+    public function setUnique($reference)
+    {
+        $this->processRequest($this->name,"unique",[
+            "type"=>"unique",
+            "name"=>$this->name,
+            "references"=>$reference,
+        ]);
+        return $this;
+    }
 
     // Changed name from primaryKey to primary
     public function primary()
     {
         
         // set the primary key      
-        $table = Schema::getTable();
+        $table = $this->getTable();;
         if(!isset(self::$primaryKey[$table]))
         {
             self::$primaryKey[$table] = [];
@@ -115,7 +112,7 @@ trait Indexes
 
     public function index($key = "idx_default")
     {
-        $table = Schema::getTable();
+        $table = $this->getTable();;
         if(!isset(self::$index[$table]))
         {
             self::$index[$table] = [];
@@ -130,7 +127,7 @@ trait Indexes
 
     private function loadIndexes()
     {
-            $table = Schema::getTable();
+            $table = $this->getTable();
             foreach (self::$index[$table] as $key => $value) {
                 $idx_name = isset(self::$indexKey[$table][$key]) ? "idx_" . self::$indexKey[$table][$key] : "idx_default";
                 $columns[] = $value;
@@ -141,7 +138,7 @@ trait Indexes
 
     private function loadUniques()
     {
-        $table = Schema::getTable();
+        $table = $this->getTable();;
             foreach (self::$index[$table] as $key => $unique) {
                 $unique_name = isset(self::$indexKey[$key]) ? "unique_" . self::$indexKey[$key] : "unique_default";
                 $columns[] = $unique;
@@ -154,7 +151,7 @@ trait Indexes
     public function unique($key="unique_")
     {
 
-            $table = Schema::getTable();
+            $table = $this->getTable();;
             self::$index[$table][$this->name] = $this->name;
             self::$indexKey[$table][$this->name] = $key;
             self::$indexType[$table][$this->name] = "unique";
