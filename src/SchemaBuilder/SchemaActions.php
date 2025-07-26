@@ -173,7 +173,11 @@ class SchemaActions extends SchemaCore
 
         // dd(self::getParams());
         $columns = [];
-        foreach (self::getParams() as $name => $props) {
+        $params = self::getParams();
+        if (!is_array($params)) {
+            $params = [];
+        }
+        foreach ($params as $name => $props) {
             // Continue the script
             $datatype = self::passDatatype($props);
             $modifier = self::passModifier($props);
