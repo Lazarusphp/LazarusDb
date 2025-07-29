@@ -29,6 +29,41 @@ trait Fk
       return true;
     }
 
+    public function addFk($table,$column)
+    {
+        $name = $this->name;
+        $actions = [
+            $this->name => [
+                "table"=>$table,
+                "column"=>$column
+            ],
+        ];
+        $this->processRequest($this->name,"fk",$actions);
+        return $this;
+    }
+
+    public function isDeleted($action)
+    {
+        $actions = [
+            $this->name => ["onDelete"=>$action],
+        ];
+
+        $this->processRequest($this->name,"fk",$actions);
+        return $this;
+    }
+
+
+        public function isUpdated($action)
+    {
+        $actions = [
+            $this->name => ["onUpdate"=>$action],
+        ];
+
+        $this->processRequest($this->name,"fk",$actions);
+        return $this;
+    }
+
+
 
     public function constraint($refTable,$refColumn)
     {
@@ -114,8 +149,15 @@ public function loadFk()
             $delete = isset(self::$action[$table]["delete"]) ? self::$action[$table]["delete"] : "RESTRICT";
             $fkSql[] = "{$constraint} FOREIGN KEY (`{$fk['column']}`) REFERENCES `{$fk['refTable']}`(`{$fk['refColumn']}`) ON DELETE $delete ON UPDATE $update";
         }
-        $data = implode(", ", $fkSql);
-        self::$query["fk"] = $data;
+
+        $colums=[];
+        foreach($fkSql as $sql)
+        {
+            $columns[] = $sql;
+            echo $sql;
+        }
+        $data = implode(", ", $columns);
+        self::$query["fk"]= $data;
     }
 }
 

@@ -78,7 +78,8 @@ class Table extends SchemaActions implements TableInterface
             $this->loadFk();
 
              Functions::dd(self::$query);
-            //  exit();
+
+             exit();
             $columns = [];
             
             foreach(self::$query as $key => $value)

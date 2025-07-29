@@ -61,7 +61,7 @@ class SchemaActions extends SchemaCore
     }
 
 
-    protected function processRequest($name, $action, $array)
+    protected function processRequest(string $name, string $action, array $array)
     {
         $this->name = $name;
         SchemaActions::params($this->name, $action, $array);
@@ -178,6 +178,7 @@ class SchemaActions extends SchemaCore
         }
     }
 
+
     // Build final INDEX statements
     foreach ($references as $idxName => $columns) {
         // If duplicate index name exists, group all columns into one INDEX
@@ -186,7 +187,20 @@ class SchemaActions extends SchemaCore
     }
 }      
 
-    private static function passUniques($props)
+    private static function passFk()
+    {
+            $params = self::getParams();
+            foreach($params as $index => $properties)
+            {
+              if(isset($properties[$index]))
+              {
+                $name = $properties[$index];
+                var_dump($name);
+              }
+            }
+    }
+
+    private static function passUniques()
     {
       $params = self::getParams();
     $references = [];
@@ -242,7 +256,8 @@ class SchemaActions extends SchemaCore
         }
 
         self::passIndexes();
-        self::passUniques($props);
+        self::passUniques();
+        self::passFk();
 
         return $columns;
 
