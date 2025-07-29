@@ -11,26 +11,27 @@ class SchemaLoader
 {
     public $table;
     public $classname;
+    private static $targetname;
     private SchemaLoaderInterface $schemaLoaderInterface;
 
 
 
-    public static function load(string $dir, string $method = "")
-    {
-        
-        if (is_dir($dir) === false) {
-            throw new \Exception("Directory not found");
-        }
-
-        $scandir = scandir($dir);
-        foreach ($scandir as $directory) {
-            if ($directory !== "." && $directory !== "..") {
-                $filename = pathinfo($directory, PATHINFO_FILENAME);
-                new self("Migrations\\Schemas\\$filename",$method);
-            }
-        }
+public static function load(string $dir, string $method, string $target = "")
+{
+    if (is_dir($dir) === false) {
+        throw new \Exception("Directory not found");
     }
 
+    $scandir = scandir($dir);
+    foreach ($scandir as $directory) {
+        if ($directory !== "." && $directory !== "..") {
+            $filename = pathinfo($directory, PATHINFO_FILENAME);
+            if ($target && strtolower($filename) !== strtolower($target)) continue; // Only run for the target
+            self::$targetname = $filename;
+            new self("Migrations\\Schemas\\$filename", $method);
+        }
+    }
+}
     private function hasbody($schema, $methodname)
     {
         $reflection = new ReflectionClass($schema);
@@ -64,18 +65,17 @@ class SchemaLoader
         if (class_exists($schema)) {
 
 
-            
-            if( TableControl::table($this->table)->hasTable())
-            {
 
-            if (!empty($method) && $method === "alter") {
-                if (method_exists($this->schemaLoaderInterface, "alter") && TableControl::table($this->table)->hasTable()) {
+            if (TableControl::table($this->table)->hasTable()) {
 
-                    if ($this->hasbody($this->schemaLoaderInterface, "alter")) {
-                        $this->schemaLoaderInterface->alter($this->table);
+                if (!empty($method) && $method === "alter") {
+                    if (method_exists($this->schemaLoaderInterface, "alter") && TableControl::table($this->table)->hasTable()) {
+
+                        if ($this->hasbody($this->schemaLoaderInterface, "alter")) {
+                            $this->schemaLoaderInterface->alter($this->table);
+                        }
                     }
                 }
-            }
             }
 
 
@@ -87,10 +87,16 @@ class SchemaLoader
                     Schema::$migrationFailed[$this->table] = true;
                 }
             }
+        }
 
-
-            if (Schema::MigrationFailed() && method_exists($this->schemaLoaderInterface, "down") && $this->hasbody($this->schemaLoaderInterface, "down")) {
-                $this->schemaLoaderInterface->down($this->table);
+        if (TableControl::table($this->table)->hasTable()) {
+            if (
+                !empty($method) &&
+                in_array($method, ["down"]) &&
+                method_exists($this->schemaLoaderInterface, "down") &&
+                $this->hasbody($this->schemaLoaderInterface, "down")
+            ) {
+                 $this->schemaLoaderInterface->down($this->table);         
             }
         }
     }
@@ -99,12 +105,5 @@ class SchemaLoader
     {
         return new ReflectionClass($classname);
     }
-
-    public function loadSchema($schema)
-    {
-         
-        $this->classname = $this->classname($schema)->getShortname();
-        $this->table = strtolower($schema);
     
-    }
 }

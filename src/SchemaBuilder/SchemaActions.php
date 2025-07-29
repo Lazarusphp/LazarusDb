@@ -2,6 +2,7 @@
 
 namespace LazarusPhp\LazarusDb\SchemaBuilder;
 
+use App\System\Core\Functions;
 use LazarusPhp\LazarusDb\SchemaBuilder\CoreFiles\SchemaCore;
 use LazarusPhp\LazarusDb\TableManagement\TableControl;
 
@@ -145,29 +146,74 @@ class SchemaActions extends SchemaCore
     private static function passPrimary($props)
     {
         if (isset($props["primary"])) {
-            return $props["primary"]["command"];
+            self::$query["primary"] = $props["primary"]["command"];
         }
         return null;
     }
 
-    private static function passIndexes($props)
-    {
-        if (isset($props["indexes"])) {
-            return $props["indexes"]["command"];
+    private static function passIndexes()
+{
+    $params = self::getParams();
+    $references = [];
+
+        foreach ($params as $table => $properties) {
+        if (!isset($properties["indexes"])) {
+            continue;
         }
-        return null;
+
+        
+        foreach ($properties["indexes"] as $ref => $data) {
+            // Ensure this index reference exists
+            if (!isset($references[$ref])) {
+                $references[$ref] = [];
+            }
+
+            // Append the column name to this index reference
+            $references[$ref][] = $data["name"];
+        }
     }
+
+    // Build final INDEX statements
+    foreach ($references as $idxName => $columns) {
+        // If duplicate index name exists, group all columns into one INDEX
+        $columnList = implode(', ', array_unique($columns));
+        self::$query["indexes"][] = "INDEX $idxName ($columnList)";
+    }
+}      
 
     private static function passUniques($props)
     {
-        if (isset($props["uniques"])) {
-            return $props["uniques"]["command"];
+      $params = self::getParams();
+    $references = [];
+
+        foreach ($params as $table => $properties) {
+        if (!isset($properties["uniques"])) {
+            continue;
         }
-        return null;
+
+        
+        foreach ($properties["uniques"] as $ref => $data) {
+            // Ensure this index reference exists
+            if (!isset($references[$ref])) {
+                $references[$ref] = [];
+            }
+
+            // Append the column name to this index reference
+            $references[$ref][] = $data["name"];
+        }
+    }
+
+    // Build final INDEX statements
+    foreach ($references as $idxName => $columns) {
+        // If duplicate index name exists, group all columns into one INDEX
+        $columnList = implode(', ', array_unique($columns));
+        self::$query["uniques"][] = "CONSTRAINT UNIQUE $idxName ($columnList)";
+    }
     }
 
     protected static function processParams()
     {
+
         $table = self::tableControl();
         // Code for processing params goes here
 
@@ -185,24 +231,18 @@ class SchemaActions extends SchemaCore
             $null = self::passNullable($props);
             $default = self::passDefault($props);
             $position = self::passPosition($props);
-            $primary = self::passPrimary($props);
-            $indexes = self::passIndexes($props);
-            $uniques = self::passUniques($props);
+            self::passPrimary($props);
 
-            // Move this into its own Section.
             $columns[] = trim("$modifier $datatype $attributes $null $default $position");
         }
 
-        if (count($columns) > 0) {
-            $query["datatypes"] = $columns;
-            return $query["datatypes"];
-        } else {
-            return [];
-        }
+        self::passIndexes();
+        self::passUniques($props);
+
+        return $columns;
 
         // Code for Database table goes here
 
         // Verify and match both local and database code to see if they match or dont match
     }
-
 }

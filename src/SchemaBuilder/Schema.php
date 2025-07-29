@@ -1,6 +1,7 @@
 <?php
 
 namespace LazarusPhp\LazarusDb\SchemaBuilder;
+
 use LazarusPhp\LazarusDb\SchemaBuilder\CoreFiles\SchemaCore;
 use LazarusPhp\LazarusDb\TableManagement\Table;
 
@@ -15,59 +16,56 @@ class Schema extends SchemaCore
     public static function table($table)
     {
         self::$table = $table;
-    
+
         return new static;
     }
 
     public static function MigrationFailed()
     {
-        if(isset(self::$migrationFailed[self::$table]) && self::$migrationFailed[self::$table] === true)
-        {
+        if (isset(self::$migrationFailed[self::$table]) && self::$migrationFailed[self::$table] === true) {
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
 
-        public static  function getTable()
+    public static  function getTable()
     {
         return self::$table;
     }
 
 
     public function create(callable $table)
-    {    
+    {
         SchemaActions::method(__FUNCTION__);
         self::$sql = "CREATE TABLE IF NOT EXISTS " . self::$table . " (";
-        if(is_callable($table))
-        {
+        if (is_callable($table)) {
             $class = new Table();
             $table($class);
             self::$sql .= $class->build();
         }
         self::$sql .= ")";
-        !$this->save() ? self::$migrationFailed = true : self::$migrationFailed = false;
-     
-        // Display Errors if any occur
-        if(count(self::$migrationError)){
-            // Output as sql statement
         // echo self::$sql;
-        // Dump the migration errors as a var dump
-        foreach(self::$migrationError as $error)
-        {
-            echo "<br><h1>Error</h1>";
-        }
+        !$this->save() ? self::$migrationFailed = true : self::$migrationFailed = false;
+
+                echo json_encode(self::$migrationError);
+        // Display Errors if any occur
+        if (count(self::$migrationError)) {
+            // Output as sql statement
+            // echo self::$sql;
+            // Dump the migration errors as a var dump
+            // foreach (self::$migrationError as $error) {
+            //     // echo "<br><h1>Error</h1>";
+            //     // echo $error;
+            // }
         }
     }
 
     public function alter(callable $table)
     {
-         SchemaActions::method(__FUNCTION__);
+        SchemaActions::method(__FUNCTION__);
         self::$sql = "ALTER TABLE " . self::$table . " ";
-        if(is_callable($table))
-        {
+        if (is_callable($table)) {
             $class = new Table();
             $table($class);
             self::$sql .= $class->build();
@@ -76,58 +74,55 @@ class Schema extends SchemaCore
         !$this->save() ? self::$migrationFailed = true : self::$migrationFailed = false;
         // Count Migrations Errors
 
-       if(count(self::$migrationError)){
-        // Dump the migration errors as a var dump
-        echo self::$sql;
-        echo "<br><h1>Errors found</h1>";
-        echo '<pre>' . json_encode(self::$migrationError, JSON_PRETTY_PRINT) . '</pre>';
-     
-    }
+        if (count(self::$migrationError)) {
+            // Dump the migration errors as a var dump
+            // echo self::$sql;
+            json_encode(self::$migrationError, JSON_PRETTY_PRINT);
+        }
     }
 
     public function index(string|array $column)
     {
-        $key = is_array($column) ? implode(",",$column) : "idx_$column";
-        $column = is_array($column) ? implode(", ",$column) : $column;
-        self::$sql = "CREATE INDEX $key ON ". self::$table."($column)";
-        echo "<br>".self::$sql;
+        $key = is_array($column) ? implode(",", $column) : "idx_$column";
+        $column = is_array($column) ? implode(", ", $column) : $column;
+        self::$sql = "CREATE INDEX $key ON " . self::$table . "($column)";
+        echo "<br>" . self::$sql;
         $this->save();
     }
 
-     public function rename($table2)
-     {
-      self::$sql = "RENAME TABLE " . self::$table . " TO $table2";
-      $result = $this->save();
-
-        return $result ? true : false ;
-
-     }
-
-     /**
-      * Drop
-      *
-      * @param array $name
-      * Deletes the table completly if it exists;
-      * @return void
-      */
-     public function drop()
-     {
-        self::$sql = "DROP TABLE IF EXISTS " .self::$table ;
-        return $this->save() ? true : false ;
-
-     }
-
-     /**
-      * EmptyTable
-      * 
-      * @param array $table
-      * @description Empties table using truncate sql query.
-      * @return void
-      */
-     public function emptyTable()
-     {
-        self::$sql = "TRUNCATE TABLE ". self::$table ;
+    public function rename($table2)
+    {
+        self::$sql = "RENAME TABLE " . self::$table . " TO $table2";
         $result = $this->save();
-        return $result ? true : false ;
-     }
+
+        return $result ? true : false;
+    }
+
+
+    /**
+     * Drop
+     *
+     * @param array $name
+     * Deletes the table completly if it exists;
+     * @return void
+     */
+    public function drop()
+    {
+        self::$sql = "DROP TABLE IF EXISTS " . self::$table;
+        return $this->save() ? true : false;
+    }
+
+    /**
+     * EmptyTable
+     * 
+     * @param array $table
+     * @description Empties table using truncate sql query.
+     * @return void
+     */
+    public function emptyTable()
+    {
+        self::$sql = "TRUNCATE TABLE " . self::$table;
+        $result = $this->save();
+        return $result ? true : false;
+    }
 };

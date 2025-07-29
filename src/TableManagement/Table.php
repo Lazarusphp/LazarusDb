@@ -2,6 +2,7 @@
 
 namespace LazarusPhp\LazarusDb\TableManagement;
 
+use App\System\Core\Functions;
 use LazarusPhp\LazarusDb\SchemaBuilder\CoreFiles\SchemaCore;
 use LazarusPhp\LazarusDb\SchemaBuilder\Interfaces\TableInterface;
 use LazarusPhp\LazarusDb\SchemaBuilder\Schema;
@@ -54,60 +55,33 @@ class Table extends SchemaActions implements TableInterface
             unset(self::$action[self::$table]);
             unset($this->schemaCommands);
             unset($this->schemaAction);
-            unset($this->query);
+            // unset(self::$query);
 
             self::$fk = [];
             self::$primaryKey = [];
             self::$action = [];
             $this->schemaAction = [];
             $this->schemaCommands = [];
-            $this->query = [];
+            self::$query = [];
 
     }
 
-    
-
-
-    private function fragmentBuilder():void
-    {
-
-
-
-        // //$this->.extra$ ie primary key, index, unique, foreign key
-        // $columns=[];
-
-        // foreach(SchemaActions::getParams() as $props)
-        // {
-        //     $datatype = (isset($props["datatype"])) ? $props["datatype"]["command"]  : "";
-        //     $modifier = (isset($props["modifier"])) ? $props["modifier"]["command"]  : "";
-        //     $null  = (isset($props["nullable"])) ? $props["nullable"]["command"]   : "";
-        //     $default = (isset($props["default"])) ? $props["default"]["command"]  : "";
-        //     $attributes =(isset($props["attributes"])) ? $props["attributes"]["command"]  : "";
-        //     $position = (isset($props["position"])) ? $props["position"]["command"]  : "";
-           
-        //     // Move this into its own Section.
-        //     $columns[] = trim("$modifier $datatype $attributes $null $default $position");
-        
-        // }
-        // // echo implode("<hr>",$columns);
-        $columns = SchemaActions::processParams();
-        $this->query["datatypes"] = $columns;
-        }
 
     public function build()
     {
 
         // Return as a string.
-            $this->fragmentBuilder();
-            $this->loadPrimaryKey();
-            $this->processIndexes();
+        $columns = SchemaActions::processParams();
+        self::$query["datatypes"] = $columns;
+       
+            // $this->processIndexes();
             $this->loadFk();
 
+             Functions::dd(self::$query);
+            //  exit();
             $columns = [];
-
             
-
-            foreach($this->query as $key => $value)
+            foreach(self::$query as $key => $value)
             {
                 // Check if Load Primary key and indexes are in an array
                 if (is_array($value)) {

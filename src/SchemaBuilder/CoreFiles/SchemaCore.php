@@ -15,7 +15,7 @@ abstract class SchemaCore extends Database
     protected $errors = [];
     // Possibly Move Name to Ta
     protected $name;
-    protected $query = [];
+    protected static $query = [];
     protected $tableControl;
     protected static $table;
     // Sql Statement
