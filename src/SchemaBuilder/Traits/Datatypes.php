@@ -28,6 +28,11 @@ trait Datatypes
      */
 
  
+    public function id($id="id")
+    {
+        return $this->int($id)->ai();
+    }
+
 
     public function string($name, $value = 100)
     {

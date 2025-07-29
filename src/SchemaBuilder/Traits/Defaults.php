@@ -4,7 +4,7 @@ namespace LazarusPhp\LazarusDb\SchemaBuilder\Traits;
 
 use LazarusPhp\LazarusDb\SchemaBuilder\Schema;
 use LazarusPhp\LazarusDb\SchemaBuilder\SchemaActions;
-
+use App\System\Core\Functions;
 trait Defaults
 {
 
@@ -35,7 +35,7 @@ trait Defaults
                 "command" => " DEFAULT $value "
             ]);
             } else {
-                $this->default(NOW());
+                $this->default(Functions::now());
             }
          
         }

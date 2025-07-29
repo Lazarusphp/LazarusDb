@@ -115,7 +115,7 @@ public function loadFk()
             $fkSql[] = "{$constraint} FOREIGN KEY (`{$fk['column']}`) REFERENCES `{$fk['refTable']}`(`{$fk['refColumn']}`) ON DELETE $delete ON UPDATE $update";
         }
         $data = implode(", ", $fkSql);
-        $this->query["fk"] = $data;
+        self::$query["fk"] = $data;
     }
 }
 

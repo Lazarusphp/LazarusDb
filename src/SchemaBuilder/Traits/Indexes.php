@@ -15,39 +15,35 @@ trait Indexes
     protected $ai = [];
     protected $requirePrimary = false;
 
+    private static $countArray = [];
     private function processAi()
     {
-            $this->processRequest($this->name,"ai",[
-            "command"=>" AUTO_INCREMENT "
+        $this->processRequest($this->name, "ai", [
+            "command" => " AUTO_INCREMENT "
         ]);
-            $this->primary();       
+        $this->primary();
     }
 
     public function processIndexes()
     {
         $table = $this->getTable();
-        
-        if(isset(self::$index[$table]))
-        {  
-            if(count(self::$index[$table]) > 1)
-            {
-                foreach(self::$indexType[$table] as $value => $type)
-                {
-                    if($type === "index")
-                    {
+
+        if (isset(self::$index[$table])) {
+            if (count(self::$index[$table]) > 1) {
+                foreach (self::$indexType[$table] as $value => $type) {
+                    if ($type === "index") {
                         $this->loadIndexes();
                     }
-                    
-                    if($type === "unique")
-                    {
+
+                    if ($type === "unique") {
                         $this->loadUniques();
                     }
                 }
             }
         }
     }
-    
-  
+
+
 
 
     public function ai()
@@ -57,39 +53,50 @@ trait Indexes
     }
 
     public function loadPrimaryKey()
-    {   
-         $table = $this->getTable();
-         if($this->requirePrimary === false){
-        // Check if the pk has been set in primary key and if not default to id;
-        $id = isset(self::$primaryKey[$table]["pk"]) ? self::$primaryKey[$table]["pk"] : "id";
-        
-            if(isset(self::$primaryKey[$table]["pk"]))
-            {
-                $this->query["pk"] = " PRIMARY KEY ($id) ";
+    {
+        $table = $this->getTable();
+        if ($this->requirePrimary === false) {
+            // Check if the pk has been set in primary key and if not default to id;
+            $id = isset(self::$primaryKey[$table]["pk"]) ? self::$primaryKey[$table]["pk"] : "id";
+
+            if (isset(self::$primaryKey[$table]["pk"])) {
+                self::$query["pk"] = " PRIMARY KEY ($id) ";
             }
-        }
-        else
-        {
+        } else {
             Schema::$migrationError[$table] = "Primary key is required when adding auto increment";
             Schema::$migrationFailed[$table] = true;
         }
-        
     }
 
     public function setPrimary()
     {
-        $this->processRequest($this->name,"primary",[
-            "command"=>" PRIMARY KEY ({$this->name}) "]);
+
+        if (!isset(self::$countArray["primary"]) || !is_array(self::$countArray["primary"])) {
+            self::$countArray["primary"] = [];
+        }
+        self::$countArray["primary"][] = $this->name;
+
+        if (count(self::$countArray["primary"]) > 1) {
+            Schema::$migrationError[self::$table] = "Primary key can only be set once per table";
+            Schema::$migrationFailed[self::$table] = true;
             return $this;
+        } else {
+            $actions = [
+                "command" => " PRIMARY KEY ({$this->name}) "
+            ];
+
+            $this->processRequest($this->name, "primary", $actions);
+            return $this;
+        }
     }
 
 
     public function setUnique($reference)
     {
-        $this->processRequest($this->name,"unique",[
-            "type"=>"unique",
-            "name"=>$this->name,
-            "references"=>$reference,
+        $this->processRequest($this->name, "unique", [
+            "type" => "unique",
+            "name" => $this->name,
+            "references" => $reference,
         ]);
         return $this;
     }
@@ -97,64 +104,59 @@ trait Indexes
     // Changed name from primaryKey to primary
     public function primary()
     {
-        
-        // set the primary key      
-        $table = $this->getTable();;
-        if(!isset(self::$primaryKey[$table]))
-        {
-            self::$primaryKey[$table] = [];
-            self::$primaryKey[$table]["pk"] = $this->name;
-        }
-
-        
+        $actions = ["command" => " PRIMARY KEY (id) "];
+        $this->processRequest($this->name, "primary", $actions);
         return $this;
     }
 
     public function index($key = "idx_default")
     {
-        $table = $this->getTable();;
-        if(!isset(self::$index[$table]))
-        {
-            self::$index[$table] = [];
-            self::$indexKey[$table] = [];
-            self::$indexType[$table] = [];
-        }
-            self::$index[$table][$this->name] = $this->name;
-            self::$indexKey[$table][$this->name] = $key;
-            self::$indexType[$table][$this->name] = "index";
+        $actions = [
+            $key => [
+                "name" => $this->name,
+                "reference" => $key
+            ]
+        ];
+
+        $this->processRequest($this->name, "indexes", $actions);
+
+        // $table = $this->getTable();
+        // if(!isset(self::$index[$table]))
+        // {
+        //     self::$index[$table] = [];
+        //     self::$indexKey[$table] = [];
+        //     self::$indexType[$table] = [];
+        // }
+        //     self::$index[$table][$this->name] = $this->name;
+        //     self::$indexKey[$table][$this->name] = $key;
+        //     self::$indexType[$table][$this->name] = "index";
         return $this;
     }
 
-    private function loadIndexes()
-    {
-            $table = $this->getTable();
-            foreach (self::$index[$table] as $key => $value) {
-                $idx_name = isset(self::$indexKey[$table][$key]) ? "idx_" . self::$indexKey[$table][$key] : "idx_default";
-                $columns[] = $value;
-            }
-            $this->query["indexes"] =  "INDEX $idx_name (" . implode(',', $columns) . ") ";
-        
-    }
 
     private function loadUniques()
     {
         $table = $this->getTable();;
-            foreach (self::$index[$table] as $key => $unique) {
-                $unique_name = isset(self::$indexKey[$key]) ? "unique_" . self::$indexKey[$key] : "unique_default";
-                $columns[] = $unique;
-            
+        foreach (self::$index[$table] as $key => $unique) {
+            $unique_name = isset(self::$indexKey[$key]) ? "unique_" . self::$indexKey[$key] : "unique_default";
+            $columns[] = $unique;
 
-            $this->query["uniques"] =  "CONSTRAINT UNIQUE $unique_name (" . implode(',', $columns) . ") ";
+
+            self::$query["uniques"] =  "CONSTRAINT UNIQUE $unique_name (" . implode(',', $columns) . ") ";
         }
     }
 
-    public function unique($key="unique_")
+    public function unique($key = "unique_")
     {
+        
+        $actions = [
+            $key => [
+                "name" => $this->name,
+                "reference" => $key
+            ]
+        ];
 
-            $table = $this->getTable();;
-            self::$index[$table][$this->name] = $this->name;
-            self::$indexKey[$table][$this->name] = $key;
-            self::$indexType[$table][$this->name] = "unique";
-            return $this;
+        $this->processRequest($this->name, "uniques", $actions);
+        return $this;
     }
 }
