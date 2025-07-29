@@ -11,12 +11,17 @@ class SchemaActions extends SchemaCore
     private static $params = [];
     private static $column;
     private static $method = [];
+    private $tableControl;
 
-    public function __construct() {}
+    public function __construct() {
+        parent::__construct();
+        $this->tableControl = new tableControl(self::$table);
+    }
 
     protected static function column()
     {
         return self::$column;
+        parent::__construct();
     }
 
     public static function getParams(...$args)
