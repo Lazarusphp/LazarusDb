@@ -16,7 +16,7 @@ abstract class SchemaCore extends Database
     // Possibly Move Name to Ta
     protected $name;
     protected static $query = [];
-    protected $tableControl;
+    // protected $tableControl;
     protected static $table;
     // Sql Statement
 
@@ -28,7 +28,6 @@ abstract class SchemaCore extends Database
 
     public function __construct()
     {
-        $this->tableControl = new TableControl(self::$table);
         parent::__construct();
     }
 
