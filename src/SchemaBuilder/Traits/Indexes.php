@@ -18,10 +18,7 @@ trait Indexes
     private static $countArray = [];
     private function processAi()
     {
-        $this->processRequest($this->name, "ai", [
-            "command" => " AUTO_INCREMENT "
-        ]);
-        $this->primary();
+  
     }
 
     public function processIndexes()
@@ -48,7 +45,11 @@ trait Indexes
 
     public function ai()
     {
-        $this->processAi();
+        echo "Processing Ai";
+        $this->processRequest($this->name, "ai", [
+            "command" => " AUTO_INCREMENT "
+        ]);
+        $this->primary();
         return $this;
     }
 
