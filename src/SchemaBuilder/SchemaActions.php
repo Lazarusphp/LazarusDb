@@ -11,17 +11,12 @@ class SchemaActions extends SchemaCore
     private static $params = [];
     private static $column;
     private static $method = [];
-    private $tableControl;
 
-    public function __construct() {
-        parent::__construct();
-        $this->tableControl = new tableControl(self::$table);
-    }
+    public function __construct() {}
 
     protected static function column()
     {
         return self::$column;
-        parent::__construct();
     }
 
     public static function getParams(...$args)
@@ -61,7 +56,7 @@ class SchemaActions extends SchemaCore
     }
 
 
-    protected function processRequest(string $name, string $action, array $array)
+    protected function processRequest($name, $action, $array)
     {
         $this->name = $name;
         SchemaActions::params($this->name, $action, $array);
@@ -74,14 +69,20 @@ class SchemaActions extends SchemaCore
         if (!isset(self::$params[self::$table])) {
             self::$params[self::$table] = [];
 
-            if (!isset(self::$params[self::$table][$name])) {
+        }
+
+         if (!isset(self::$params[self::$table][$name])) {
                 self::$params[self::$table][$name] = [];
             }
+        
+        if(!isset(self::$params[self::$table][$name][$action]))
+        {
+            self::$params[self::$table][$name][$action] = [];
         }
         // Merge with existing column params if they exist
 
         if (isset(self::$params[self::$table][$name][$action])) {
-            self::$params[self::$table][$name] = array_merge(
+            self::$params[self::$table][$name][$action] = array_merge(
                 self::$params[self::$table][$name][$action],
                 $array
             );
@@ -94,6 +95,14 @@ class SchemaActions extends SchemaCore
     {
         if (isset($props["datatype"])) {
             return $props["datatype"]["command"];
+        }
+        return null;
+    }
+
+    private static function passAi($props)
+    {
+        if (isset($props["ai"])) {
+            return $props["ai"]["command"];
         }
         return null;
     }
@@ -178,7 +187,6 @@ class SchemaActions extends SchemaCore
         }
     }
 
-
     // Build final INDEX statements
     foreach ($references as $idxName => $columns) {
         // If duplicate index name exists, group all columns into one INDEX
@@ -187,20 +195,7 @@ class SchemaActions extends SchemaCore
     }
 }      
 
-    private static function passFk()
-    {
-            $params = self::getParams();
-            foreach($params as $index => $properties)
-            {
-              if(isset($properties[$index]))
-              {
-                $name = $properties[$index];
-                var_dump($name);
-              }
-            }
-    }
-
-    private static function passUniques()
+    private static function passUniques($props)
     {
       $params = self::getParams();
     $references = [];
@@ -230,6 +225,56 @@ class SchemaActions extends SchemaCore
     }
     }
 
+    public static function passfk()
+    {
+        $fk = [];
+        $commands = [];
+        $params = self::getParams();
+
+        foreach($params as $indexes => $properties)
+        {
+           
+            if(isset($properties["fk"])){
+                $props = $properties["fk"];
+             if(!isset($fk[$indexes]))
+            {
+                $fk[] = $indexes;
+            }
+
+            if(isset($props["table"]) && isset($props["column"]))
+            {
+                $fk[$indexes] = [
+                    "table"=>$props["table"],
+                    "columns"=>$props["column"]
+                ];
+            }
+            
+            if(isset($properties["fkDelete"]))
+                {
+                $props = $properties["fkDelete"];
+                
+            if(isset($props["command"]))
+            {
+                $delete = $props["command"];
+            }
+            }            
+
+            if(isset($properties["fkUpdate"])){
+                $props = $properties["fkUpdate"];
+                
+            if(isset($props["command"]))
+            {
+                $update = $props["command"];
+            }
+            }   
+             self::$query["fk"][] =  "FOREIGN KEY (".$properties["fk"]['currentColumn'].") REFERENCES ".$properties["fk"]['table']." (".$properties["fk"]['column'].") ON DELETE $delete ON UPDATE $update";
+       
+        }
+
+        // End foreach loop below
+    }
+}
+
     protected static function processParams()
     {
 
@@ -246,19 +291,19 @@ class SchemaActions extends SchemaCore
             // Continue the script
             $datatype = self::passDatatype($props);
             $modifier = self::passModifier($props);
+            $ai = self::passAi($props);
             $attributes = self::passAttributes($props);
             $null = self::passNullable($props);
             $default = self::passDefault($props);
             $position = self::passPosition($props);
             self::passPrimary($props);
 
-            $columns[] = trim("$modifier $datatype $attributes $null $default $position");
+            $columns[] = trim("$modifier $datatype $default $attributes $null $ai $position");
         }
 
         self::passIndexes();
-        self::passUniques();
-        self::passFk();
-
+        self::passUniques($props);
+        self::passfk();
         return $columns;
 
         // Code for Database table goes here
