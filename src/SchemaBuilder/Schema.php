@@ -45,10 +45,8 @@ class Schema extends SchemaCore
             self::$sql .= $class->build();
         }
         self::$sql .= ")";
-        echo self::$sql;
         !$this->save() ? self::$migrationFailed = true : self::$migrationFailed = false;
 
-                echo json_encode(self::$migrationError);
         // Display Errors if any occur
         if (count(self::$migrationError)) {
             // Output as sql statement
