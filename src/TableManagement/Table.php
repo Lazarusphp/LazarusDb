@@ -52,14 +52,12 @@ class Table extends SchemaActions implements TableInterface
     {
             unset(self::$fk[self::$table]);
             unset(self::$primaryKey[self::$table]);
-            unset(self::$action[self::$table]);
             unset($this->schemaCommands);
             unset($this->schemaAction);
             // unset(self::$query);
 
             self::$fk = [];
             self::$primaryKey = [];
-            self::$action = [];
             $this->schemaAction = [];
             $this->schemaCommands = [];
             self::$query = [];
@@ -75,11 +73,10 @@ class Table extends SchemaActions implements TableInterface
         self::$query["datatypes"] = $columns;
        
             // $this->processIndexes();
-            $this->loadFk();
-
+            // $this->loadFk();
+        
              Functions::dd(self::$query);
-
-             exit();
+            //  exit();
             $columns = [];
             
             foreach(self::$query as $key => $value)
