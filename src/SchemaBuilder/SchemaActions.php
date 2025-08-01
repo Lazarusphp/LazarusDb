@@ -24,7 +24,7 @@ class SchemaActions extends SchemaCore
         if (isset(self::$params[self::$table])) {
             return self::$params[self::$table];
         } else {
-            return null;
+            
         }
     }
 
@@ -96,7 +96,7 @@ class SchemaActions extends SchemaCore
         if (isset($props["datatype"])) {
             return $props["datatype"]["command"];
         }
-        return null;
+        
     }
 
     private static function passAi($props)
@@ -104,7 +104,7 @@ class SchemaActions extends SchemaCore
         if (isset($props["ai"])) {
             return $props["ai"]["command"];
         }
-        return null;
+        
     }
 
     private static function passModifier($props)
@@ -112,7 +112,7 @@ class SchemaActions extends SchemaCore
         if (isset($props["modifier"])) {
             return $props["modifier"]["command"];
         }
-        return null;
+        
     }
 
     private static function passNullable($props)
@@ -120,7 +120,7 @@ class SchemaActions extends SchemaCore
         if (isset($props["nullable"])) {
             return $props["nullable"]["command"];
         }
-        return null;
+        
     }
 
     private static function passDefault($props)
@@ -128,7 +128,6 @@ class SchemaActions extends SchemaCore
         if (isset($props["default"])) {
             return $props["default"]["command"];
         }
-        return null;
     }
 
     private static function passAttributes($props)
@@ -154,7 +153,7 @@ class SchemaActions extends SchemaCore
         if (isset($props["position"])) {
             return $props["position"]["command"];
         }
-        return null;
+        
     }
 
     private static function passPrimary($props)
@@ -162,7 +161,7 @@ class SchemaActions extends SchemaCore
         if (isset($props["primary"])) {
             self::$query["primary"] = $props["primary"]["command"];
         }
-        return null;
+        
     }
 
     private static function passIndexes()
@@ -298,13 +297,36 @@ class SchemaActions extends SchemaCore
             $position = self::passPosition($props);
             self::passPrimary($props);
 
-            $columns[] = trim("$modifier $datatype $default $attributes $null $ai $position");
+            $columns[] = trim("$modifier $datatype $attributes $null $default $ai $position");
         }
 
         self::passIndexes();
         self::passUniques($props);
         self::passfk();
-        return $columns;
+        
+        self::$query["datatypes"] = $columns;
+
+
+                    $columns = [];
+            
+            foreach(self::$query as $key => $value)
+            {
+                // Check if Load Primary key and indexes are in an array
+                if (is_array($value)) {
+                    foreach ($value as $item) {
+                        $columns[] =   $item;
+                    }
+                    // output data as normal;
+                } else {
+                    $columns[] = $value;
+                }
+            }
+
+            if(count($columns)){
+            self::$query = [];
+            return implode(", ", $columns);
+            }
+
 
         // Code for Database table goes here
 
