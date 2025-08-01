@@ -5,6 +5,7 @@ namespace LazarusPhp\LazarusDb\SchemaBuilder\Traits;
 use LazarusPhp\LazarusDb\TableManagement\TableControl;
 use LazarusPhp\LazarusDb\SchemaBuilder\Schema;
 use LazarusPhp\LazarusDb\SchemaBuilder\SchemaActions;
+use LazarusPhp\LazarusDb\TableManagement\Table;
 
 trait Modifier
 {
@@ -45,4 +46,13 @@ trait Modifier
         ]);
     }
     }
+ 
+    public function add()
+    {
+        if(self::tableControl()->hasTablebyColumn($this->name)===false)
+        {
+
+        }
+    }
+
 }
