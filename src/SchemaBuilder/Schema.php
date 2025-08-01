@@ -40,7 +40,7 @@ class Schema extends SchemaCore
         SchemaActions::method(__FUNCTION__);
         self::$sql = "CREATE TABLE IF NOT EXISTS " . self::$table . " (";
         if (is_callable($table)) {
-            $class = new Table();
+            $class = new SchemaActions();
             $table($class);
             self::$sql .= $class->build();
         }
@@ -64,7 +64,7 @@ class Schema extends SchemaCore
         SchemaActions::method(__FUNCTION__);
         self::$sql = "ALTER TABLE " . self::$table . " ";
         if (is_callable($table)) {
-            $class = new Table();
+            $class = new SchemaActions();
             $table($class);
             self::$sql .= $class->build();
         }
