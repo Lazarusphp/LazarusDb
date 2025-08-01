@@ -3,14 +3,35 @@
 namespace LazarusPhp\LazarusDb\SchemaBuilder;
 
 use App\System\Core\Functions;
+use LazarusPhp\LazarusDb\SchemaBuilder\Interfaces\TableInterface;
+use LazarusPhp\LazarusDb\SchemaBuilder\Schema;
+use LazarusPhp\LazarusDb\SchemaBuilder\Traits\Datatypes;
+use LazarusPhp\LazarusDb\SchemaBuilder\Traits\Indexes;
+use LazarusPhp\LazarusDb\SchemaBuilder\Traits\Nullable;
+use LazarusPhp\LazarusDb\SchemaBuilder\Traits\Defaults;
+use LazarusPhp\LazarusDb\SchemaBuilder\Traits\Attributes;
+use LazarusPhp\LazarusDb\SchemaBuilder\Traits\Fk;
+use LazarusPhp\LazarusDb\SchemaBuilder\Traits\Modifier;
+use LazarusPhp\LazarusDb\SchemaBuilder\Traits\Position;
 use LazarusPhp\LazarusDb\SchemaBuilder\CoreFiles\SchemaCore;
 use LazarusPhp\LazarusDb\TableManagement\TableControl;
 
-class SchemaActions extends SchemaCore
+class SchemaActions extends SchemaCore implements TableInterface
 {
     private static $params = [];
     private static $column;
     private static $method = [];
+
+    use Datatypes;
+    use Indexes;
+    use Fk;
+    use Defaults;
+    use Nullable;
+    use Attributes;
+    use Modifier;
+    use Position;
+
+    public bool $buildFailed = false;
 
     public function __construct() {}
 
@@ -332,4 +353,14 @@ class SchemaActions extends SchemaCore
 
         // Verify and match both local and database code to see if they match or dont match
     }
+
+
+    public function build()
+    {
+
+        // Return as a string.
+        return self::processParams();
+       
+ 
+        }
 }

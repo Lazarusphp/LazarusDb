@@ -25,12 +25,11 @@ public static function load(string $dir, string $method, string $target = "")
     foreach ($scandir as $directory) {
         if ($directory !== "." && $directory !== "..") {
             $filename = pathinfo($directory, PATHINFO_FILENAME);
-            
-            if(file_exists($filename)){
+
             if ($target && strtolower($filename) !== strtolower($target)) continue; // Only run for the target
             self::$targetname = $filename;
             new self("Migrations\\Schemas\\$filename", $method);
-            }
+            
      
        }
       
