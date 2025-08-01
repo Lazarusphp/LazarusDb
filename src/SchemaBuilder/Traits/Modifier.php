@@ -21,17 +21,18 @@ trait Modifier
 
     public function rename($name)
     {
-        $this->oldname = $name; 
+        $this->oldname = $name;
         return $this;
     }
 
     public function change()
     {
         $name  = ($this->oldname || !empty($this->oldname)) ? $this->oldname : $this->name;
+
+        $name;
         $this->processRequest($this->name,"modifier",[
             "command"=>" CHANGE {$name} ","changeable"=>true 
         ]);
-
     }
 
     public function drop($column)
