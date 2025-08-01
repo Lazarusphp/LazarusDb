@@ -69,35 +69,16 @@ class Table extends SchemaActions implements TableInterface
     {
 
         // Return as a string.
-        $columns = SchemaActions::processParams();
-        self::$query["datatypes"] = $columns;
+        return SchemaActions::processParams();
        
             // $this->processIndexes();
             // $this->loadFk();
         
-             Functions::dd(self::$query);
-            //  exit();
-            $columns = [];
-            
-            foreach(self::$query as $key => $value)
-            {
-                // Check if Load Primary key and indexes are in an array
-                if (is_array($value)) {
-                    foreach ($value as $item) {
-                        $columns[] =   $item;
-                    }
-                    // output data as normal;
-                } else {
-                    $columns[] = $value;
-                }
-            }
+            //  Functions::dd(self::$query);
 
             // implode the array to text with a trailing comma
             // Apply $this->modifier to each column at the beginning
 
-            if(count($columns)){
-            $this->unsetData();
-            return implode(", ", $columns);
-            }
+            
         }
 }
