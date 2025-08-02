@@ -371,6 +371,11 @@ class SchemaActions extends SchemaCore implements TableInterface
             }
             else
             {
+           
+                foreach(self::returnErrors() as $key => $errors)
+                {
+                  
+                }
             }
 
 

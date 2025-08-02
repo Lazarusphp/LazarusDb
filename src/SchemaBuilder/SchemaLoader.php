@@ -21,16 +21,15 @@ public static function load(string $dir, string $method, string $target = "")
     if (is_dir($dir) === false) {
         throw new \Exception("Directory not found");
     }
+  
     $scandir = scandir($dir);
     foreach ($scandir as $directory) {
         if ($directory !== "." && $directory !== "..") {
             $filename = pathinfo($directory, PATHINFO_FILENAME);
-
             if ($target && strtolower($filename) !== strtolower($target)) continue; // Only run for the target
             self::$targetname = $filename;
             new self("Migrations\\Schemas\\$filename", $method);
             
-     
        }
       
     }

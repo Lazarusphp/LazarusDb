@@ -41,7 +41,7 @@ abstract class SchemaCore extends Database
             self::$schemaErrors[] = $error_key;
         }
 
-        var_dump(self::$schemaErrors);
+        // var_dump(self::$schemaErrors);
     }
 
     protected static function returnErrors()
