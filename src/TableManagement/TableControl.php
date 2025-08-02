@@ -21,8 +21,10 @@ class TableControl extends TableCore
     }
 
 
-    public function hasTable()
+    public function hasTable($table="")
     {
+
+        $this->table = $table ?? self::$table;
           $query = "SELECT * ";
                 $query .= " FROM INFORMATION_SCHEMA.COLUMNS ";
                 $query .= " WHERE TABLE_SCHEMA='" . $_ENV['dbname'] . "' ";
