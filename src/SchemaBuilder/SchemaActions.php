@@ -13,7 +13,6 @@ use LazarusPhp\LazarusDb\SchemaBuilder\Traits\Fk;
 use LazarusPhp\LazarusDb\SchemaBuilder\Traits\Modifier;
 use LazarusPhp\LazarusDb\SchemaBuilder\Traits\Position;
 use LazarusPhp\LazarusDb\SchemaBuilder\CoreFiles\SchemaCore;
-use LazarusPhp\LazarusDb\TableManagement\TableControl;
 use LazarusPhp\LazarusDb\SchemaBuilder\Interfaces\SchemActionInterface;
 use LazarusPhp\LazarusDb\SchemaBuilder\SchemaErrors;
 use LazarusPhp\LazarusDb\SchemaBuilder\SchemaValidator;
@@ -23,6 +22,7 @@ class SchemaActions extends SchemaCore implements SchemActionInterface
     private static $params = [];
     private static $column;
     private static $method = [];
+    protected static $validator;
 
     use Datatypes;
     use Indexes;
@@ -60,9 +60,9 @@ class SchemaActions extends SchemaCore implements SchemActionInterface
     }
 
 
-    protected static function tableControl()
+    protected static function validator()
     {
-        return new TableControl(self::$table);
+        return self::$validator = new SchemaValidator(self::$table);
     }
 
 
@@ -175,8 +175,8 @@ class SchemaActions extends SchemaCore implements SchemActionInterface
             $exploded = explode("|", $required);
 
             if (!in_array($props["datatype"]["function"], $exploded)) {
-                Schema::$migrationError[self::$table] = "Datatype " . $props["datatype"]["function"] . " is not allowed for attributes";
-                Schema::$migrationFailed[self::$table] = true;
+                SchemaErrors::generate("Cannot Pass Attributes",["Reason"=>"Invalid Datatype used",
+                "Supported Types"=>$exploded]);
                 return false;
             } else {
                 return $props["attributes"]["command"];
@@ -223,6 +223,7 @@ class SchemaActions extends SchemaCore implements SchemActionInterface
         // Build final INDEX stateme
         foreach ($commands as $idxName => $command) {
                 $indexColumns = [];
+                
                 foreach($validator->hasIndexes($idxName) as $column)
                 {
                     $indexColumns[] = $column->COLUMN_NAME;
