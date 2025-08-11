@@ -21,6 +21,11 @@ trait Fk
         return $this;
     }
 
+    public function dropFk()
+    {
+        // Add Code here
+    }
+
 
     public function onUpdate($action = "cascade")
     {
