@@ -1,0 +1,28 @@
+<?php
+
+namespace Migrations\Schemas;
+
+use LazarusPhp\LazarusDb\SchemaBuilder\Schema;
+use LazarusPhp\LazarusDb\SchemaBuilder\Interfaces\SchemaLoaderInterface;
+
+class Users implements SchemaLoaderInterface
+{
+    public function up(string $table): void
+    {
+        // Must have data in it.
+        Schema::table($table)->create(function ($table) {
+        });
+    }
+
+    public function alter(string $table): void {
+                Schema::table($table)->alter(function ($table) {
+        });
+    }
+
+    public function down(string $table):void
+    {
+        Schema::table($table)->drop();
+    }
+
+   
+}
