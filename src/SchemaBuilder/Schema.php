@@ -3,7 +3,11 @@
 namespace LazarusPhp\LazarusDb\SchemaBuilder;
 
 use LazarusPhp\LazarusDb\SchemaBuilder\CoreFiles\SchemaCore;
+use LazarusPhp\LazarusDb\SchemaBuilder\SchemaActions;
 use LazarusPhp\LazarusDb\TableManagement\Table;
+use LazarusPhp\LazarusDb\TableManagement\TableControl;
+use LazarusPhp\LazarusDb\SchemaBuilder\SchemaLoader;
+use LazarusPhp\LazarusDb\TableManagement\CoreFiles\TableCore;
 
 class Schema extends SchemaCore
 {
@@ -45,17 +49,15 @@ class Schema extends SchemaCore
             self::$sql .= $class->build();
         }
         self::$sql .= ")";
-        !$this->save() ? self::$migrationFailed = true : self::$migrationFailed = false;
+        !$this->save() ? SchemaErrors::generate(
+            "Schema Build Failed",
+            ["table" => self::$table, "reason" => self::$sql]
+        ) : "";
+        // Count Migrations Errors
 
         // Display Errors if any occur
-        if (count(self::$migrationError)) {
-            // Output as sql statement
-            // echo self::$sql;
-            // Dump the migration errors as a var dump
-            // foreach (self::$migrationError as $error) {
-            //     // echo "<br><h1>Error</h1>";
-            //     // echo $error;
-            // }
+        if (SchemaErrors::countErrors()) {
+            SchemaErrors::loadErrors();
         }
     }
 
@@ -68,15 +70,32 @@ class Schema extends SchemaCore
             $table($class);
             self::$sql .= $class->build();
         }
-        // echo self::$sql;
-        !$this->save() ? self::$migrationFailed = true : self::$migrationFailed = false;
+        echo self::$sql;
+        !$this->save() ? SchemaErrors::generate(
+            "Schema Build Failed",
+            ["table" => self::$table, "reason" => self::$sql]
+        ) : "";
         // Count Migrations Errors
 
-        if (count(self::$migrationError)) {
-            // Dump the migration errors as a var dump
-            // echo self::$sql;
-            json_encode(self::$migrationError, JSON_PRETTY_PRINT);
+        if (SchemaErrors::countErrors()) {
+            SchemaErrors::loadErrors();
         }
+    }
+
+    public function requiresFirst(...$args)
+    {
+        
+        foreach ($args as $key => $value) {
+            $table = TableControl::table($value);
+            if (!$table->hasTable()) {
+                SchemaLoader::load(ROOT . "/Migrations/Schemas", "up", $value);
+            }
+            else
+            {
+                echo "table not working";
+            }
+        }
+        return $this;
     }
 
     public function index(string|array $column)

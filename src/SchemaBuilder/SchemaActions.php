@@ -3,7 +3,6 @@
 namespace LazarusPhp\LazarusDb\SchemaBuilder;
 
 use App\System\Core\Functions;
-use LazarusPhp\LazarusDb\SchemaBuilder\Interfaces\TableInterface;
 use LazarusPhp\LazarusDb\SchemaBuilder\Schema;
 use LazarusPhp\LazarusDb\SchemaBuilder\Traits\Datatypes;
 use LazarusPhp\LazarusDb\SchemaBuilder\Traits\Indexes;
@@ -15,8 +14,11 @@ use LazarusPhp\LazarusDb\SchemaBuilder\Traits\Modifier;
 use LazarusPhp\LazarusDb\SchemaBuilder\Traits\Position;
 use LazarusPhp\LazarusDb\SchemaBuilder\CoreFiles\SchemaCore;
 use LazarusPhp\LazarusDb\TableManagement\TableControl;
+use LazarusPhp\LazarusDb\SchemaBuilder\Interfaces\SchemActionInterface;
+use LazarusPhp\LazarusDb\SchemaBuilder\SchemaErrors;
+use LazarusPhp\LazarusDb\SchemaBuilder\SchemaValidator;
 
-class SchemaActions extends SchemaCore implements TableInterface
+class SchemaActions extends SchemaCore implements SchemActionInterface
 {
     private static $params = [];
     private static $column;
@@ -42,12 +44,21 @@ class SchemaActions extends SchemaCore implements TableInterface
 
     public static function getParams(...$args)
     {
+   
         if (isset(self::$params[self::$table])) {
+            if(count($args) === 0){
             return self::$params[self::$table];
-        } else {
-            
+            }
+            else
+            {
+                 $table = array_merge(self::$params[self::$table],$args);
+                 return $table;
+            } 
+        }
+        else {
         }
     }
+
 
     protected static function tableControl()
     {
@@ -82,6 +93,16 @@ class SchemaActions extends SchemaCore implements TableInterface
         $this->name = $name;
         SchemaActions::params($this->name, $action, $array);
     }
+    
+
+    protected static function unsetParams($name)
+    {
+        if(isset(self::$params[self::$table][$name]))
+        {
+            unset(self::$params[self::$table][$name]);
+        }
+        return self::$params[self::$table];
+    }
 
 
     protected static function params(string $name, string $action, array $array): void
@@ -89,15 +110,13 @@ class SchemaActions extends SchemaCore implements TableInterface
         // Initialize the table if not already set
         if (!isset(self::$params[self::$table])) {
             self::$params[self::$table] = [];
-
         }
 
-         if (!isset(self::$params[self::$table][$name])) {
-                self::$params[self::$table][$name] = [];
-            }
-        
-        if(!isset(self::$params[self::$table][$name][$action]))
-        {
+        if (!isset(self::$params[self::$table][$name])) {
+            self::$params[self::$table][$name] = [];
+        }
+
+        if (!isset(self::$params[self::$table][$name][$action])) {
             self::$params[self::$table][$name][$action] = [];
         }
         // Merge with existing column params if they exist
@@ -114,10 +133,11 @@ class SchemaActions extends SchemaCore implements TableInterface
 
     private static function passDatatype($props)
     {
-        if (isset($props["datatype"])) {
-            return $props["datatype"]["command"];
+        $datatype = isset($props["datatype"]) ? $props["datatype"] : null;
+        if($datatype)
+        {
+            return $datatype["command"];
         }
-        
     }
 
     private static function passAi($props)
@@ -125,7 +145,6 @@ class SchemaActions extends SchemaCore implements TableInterface
         if (isset($props["ai"])) {
             return $props["ai"]["command"];
         }
-        
     }
 
     private static function passModifier($props)
@@ -133,7 +152,6 @@ class SchemaActions extends SchemaCore implements TableInterface
         if (isset($props["modifier"])) {
             return $props["modifier"]["command"];
         }
-        
     }
 
     private static function passNullable($props)
@@ -141,7 +159,6 @@ class SchemaActions extends SchemaCore implements TableInterface
         if (isset($props["nullable"])) {
             return $props["nullable"]["command"];
         }
-        
     }
 
     private static function passDefault($props)
@@ -174,7 +191,6 @@ class SchemaActions extends SchemaCore implements TableInterface
         if (isset($props["position"])) {
             return $props["position"]["command"];
         }
-        
     }
 
     private static function passPrimary($props)
@@ -182,67 +198,105 @@ class SchemaActions extends SchemaCore implements TableInterface
         if (isset($props["primary"])) {
             self::$query["primary"] = $props["primary"]["command"];
         }
-        
     }
 
     private static function passIndexes()
-{
-    $params = self::getParams();
-    $references = [];
+    {
+        
+        $validator = new SchemaValidator(self::$table);
+        $params = self::getParams();
+        $references = [];
+        $commands = [];
 
         foreach ($params as $table => $properties) {
-        if (!isset($properties["indexes"])) {
-            continue;
-        }
-
-        
-        foreach ($properties["indexes"] as $ref => $data) {
-            // Ensure this index reference exists
-            if (!isset($references[$ref])) {
-                $references[$ref] = [];
+            if (!isset($properties["indexes"])) {
+                continue;
             }
 
-            // Append the column name to this index reference
-            $references[$ref][] = $data["name"];
-        }
-    }
 
-    // Build final INDEX statements
-    foreach ($references as $idxName => $columns) {
-        // If duplicate index name exists, group all columns into one INDEX
-        $columnList = implode(', ', array_unique($columns));
-        self::$query["indexes"][] = "INDEX $idxName ($columnList)";
+            foreach ($properties["indexes"] as $ref => $data) {
+                $references[$ref][] = $data["name"];
+                $commands[$ref] = $data["command"];
+            }
+        }
+
+        // Build final INDEX stateme
+        foreach ($commands as $idxName => $command) {
+                $indexColumns = [];
+                foreach($validator->hasIndexes($idxName) as $column)
+                {
+                    $indexColumns[] = $column->COLUMN_NAME;
+                }
+                
+                if(count($indexColumns) >= 1)
+                {
+                    self::$query["indexes"][] = " DROP INDEX $idxName";
+                }
+                
+                $command = (self::method() === "alter") ? "ADD $command" : $command;
+                $columnList = implode(', ', array_unique($references[$idxName]));
+                $queries = " $command $idxName ($columnList)";
+                
+         
+                self::$query["indexes"][] = $queries;
+             
+                // echo $queries;
+        
+        }
+
+
     }
-}      
 
     private static function passUniques($props)
     {
-      $params = self::getParams();
-    $references = [];
+        $validator = new SchemaValidator(self::$table);
+        $params = self::getParams();
+        $references = [];
+        $commands = [];
 
         foreach ($params as $table => $properties) {
-        if (!isset($properties["uniques"])) {
-            continue;
-        }
-
-        
-        foreach ($properties["uniques"] as $ref => $data) {
-            // Ensure this index reference exists
-            if (!isset($references[$ref])) {
-                $references[$ref] = [];
+            if (!isset($properties["uniques"])) {
+                continue;
             }
 
-            // Append the column name to this index reference
-            $references[$ref][] = $data["name"];
-        }
-    }
 
-    // Build final INDEX statements
-    foreach ($references as $idxName => $columns) {
-        // If duplicate index name exists, group all columns into one INDEX
-        $columnList = implode(', ', array_unique($columns));
-        self::$query["uniques"][] = "CONSTRAINT UNIQUE $idxName ($columnList)";
-    }
+            foreach ($properties["uniques"] as $ref => $data) {
+                $references[$ref][] = $data["name"];
+                $commands[$ref] = $data["command"];
+            }
+        }
+
+        // Build final INDEX stateme
+        foreach ($commands as $idxName => $command) {
+                $indexColumns = [];
+                foreach($validator->hasIndexes($idxName) as $column)
+                {
+                    if($column->NON_UNIQUE === 0){
+                        $indexColumns[] = $column->COLUMN_NAME;
+                    }
+                    else
+                    {
+                    echo $column->COLUMN_NAME . "is not unique";
+                    }
+                }
+                
+                if(count($indexColumns) >= 1)
+                {
+                    self::$query["indexes"][] = " DROP INDEX $idxName";
+                }
+                
+                $command = (self::method() === "alter") ? "ADD $command" : $command;
+                $columnList = implode(', ', array_unique($references[$idxName]));
+                $queries = " $command $idxName ($columnList)";
+                
+         
+                self::$query["uniques"][] = $queries;
+             
+                // echo $queries;
+        
+        }
+
+
     }
 
     public static function passfk()
@@ -250,77 +304,103 @@ class SchemaActions extends SchemaCore implements TableInterface
 
 
         $fk = [];
-        $commands = [];
+        $foreignKey = [];
         $params = self::getParams();
-        $tables = [];
+        $keys = [];
 
-        foreach($params as $indexes => $properties)
-        {
+        // Generate date in loop
+        foreach ($params as $indexes => $properties) {
 
-           
-            if(isset($properties["fk"])){
+            // Check if fk propery is valid
+            if (isset($properties["fk"])) {
                 $props = $properties["fk"];
 
                 $table = $properties["fk"]["table"];
                 $column = $properties["fk"]["column"];
-                
-            
 
-                if(self::tableControl()->hasTable($table) === false)
-                {
-                    self::schemaErrors($table,"foreign Key cannot be Created $table not found");
+                if (!isset($fk[$indexes])) {
+                    $fk[] = $indexes;
                 }
-                elseif(self::tableControl()->hasTableByColumn($column) === false)
-                    {
-                     self::schemaErrors(self::$table,"foreign Key cannot be Created $column not found");
-                }
-                
-            // Do a check against the existsing tables;
-            
-             if(!isset($fk[$indexes]))
-            {
-                $fk[] = $indexes;
-            
-            }
-            if(isset($props["table"]) && isset($props["column"]))
-            {
-                $fk[$indexes] = [
-                    "table"=>$props["table"],
-                    "columns"=>$props["column"]
-                ];
-            }
-            
-            if(isset($properties["fkDelete"]))
-                {
-                $props = $properties["fkDelete"];
-                
-            if(isset($props["command"]))
-            {
-                $delete = $props["command"];
-            }
-            }            
 
-            if(isset($properties["fkUpdate"])){
-                $props = $properties["fkUpdate"];
-                
-            if(isset($props["command"]))
-            {
-                $update = $props["command"];
+                if (isset($props["table"]) && isset($props["column"])) {
+                    $fk[$indexes] = [
+                        "table" => $props["table"],
+                        "columns" => $props["column"]
+                    ];
+                }
+
+                if (!array_key_exists($table, $keys)) {
+                    $keys[$table] = [
+                        "column" => $column,
+                    ];
+                }
+
+                if (!in_array($table, $foreignKey)) {
+                    $foreignKey[$table] = [];
+                }
+
+
+                if (isset($properties["fkDelete"])) {
+                    $props = $properties["fkDelete"];
+
+                    if (isset($props["command"])) {
+                        $delete = $props["command"];
+                    }
+                }
+
+                if (isset($properties["fkUpdate"])) {
+                    $props = $properties["fkUpdate"];
+
+                    if (isset($props["command"])) {
+                        $update = $props["command"];
+                    }
+                }
+
+                // Store Foreign key Command in an array for later
+                $foreignKey[$table] = "FOREIGN KEY (" . $properties["fk"]['currentColumn'] . ") REFERENCES " . $properties["fk"]['table'] . " (" . $properties["fk"]['column'] . ") ON DELETE $delete ON UPDATE $update";
             }
-            }   
-            
-             self::$query["fk"][] =  "FOREIGN KEY (".$properties["fk"]['currentColumn'].") REFERENCES ".$properties["fk"]['table']." (".$properties["fk"]['column'].") ON DELETE $delete ON UPDATE $update";
-       
+
+            // End foreach loop below
         }
 
-        // End foreach loop below
+        // New Loop validate code against database or generate errors
+        foreach ($keys as $key => $value) {
+            if ($key) {
+                $validator = new SchemaValidator($key);
+
+                if (!$validator->hasTable()) {
+                    SchemaErrors::generate("Foreign Key Cannot be Applied Because ", [
+                        "table" => self::$table,
+                        "reason" => "Table $key does not match Schema Migration Request"
+                    ]);
+                }
+
+                if ($validator->hasTable()) {
+                    if ($validator->hasColumn($value["column"]) === false) {
+                        SchemaErrors::generate(
+                            "Foreign Key Cannot be Applied",
+                            [
+                                "table" => self::$table,
+                                "reason" => "Column does not match Schema Migration Request",
+                                "required column" => $value["column"],
+                            ]
+                        );
+                    }
+                }
+            } else {
+            }
+        }
+
+        // Final execute foreign key array and add to self::$query
+        foreach ($foreignKey as $table => $value) {
+            self::$query["fk"][] = $value;
+        }
     }
-}
+
+
 
     protected static function processParams()
     {
-
-        $table = self::tableControl();
         // Code for processing params goes here
 
         // dd(self::getParams());
@@ -329,8 +409,10 @@ class SchemaActions extends SchemaCore implements TableInterface
         if (!is_array($params)) {
             $params = [];
         }
+
         foreach ($params as $name => $props) {
             // Continue the script
+            
             $datatype = self::passDatatype($props);
             $modifier = self::passModifier($props);
             $ai = self::passAi($props);
@@ -339,44 +421,39 @@ class SchemaActions extends SchemaCore implements TableInterface
             $default = self::passDefault($props);
             $position = self::passPosition($props);
             self::passPrimary($props);
-
             $columns[] = trim("$modifier $datatype $attributes $null $default $ai $position");
+        
         }
 
         self::passIndexes();
         self::passUniques($props);
         self::passfk();
-        
+
         self::$query["datatypes"] = $columns;
 
+        $columns = [];
 
-                    $columns = [];
-            
-            foreach(self::$query as $key => $value)
-            {
-                // Check if Load Primary key and indexes are in an array
-                if (is_array($value)) {
-                    foreach ($value as $item) {
-                        $columns[] =   $item;
-                    }
-                    // output data as normal;
-                } else {
-                    $columns[] = $value;
+        foreach (self::$query as $key => $value) {
+            // Check if Load Primary key and indexes are in an array
+            if (is_array($value)) {
+                foreach ($value as $item) {
+                    $columns[] =   $item;
                 }
+                // output data as normal;
+            } else {
+                $columns[] = $value;
             }
+        }
 
-            if((count($columns) && self::countErrors() === false)){
+
+
+        if ((count($columns) && SchemaErrors::countErrors() === false)) {
             self::$query = [];
             return implode(", ", $columns);
-            }
-            else
-            {
-           
-                foreach(self::returnErrors() as $key => $errors)
-                {
-                  
-                }
-            }
+        } else {
+            echo " there are errors";
+        }
+
 
 
         // Code for Database table goes here

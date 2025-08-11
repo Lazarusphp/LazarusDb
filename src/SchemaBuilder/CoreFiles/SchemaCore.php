@@ -4,6 +4,7 @@ namespace LazarusPhp\LazarusDb\SchemaBuilder\CoreFiles;
 use Exception;
 use LazarusPhp\LazarusDb\Database\CoreFiles\Database;
 use LazarusPhp\LazarusDb\SchemaBuilder\Schema;
+use LazarusPhp\LazarusDb\SchemaBuilder\SchemaErrors;
 use LazarusPhp\LazarusDb\TableManagement\TableControl;
 use PDO;
 use PDOException;
@@ -16,14 +17,12 @@ abstract class SchemaCore extends Database
     // Possibly Move Name to Ta
     protected $name;
     protected static $query = [];
-    // protected $tableControl;
     protected static $table;
     // Sql Statement
 
     public static $migrationFailed = [];
     public static $migrationError = [];
 
-    private static $schemaErrors = [];
     protected static $sql = "";
 
     // Constructor
@@ -66,7 +65,7 @@ abstract class SchemaCore extends Database
            $stmt->execute();
            return true;
        } catch (PDOException $e) {
-            Schema::$migrationError[] = $e->getMessage();
+            SchemaErrors::generate("Failed to save",["reason",$e->getMessage()]);
             return false;
        }
    }

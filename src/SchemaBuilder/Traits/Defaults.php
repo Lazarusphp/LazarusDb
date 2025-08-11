@@ -10,18 +10,6 @@ trait Defaults
 
     private function processDefaults()
     {
-        // Define new Array#
-        // $table = Schema::getTable();
-        // // Set a new datatype if it doesnt exist;
-        // if (!isset($this->defaults[$table])) {
-        //     $this->defaults[$table] = [];
-        // }
-
-        // if (array_key_exists($this->name, $this->defaults[$table])) {
-        //     Schema::$migrationError[$table] = "Cannot Add Duplicate ";
-        //     Schema::$migrationFailed[$table] = true;
-        //     return false;
-        // }
         return true;
     }
 

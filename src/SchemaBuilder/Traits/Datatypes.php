@@ -12,7 +12,7 @@ use LazarusPhp\LazarusDb\TableManagement\TableControl;
 trait Datatypes
 {
 
-    private function sendRequest($name,$type, $actions)
+    private function sendRequest($name, $type, $actions)
     {
         $this->processRequest($name, $type, $actions);
     }
@@ -27,36 +27,36 @@ trait Datatypes
      * @return true|false
      */
 
- 
-    public function id($id="id")
+
+    public function id($id = "id")
     {
         return $this->int($id)->ai();
     }
-
-
     public function string($name, $value = 100)
     {
         $actions = [
             "function" => __FUNCTION__,
+            "name" => $name,
             "value" => $value,
             "command" => "$name CHAR($value)",
         ];
 
-       $this->sendRequest($name, $this->type, $actions);
+        $this->sendRequest($name, $this->type, $actions);
         return $this;
     }
 
     public function varchar($name, $value = 255)
     {
 
-       
+
         $actions = [
             "function" => __FUNCTION__,
+            "name"=>$name,
             "value" => $value,
             "command" => "$name VARCHAR($value)",
         ];
 
-       $this->sendRequest($name, $this->type, $actions);
+        $this->sendRequest($name, $this->type, $actions);
         return $this;
     }
 
@@ -64,10 +64,11 @@ trait Datatypes
     {
         $actions = [
             "function" => __FUNCTION__,
+            "name"=>$name,
             "command" => "$name TINYINT ",
         ];
 
-       $this->sendRequest($name, $this->type, $actions);
+        $this->sendRequest($name, $this->type, $actions);
         return $this;
     }
 
@@ -76,10 +77,11 @@ trait Datatypes
 
         $actions = [
             "function" => __FUNCTION__,
+            "name"=>$name,
             "command" => "$name INT ",
         ];
 
-       $this->sendRequest($name, $this->type, $actions);
+        $this->sendRequest($name, $this->type, $actions);
         return $this;
     }
 
@@ -88,10 +90,11 @@ trait Datatypes
     {
         $actions = [
             "function" => __FUNCTION__,
+            "name" => $name,
             "command" => "$name BIGINT ",
         ];
 
-       $this->sendRequest($name, $this->type, $actions);
+        $this->sendRequest($name, $this->type, $actions);
         return $this;
     }
 
@@ -101,10 +104,11 @@ trait Datatypes
 
         $actions = [
             "function" => __FUNCTION__,
+            "name" => $name,
             "command" => "$name TEXT ",
         ];
 
-       $this->sendRequest($name, $this->type, $actions);
+        $this->sendRequest($name, $this->type, $actions);
         return $this;
     }
 
@@ -113,10 +117,11 @@ trait Datatypes
 
         $actions = [
             "function" => __FUNCTION__,
+            "name" => $name,
             "command" => "$name MEDIUMTEXT ",
         ];
 
-       $this->sendRequest($name, $this->type, $actions);
+        $this->sendRequest($name, $this->type, $actions);
         return $this;
     }
 
@@ -125,10 +130,11 @@ trait Datatypes
 
         $actions = [
             "function" => __FUNCTION__,
+            "name" => $name,
             "command" => "$name LONGTEXT ",
         ];
 
-       $this->sendRequest($name, $this->type, $actions);
+        $this->sendRequest($name, $this->type, $actions);
         return $this;
     }
 
@@ -136,10 +142,11 @@ trait Datatypes
     {
         $actions = [
             "function" => __FUNCTION__,
+            "name" => $name,
             "command" => "$name DATE ",
         ];
 
-        $this->sendRequest($name, $this->type,$actions);
+        $this->sendRequest($name, $this->type, $actions);
         return $this;
     }
 
@@ -148,10 +155,11 @@ trait Datatypes
 
         $actions = [
             "function" => __FUNCTION__,
+            "name" => $name,
             "command" => "$name DATETIME ",
         ];
 
-       $this->sendRequest($name, $this->type, $actions);
+        $this->sendRequest($name, $this->type, $actions);
         return $this;
     }
 }

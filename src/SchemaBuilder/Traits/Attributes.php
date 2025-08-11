@@ -30,6 +30,7 @@ trait Attributes
             "requiredDatatype" => "timestamp|datetime",
             "command"=>" on update CURRENT_TIMESTAMP "
         ]);
+        
         return $this;
     }
 }

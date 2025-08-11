@@ -16,24 +16,44 @@ class SchemaLoader
 
 
 
-public static function load(string $dir, string $method, string $target = "")
-{
-    if (is_dir($dir) === false) {
-        throw new \Exception("Directory not found");
+    public static function load(string $dir, string $method, string  $target = "")
+    {
+        if (!is_dir($dir)) {
+            throw new \Exception("Directory not found: $dir");
+        }
+
+        $files = scandir($dir);
+
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
+
+            // Only handle PHP files
+            if (pathinfo($file, PATHINFO_EXTENSION) !== 'php') {
+                continue;
+            }
+
+            $filename = pathinfo($file, PATHINFO_FILENAME);
+            if (!$filename) {
+                continue;
+            }
+
+            // If a target is provided, only process that one
+            if ($target !== '' && strtolower($filename) !== strtolower($target)) {
+                continue;
+            }
+
+            $class = "Migrations\\Schemas\\$filename";
+
+            if (!class_exists($class)) {
+                throw new \Exception("Class $class does not exist.");
+            }
+
+            new self($class, $method);
+        }
     }
-  
-    $scandir = scandir($dir);
-    foreach ($scandir as $directory) {
-        if ($directory !== "." && $directory !== "..") {
-            $filename = pathinfo($directory, PATHINFO_FILENAME);
-            if ($target && strtolower($filename) !== strtolower($target)) continue; // Only run for the target
-            self::$targetname = $filename;
-            new self("Migrations\\Schemas\\$filename", $method);
-            
-       }
-      
-    }
-}
+
     private function hasbody($schema, $methodname)
     {
         $reflection = new ReflectionClass($schema);
@@ -61,51 +81,89 @@ public static function load(string $dir, string $method, string $target = "")
 
     public function __construct($schema, $method)
     {
-        $this->table = strtolower($this->classname($schema)->getShortName());
 
-        $this->schemaLoaderInterface = new $schema();
-        if (class_exists($schema)) {
+        $classname = $this->classname($schema);
+        $this->table = strtolower($classname->getShortName());
 
+            $this->schemaLoaderInterface = new $schema();
+            if (class_exists($schema)) {
+                if ($method) {
 
+                    if ($method === "up") {
+                        $this->migrateTable($method);
+                    }
 
-            if (TableControl::table($this->table)->hasTable()) {
+                    if ($method === "alter") {
+                        $this->modifyTable($method);
+                    }
 
-                if (!empty($method) && $method === "alter") {
-                    if (method_exists($this->schemaLoaderInterface, "alter") && TableControl::table($this->table)->hasTable()) {
-
-                        if ($this->hasbody($this->schemaLoaderInterface, "alter")) {
-                            $this->schemaLoaderInterface->alter($this->table);
-                        }
+                    if ($method === "down") {
+                        $this->dropTable($method);
                     }
                 }
+            } else {
+                "Error Finding CLass";
             }
+        
+    }
 
+    private function migrateTable($method)
+    {
+        if (!TableControl::table($this->table)->hasTable($this->table)) {
+            if (method_exists($this->schemaLoaderInterface, $method)) {
 
-            if (!TableControl::table($this->table)->hasTable()) {
-                if ($this->hasbody($this->schemaLoaderInterface, "up")) {
+                if ($this->hasbody($this->schemaLoaderInterface, $method)) {
                     $this->schemaLoaderInterface->up($this->table);
                 } else {
-                    Schema::$migrationError[$this->table][] = "Failed to install Up method has not data";
-                    Schema::$migrationFailed[$this->table] = true;
+                    SchemaErrors::generate("Cannot create table $this->table", ["reason" => "$method code has not Body in it"]);
                 }
-            }
-        }
-
-        if (TableControl::table($this->table)->hasTable()) {
-            if (
-                !empty($method) &&
-                in_array($method, ["down"]) &&
-                method_exists($this->schemaLoaderInterface, "down") &&
-                $this->hasbody($this->schemaLoaderInterface, "down")
-            ) {
-                 $this->schemaLoaderInterface->down($this->table);         
+            } else {
+                SchemaErrors::generate("Cannot create table $this->table", ["reason" => "Method $method does not exist"]);
             }
         }
     }
+
+    private function modifyTable($method)
+    {
+        if (TableControl::table($this->table)->hasTable($this->table)) {
+            if (method_exists($this->schemaLoaderInterface, $method)) {
+
+                if ($this->hasbody($this->schemaLoaderInterface, $method)) {
+                    $this->schemaLoaderInterface->alter($this->table);
+                } else {
+                    SchemaErrors::generate("Cannot Alter table $this->table", ["reason" => "Alter code has not Body in it"]);
+                }
+            } else {
+                SchemaErrors::generate("Cannot Alter table $this->table", ["reason" => "Method $method does not exist"]);
+            }
+        } else {
+            SchemaErrors::generate("Cannot Alter table $this->table", ["reason" => "Table $this->table is reqired"]);
+        }
+    }
+
+    private function dropTable($method)
+    {
+        echo "We are doing it";
+        if (TableControl::table($this->table)->hasTable($this->table)) {
+            if (method_exists($this->schemaLoaderInterface, $method)) {
+
+                if ($this->hasbody($this->schemaLoaderInterface, $method)) {
+                    $this->schemaLoaderInterface->down($this->table);
+                } else {
+                    SchemaErrors::generate("Cannot Drop table $this->table", ["reason" => "Alter code has not Body in it"]);
+                }
+            } else {
+                SchemaErrors::generate("Cannot drop table $this->table", ["reason" => "Method $method does not exist"]);
+            }
+        } else {
+            SchemaErrors::generate("Cannot drop table $this->table", ["reason" => "Table $this->table is reqired"]);
+        }
+    }
+
+
 
     public function classname($classname)
     {
         return new ReflectionClass($classname);
     }
-    
 }
