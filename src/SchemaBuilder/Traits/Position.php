@@ -5,6 +5,7 @@ namespace LazarusPhp\LazarusDb\SchemaBuilder\Traits;
 use LazarusPhp\LazarusDb\SchemaBuilder\Schema;
 use LazarusPhp\LazarusDb\SchemaBuilder\SchemaActions;
 use LazarusPhp\LazarusDb\SchemaBuilder\SchemaErrors;
+use LazarusPhp\LazarusDb\SchemaBuilder\SchemaValidator;
 
 trait Position
 {
@@ -19,12 +20,13 @@ trait Position
   public function after($name)
   {
     $table = self::$table;
-    if (self::tableControl()->hasTable($table) === false) {
-      if (!self::tableControl()->validFields("column_name", $name)) {
+    $validator = new SchemaValidator($table);
+    if ($validator->hasTable() === false) {
+      if (!$validator->validField("column_name", $name)) {
         SchemaErrors::generate("Cannot Adjust Position", ["reason" => "Table $table doesnt exist"]);
         return false;
-      } elseif (self::tableControl()->hasTable($table)) {
-        if (!self::tableControl()->validFields("column_name", $name)) {
+      } elseif ($validator->hasTable($table)) {
+        if (!$validator->validField("column_name", $name)) {
           SchemaErrors::generate("Cannot Adjust Position", ["reason" => "Table $table doesnt exist"]);
           return false;
         }
@@ -38,20 +40,19 @@ trait Position
 
   public function first()
   {
-    $table = self::$table;
-if (self::tableControl()->hasTable($table) === false) {
-      if (!self::tableControl()->validFields("column_name", $name)) {
+    $table = $table;
+    $validator = new SchemaValidator($table);
+    if ($validator->hasTable($table) === false) {
+      if (!$validator->validField("column_name", $name)) {
         SchemaErrors::generate("Cannot Adjust Position", ["reason" => "Table $table doesnt exist"]);
         return false;
-      } elseif (self::tableControl()->hasTable($table)) {
-        if (!self::tableControl()->validFields("column_name", $name)) {
+      } elseif ($validator->hasTable($table)) {
+        if (!$validator->validField("column_name", $name)) {
           SchemaErrors::generate("Cannot Adjust Position", ["reason" => "Table $table doesnt exist"]);
           return false;
         }
       }
-    }
-      else
-     {
+    } else {
       $this->processPosition(" FIRST ");
     }
     return $this;
