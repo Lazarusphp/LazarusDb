@@ -247,20 +247,41 @@ class SchemaActions extends SchemaCore implements TableInterface
 
     public static function passfk()
     {
+
+
         $fk = [];
         $commands = [];
         $params = self::getParams();
+        $tables = [];
 
         foreach($params as $indexes => $properties)
         {
+
            
             if(isset($properties["fk"])){
                 $props = $properties["fk"];
+
+                $table = $properties["fk"]["table"];
+                $column = $properties["fk"]["column"];
+                
+            
+
+                if(self::tableControl()->hasTable($table) === false)
+                {
+                    self::schemaErrors($table,"foreign Key cannot be Created $table not found");
+                }
+                elseif(self::tableControl()->hasTableByColumn($column) === false)
+                    {
+                     self::schemaErrors(self::$table,"foreign Key cannot be Created $column not found");
+                }
+                
+            // Do a check against the existsing tables;
+            
              if(!isset($fk[$indexes]))
             {
                 $fk[] = $indexes;
+            
             }
-
             if(isset($props["table"]) && isset($props["column"]))
             {
                 $fk[$indexes] = [
@@ -287,6 +308,7 @@ class SchemaActions extends SchemaCore implements TableInterface
                 $update = $props["command"];
             }
             }   
+            
              self::$query["fk"][] =  "FOREIGN KEY (".$properties["fk"]['currentColumn'].") REFERENCES ".$properties["fk"]['table']." (".$properties["fk"]['column'].") ON DELETE $delete ON UPDATE $update";
        
         }
@@ -343,9 +365,17 @@ class SchemaActions extends SchemaCore implements TableInterface
                 }
             }
 
-            if(count($columns)){
+            if((count($columns) && self::countErrors() === false)){
             self::$query = [];
             return implode(", ", $columns);
+            }
+            else
+            {
+           
+                foreach(self::returnErrors() as $key => $errors)
+                {
+                  
+                }
             }
 
 
@@ -357,10 +387,6 @@ class SchemaActions extends SchemaCore implements TableInterface
 
     public function build()
     {
-
-        // Return as a string.
         return self::processParams();
-       
- 
-        }
+    }
 }
