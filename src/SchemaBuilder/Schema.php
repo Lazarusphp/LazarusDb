@@ -24,15 +24,6 @@ class Schema extends SchemaCore
         return new static;
     }
 
-    public static function MigrationFailed()
-    {
-        if (isset(self::$migrationFailed[self::$table]) && self::$migrationFailed[self::$table] === true) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     public static  function getTable()
     {
         return self::$table;
