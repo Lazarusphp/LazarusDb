@@ -12,6 +12,7 @@ class SchemaLoader
     public $table;
     public $classname;
     private static $targetname;
+    private $validator;
     private SchemaLoaderInterface $schemaLoaderInterface;
 
 
@@ -84,7 +85,7 @@ class SchemaLoader
 
         $classname = $this->classname($schema);
         $this->table = strtolower($classname->getShortName());
-
+        $this->validator =    new SchemaValidator($this->table);
             $this->schemaLoaderInterface = new $schema();
             if (class_exists($schema)) {
                 if ($method) {
@@ -109,12 +110,13 @@ class SchemaLoader
 
     private function migrateTable($method)
     {
-        if (!TableControl::table($this->table)->hasTable($this->table)) {
+        if (!$this->validator->hasTable($this->table)) {
             if (method_exists($this->schemaLoaderInterface, $method)) {
 
                 if ($this->hasbody($this->schemaLoaderInterface, $method)) {
                     $this->schemaLoaderInterface->up($this->table);
-                } else {
+                } 
+                else {
                     SchemaErrors::generate("Cannot create table $this->table", ["reason" => "$method code has not Body in it"]);
                 }
             } else {
@@ -125,14 +127,14 @@ class SchemaLoader
 
     private function modifyTable($method)
     {
-        if (TableControl::table($this->table)->hasTable($this->table)) {
+        
+        if ($this->validator->hasTable($this->table)) {
             if (method_exists($this->schemaLoaderInterface, $method)) {
 
                 if ($this->hasbody($this->schemaLoaderInterface, $method)) {
                     $this->schemaLoaderInterface->alter($this->table);
-                } else {
-                    SchemaErrors::generate("Cannot Alter table $this->table", ["reason" => "Alter code has not Body in it"]);
-                }
+                } 
+        
             } else {
                 SchemaErrors::generate("Cannot Alter table $this->table", ["reason" => "Method $method does not exist"]);
             }
@@ -144,14 +146,13 @@ class SchemaLoader
     private function dropTable($method)
     {
         echo "We are doing it";
-        if (TableControl::table($this->table)->hasTable($this->table)) {
+        if ($this->validator->hasTable($this->table)) {
             if (method_exists($this->schemaLoaderInterface, $method)) {
 
                 if ($this->hasbody($this->schemaLoaderInterface, $method)) {
                     $this->schemaLoaderInterface->down($this->table);
-                } else {
-                    SchemaErrors::generate("Cannot Drop table $this->table", ["reason" => "Alter code has not Body in it"]);
                 }
+
             } else {
                 SchemaErrors::generate("Cannot drop table $this->table", ["reason" => "Method $method does not exist"]);
             }
