@@ -20,9 +20,6 @@ abstract class SchemaCore extends Database
     protected static $table;
     // Sql Statement
 
-    public static $migrationFailed = [];
-    public static $migrationError = [];
-
     protected static $sql = "";
 
     // Constructor
@@ -30,31 +27,6 @@ abstract class SchemaCore extends Database
     public function __construct()
     {
         parent::__construct();
-    }
-
-    protected static function schemaErrors(string $table,string $message,array $requirements=[])
-    {
-        
-        $error_key = "errors";
-        if(!isset($schemaErrors[$error_key])){
-            self::$schemaErrors[] = $error_key;
-        }
-
-        // var_dump(self::$schemaErrors);
-    }
-
-    protected static function returnErrors()
-    {
-        return self::$schemaErrors;
-    }
-
-    protected static function countErrors()
-    {
-        if(count(self::$schemaErrors) >= 1)
-        {
-            return true;
-        }
-        return false;
     }
 
     protected function save(string $sql = "")
