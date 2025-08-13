@@ -109,12 +109,32 @@ class SchemaValidator extends SchemaCore
     return $result->fetchAll();
     }
 
+    public function hasForeignKey($column)
+    {
+        $query = "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME";
+        $query .= " FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE";
+        $query .= " WHERE REFERENCED_TABLE_SCHEMA IS NOT NULL";
+        $stmt = $this->query($query);
+        if(!empty($column))
+        {
+                $query .= " AND COLUMN_NAME='{$column}'";
+               $fetch =  $stmt->fetch();
+        }
+        else
+        {
+            $fetch = $stmt->fetchAll();
+        }
+
+        return $fetch;
+    }
+
     public function hasColumn($name)
     {
         foreach ($this->rows as $col) {
             if ($col->COLUMN_NAME === $name) {
                 $this->column = $name;
                 return true;
+                // break;
             }
         }
     }

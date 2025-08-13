@@ -63,6 +63,7 @@ trait Indexes
 
     public function dropIndex($key)
     {
+        $this->name = $key;
         // Validate that the name and the add command cannot be used together
          $actions = [
             $key => [
@@ -72,8 +73,8 @@ trait Indexes
             ]
         ];
         $this->processRequest($this->name, "indexes", $actions);
+      
         return $this;
-
     }
 
     public function unique($key = "unique_")

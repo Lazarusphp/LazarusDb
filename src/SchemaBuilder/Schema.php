@@ -77,8 +77,8 @@ class Schema extends SchemaCore
     {
         
         foreach ($args as $key => $value) {
-            $table = TableControl::table($value);
-            if (!$table->hasTable()) {
+            $validator = new SchemaValidator(self::$table);
+            if (!$validator->hasTable()) {
                 SchemaLoader::load(ROOT . "/Migrations/Schemas", "up", $value);
             }
             else

@@ -40,7 +40,7 @@ trait Position
 
   public function first()
   {
-    $table = $table;
+    $table = self::$table;
     $validator = new SchemaValidator($table);
     if ($validator->hasTable($table) === false) {
       if (!$validator->validField("column_name", $name)) {

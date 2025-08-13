@@ -74,6 +74,7 @@ trait Modifier
             "modify"=>false
             ]);
         }
+        return $this;
     }
 
     public function add()

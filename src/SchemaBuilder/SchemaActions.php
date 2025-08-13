@@ -149,8 +149,31 @@ class SchemaActions extends SchemaCore implements SchemActionInterface
 
     private static function passModifier($props)
     {
-        if (isset($props["modifier"])) {
-            return $props["modifier"]["command"];
+        $datatype = (isset($props["datatype"])) ? $props["datatype"] : null;
+        if(isset($props["modifier"]))
+        {
+            if(isset($props["modifier"]["command"]))
+            {
+                $name = (isset($props["modifier"]["name"])) ? $props["modifier"]["name"] : null ;
+                if($props["modifier"]["type"] === "drop")
+                {
+                    $dtName = (isset($props["datatype"]["name"])) ? $props["datatype"]["name"] : null;
+                    if($dtName !== null && $datatype["name"] === $name)
+                    {
+                        SchemaErrors::generate("Failed to Drop Column",["Reason"=>"Datatype Still loaded in Migration file","Cplumn"=>$name,"migration file"=>self::$table]);
+                        return false;
+                    }
+                    else
+                    {
+                        $drops[$name] =  " DROP COLUMN {$props["modifier"]["name"]} ";#
+                        return $drops;
+                    }
+                        
+                }
+                else{
+                  return $props["modifier"]["command"];
+                }
+            }
         }
     }
 
@@ -199,6 +222,8 @@ class SchemaActions extends SchemaCore implements SchemActionInterface
             self::$query["primary"] = $props["primary"]["command"];
         }
     }
+
+
 
     private static function passIndexes()
     {
@@ -308,10 +333,13 @@ class SchemaActions extends SchemaCore implements SchemActionInterface
         $foreignKey = [];
         $params = self::getParams();
         $keys = [];
+        
+        $fkdrops = [];
 
         // Generate date in loop
-        foreach ($params as $indexes => $properties) {
-
+        foreach ($params as $indexes => $properties) 
+        {
+          
             // Check if fk propery is valid
             if (isset($properties["fk"])) {
                 $props = $properties["fk"];
@@ -360,6 +388,9 @@ class SchemaActions extends SchemaCore implements SchemActionInterface
                 // Store Foreign key Command in an array for later
                 $foreignKey[$table] = "FOREIGN KEY (" . $properties["fk"]['currentColumn'] . ") REFERENCES " . $properties["fk"]['table'] . " (" . $properties["fk"]['column'] . ") ON DELETE $delete ON UPDATE $update";
             }
+
+            
+
 
             // End foreach loop below
         }
