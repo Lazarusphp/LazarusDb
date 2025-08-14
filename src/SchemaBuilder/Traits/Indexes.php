@@ -12,16 +12,11 @@ trait Indexes
 {
     protected static $primaryKey = [];
     protected static $index = [];
-    protected static $indexKey = [];
-    protected static $indexType = []; // index or unique
     protected $ai = [];
     protected $requirePrimary = false;
 
     private static $countIndex = [];
-    private function processAi()
-    {
-  
-    }
+ 
 
     public function ai()
     {
@@ -42,53 +37,52 @@ trait Indexes
         return $this;
     }
 
-    public function index($key = "idx_default")
+    public function index($key = "idx_default",...$args)
     {
-     
-
+        self::$index = $key;
         // do a check if in modify mode add index here
          // Validate that the name and the add command cannot be used together
+        if(count($args) === 0){
+        $value="";
+        }
+        else{
+        $value = count($args) === 1 ? (string) $args[0] : $args;
+        }
         $command = "INDEX";
         $actions = [
             $key => [
-                "name" => $this->name,
+                "name" => self::$index,
+                "value"=>$value,
                 "command"=>" $command ",
-                "reference" => $key
+                "reference" => self::$index
             ]
         ];
 
         $this->processRequest($this->name, "indexes", $actions);
-        return $this;
     }
 
-    public function dropIndex($key)
-    {
-        $this->name = $key;
-        // Validate that the name and the add command cannot be used together
-         $actions = [
-            $key => [
-                "name" => $this->name,
-                "command"=> " DROP INDEX $this->name",
-                "reference" => $key
-            ]
-        ];
-        $this->processRequest($this->name, "indexes", $actions);
-      
-        return $this;
-    }
 
-    public function unique($key = "unique_")
+    public function unique($key = "idx_default",...$args)
     {
-        
+        self::$index = $key;
+        // do a check if in modify mode add index here
+         // Validate that the name and the add command cannot be used together
+        if(count($args) === 0){
+        $value="";
+        }
+        else{
+        $value = count($args) === 1 ? (string) $args[0] : $args;
+        }
+
         $actions = [
             $key => [
-                "name" => $this->name,
+                "name" => self::$index,
+                "value"=>$value,
                 "command"=>" UNIQUE ",
-                "reference" => $key
-            ]
+                "reference" => self::$index,
+            ],
         ];
 
         $this->processRequest($this->name, "uniques", $actions);
-        return $this;
     }
 }
