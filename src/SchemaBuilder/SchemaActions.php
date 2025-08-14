@@ -149,30 +149,11 @@ class SchemaActions extends SchemaCore implements SchemActionInterface
 
     private static function passModifier($props)
     {
-        $datatype = (isset($props["datatype"])) ? $props["datatype"] : null;
         if(isset($props["modifier"]))
         {
             if(isset($props["modifier"]["command"]))
             {
-                $name = (isset($props["modifier"]["name"])) ? $props["modifier"]["name"] : null ;
-                if($props["modifier"]["type"] === "drop")
-                {
-                    $dtName = (isset($props["datatype"]["name"])) ? $props["datatype"]["name"] : null;
-                    if($dtName !== null && $datatype["name"] === $name)
-                    {
-                        SchemaErrors::generate("Failed to Drop Column",["Reason"=>"Datatype Still loaded in Migration file","Cplumn"=>$name,"migration file"=>self::$table]);
-                        return false;
-                    }
-                    else
-                    {
-                        $drops[$name] =  " DROP COLUMN {$props["modifier"]["name"]} ";#
-                        return $drops;
-                    }
-                        
-                }
-                else{
-                  return $props["modifier"]["command"];
-                }
+                return $props["modifier"]["command"]; 
             }
         }
     }
@@ -224,105 +205,94 @@ class SchemaActions extends SchemaCore implements SchemActionInterface
     }
 
 
-
     private static function passIndexes()
     {
-        
-        $validator = new SchemaValidator(self::$table);
-        $params = self::getParams();
         $references = [];
         $commands = [];
+        $params = self::getParams();
+        $validator = new SchemaValidator(self::$table);
 
-        foreach ($params as $table => $properties) {
-            if (!isset($properties["indexes"])) {
-                continue;
-            }
+        foreach($params as $table => $properties)
+        {
+            if(isset($properties["indexes"]))
+            {
+             $props = $properties["indexes"];
+                foreach ($properties["indexes"] as $ref => $data)
+                {
+                   
+                    $index = $validator->hasIndexes($data["name"]);
+                    if(self::method() === "alter" && $index)
+                    {
+                        self::$query["indexes"][] = " DROP INDEX {$data["name"]}";
+                    }
+                    
+                    if (is_array($data["value"])) {
+                    $idxValues = implode(", ", $data["value"]);
+                    } 
+                    else {
+                        $idxValues = $data["value"];
+                    }
 
+                        $references[$ref][] = $idxValues;
+                        
+                        $commands[$ref] =  $data["command"];
+                    }
 
-            foreach ($properties["indexes"] as $ref => $data) {
-                $references[$ref][] = $data["name"];
-                $commands[$ref] = $data["command"];
             }
         }
 
-        // Build final INDEX stateme
-        foreach ($commands as $idxName => $command) {
-                $indexColumns = [];
-                
-                foreach($validator->hasIndexes($idxName) as $column)
-                {
-                    $indexColumns[] = $column->COLUMN_NAME;
-                }
-                
-                if(count($indexColumns) >= 1)
-                {
-                    self::$query["indexes"][] = " DROP INDEX $idxName";
-                }
-                
-                $command = (self::method() === "alter") ? "ADD $command" : $command;
-                $columnList = implode(', ', array_unique($references[$idxName]));
-                $queries = " $command $idxName ($columnList)";
-                
-         
-                self::$query["indexes"][] = $queries;
-             
-                // echo $queries;
-        
+        foreach($commands as $idxName => $command)
+        {
+            $command = (self::method() === "alter") ? " ADD $command" : $command;
+            $columnList = implode(', ', array_unique($references[$idxName]));
+            $queries = "$command $idxName($columnList)";
+            self::$query["indexes"][] = $queries;
         }
-
-
     }
 
-    private static function passUniques($props)
+    private static function passUniques()
     {
-        $validator = new SchemaValidator(self::$table);
-        $params = self::getParams();
-        $references = [];
+          $references = [];
         $commands = [];
+        $params = self::getParams();
+        $validator = new SchemaValidator(self::$table);
 
-        foreach ($params as $table => $properties) {
-            if (!isset($properties["uniques"])) {
-                continue;
-            }
-
-
-            foreach ($properties["uniques"] as $ref => $data) {
-                $references[$ref][] = $data["name"];
-                $commands[$ref] = $data["command"];
-            }
-        }
-
-        // Build final INDEX stateme
-        foreach ($commands as $idxName => $command) {
-                $indexColumns = [];
-                foreach($validator->hasIndexes($idxName) as $column)
+        foreach($params as $table => $properties)
+        {
+            if(isset($properties["uniques"]))
+            {
+             $props = $properties["uniques"];
+                foreach ($properties["uniques"] as $ref => $data)
                 {
-                    if($column->NON_UNIQUE === 0){
-                        $indexColumns[] = $column->COLUMN_NAME;
-                    }
-                    else
+                
+                    if(self::method() === "alter" && $validator->hasIndexes($data["name"]))
                     {
-                    echo $column->COLUMN_NAME . "is not unique";
+                        self::$query["uniqes"][] = " DROP INDEX {$data["name"]}";
                     }
-                }
-                
-                if(count($indexColumns) >= 1)
-                {
-                    self::$query["indexes"][] = " DROP INDEX $idxName";
-                }
-                
-                $command = (self::method() === "alter") ? "ADD $command" : $command;
-                $columnList = implode(', ', array_unique($references[$idxName]));
-                $queries = " $command $idxName ($columnList)";
-                
-         
-                self::$query["uniques"][] = $queries;
-             
-                // echo $queries;
-        
+                    
+                    if (is_array($data["value"])) {
+                    $idxValues = implode(", ",$data["value"]);
+                    } 
+                    else {
+                        $idxValues = $data["value"];
+                    }
+
+                        $references[$ref][] = $idxValues;
+                        
+                        $commands[$ref] =  $data["command"];
+                    }
+
+            }
         }
 
+        foreach($commands as $idxName => $command)
+        {
+            $command = (self::method() === "alter") ? " ADD $command" : $command;
+            $columnList = implode(', ', array_unique($references[$idxName]));
 
+            $queries = "$command $idxName($columnList)";
+            self::$query["uniques"][] = $queries;
+        }
     }
 
     public static function passfk()
@@ -458,7 +428,7 @@ class SchemaActions extends SchemaCore implements SchemActionInterface
         }
 
         self::passIndexes();
-        self::passUniques($props);
+        self::passUniques();
         self::passfk();
 
         self::$query["datatypes"] = $columns;
