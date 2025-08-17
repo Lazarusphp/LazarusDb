@@ -5,13 +5,24 @@ namespace LazarusPhp\LazarusDb\SchemaBuilder\Traits;
 use LazarusPhp\LazarusDb\TableManagement\TableControl;
 use LazarusPhp\LazarusDb\SchemaBuilder\Schema;
 use LazarusPhp\LazarusDb\SchemaBuilder\SchemaActions;
+use LazarusPhp\LazarusDb\SchemaBuilder\SchemaErrors;
 use LazarusPhp\LazarusDb\SchemaBuilder\SchemaValidator;
 use LazarusPhp\LazarusDb\TableManagement\Table;
+
+// Add a Drop type Enum Drop works as a modifier but will also be part of the other scripts
+enum DropType:string
+{
+    case column = 'column';
+    case index = 'index';
+    case fk = 'fk';
+    case unique = 'unique';
+}
 
 trait Modifier
 {
    
     private $oldname = "";
+    private $rename;
 
 
     private function ValidateTable($column)
@@ -46,6 +57,24 @@ trait Modifier
 
     public function rename($name)
     {
+        $validator = new SchemaValidator(self::$table);
+        $index = $validator->hasIndexes();
+
+        foreach($index as $index)
+        {
+            if($index->COLUMN_NAME === $name)
+            {
+                SchemaErrors::generate("Cannot Rename Table", ["Reason Column $name Belongs to an index"]);
+                break;
+            }
+        }
+
+        if($validator->hasTable(self::$table) && !$validator->hasColumn($name))
+        {
+            SchemaErrors::generate("Cannot Rename Table", ["Reason Column $name doesnt exist"]);
+                
+        }
+        $this->rename = true;
         $this->oldname = $name;
         return $this;
     }
@@ -61,19 +90,78 @@ trait Modifier
         ]);
     }
 
-    public function drop($column)
+    public function drop(string|DropType $type,string $name)
     {
-        $this->name = $column;
+        $this->name = $name;
         $validator =  new SchemaValidator(self::$table);
-        if($validator->hasTable() && $validator->hasColumn($column))
+
+        if (is_string($type)) {
+        $type = DropType::from($type); // throws if invalid
+        }
+
+     
+
+        if($type===DropType::column)
         {
-            $this->processRequest($this->name,"modifier",[
-            "name"=>$column,
-            "type"=>"drop",
-            "command"=>" DROP COLUMN {$column} ",
+               if(self::hasDataType($name))
+            {
+                SchemaErrors::generate("Cannot Drop Column",
+                ["Reason"=>"Migration file : ".self::$table." containts a duplicate record for $name"]);
+                return false;
+            }
+
+            if($validator->hasTable() && !$validator->hasColumn($name))
+            {
+                SchemaErrors::generate("Cannot Drop Column",["Reason"=>"Column : $name not found"]);
+                return false;
+            }
+        }
+
+        if($type === DropType::index)
+        { 
+            foreach(self::getParams() as $table => $props)
+            {
+                if(isset($props["indexes"]))
+                {
+                    
+                    foreach($props["indexes"] as $column)
+                    {
+                        if($column["name"] !== $name)
+                        {
+                            SchemaErrors::generate("Cannot drop Index",["Reason"=>"Index Name doesnt exist","Index name"=> $column["name"]]);
+                            return true;
+                        }
+                    }
+               
+                }
+            }
+            
+        }
+
+            $command = match($type)
+        {
+            DropType::column => "DROP COLUMN $name",
+            DropType::index => "DROP INDEX $name",
+            DropType::fk => "DROP FOREIGN KEY $name",
+            DropType::unique => "DROP UNIQUE $name",
+        };
+
+        $types = match($type)
+        {
+            DropType::column => "column",
+            DropType::index => "index",
+            DropType::fk => "fk",
+            DropType::unique => "unique",
+        };
+
+
+            $this->processRequest($this->name,"drop",[
+            "name"=>$name,
+            "type"=>$types,
+            "command"=>$command,
             "modify"=>false
             ]);
-        }
+        
         return $this;
     }
 
