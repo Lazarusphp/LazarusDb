@@ -42,12 +42,13 @@ trait Datatypes
                 {
                     if($name === $value)
                     {
-                        echo "name Found $name";
-                        break;
+                        return true;
                     }
                 }
             } 
         }
+        
+                return false;
     }
 
 
