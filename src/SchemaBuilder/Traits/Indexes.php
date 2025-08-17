@@ -57,7 +57,6 @@ trait Indexes
                 "reference" => self::$index
             ]
         ];
-
         $this->processRequest($this->name, "indexes", $actions);
     }
 
