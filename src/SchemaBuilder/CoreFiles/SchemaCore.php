@@ -37,7 +37,7 @@ abstract class SchemaCore extends Database
            $stmt->execute();
            return true;
        } catch (PDOException $e) {
-            SchemaErrors::generate("Failed to save",["reason",$e->getMessage()]);
+            SchemaErrors::generate("Failed to Build Schema",["reason",$e->getMessage()]);
             return false;
        }
    }
