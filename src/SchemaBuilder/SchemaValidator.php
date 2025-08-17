@@ -93,7 +93,7 @@ class SchemaValidator extends SchemaCore
         $column = $this->column;
         $indexName = $indexName;
         $indexValue = $indexValue;
-    $query = "SELECT INDEX_NAME, COLUMN_NAME,NON_UNIQUE ";
+    $query = "SELECT INDEX_NAME, COLUMN_NAME,NON_UNIQUE";
     $query .= " FROM INFORMATION_SCHEMA.STATISTICS ";#
     $query .= " WHERE TABLE_SCHEMA = '".$_ENV["dbname"]."'";
     $query .= " AND TABLE_NAME = '$table' ";
@@ -106,27 +106,33 @@ class SchemaValidator extends SchemaCore
     $query .= " AND COLUMN_NAME = '$indexValue'";
     }
     $result = $this->query($query);
-    return $result->fetchAll();
-    }
-
-    public function hasForeignKey($column)
+    if($result && $result->rowCount() > 1)
     {
-        $query = "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME";
-        $query .= " FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE";
-        $query .= " WHERE REFERENCED_TABLE_SCHEMA IS NOT NULL";
-        $stmt = $this->query($query);
-        if(!empty($column))
-        {
-                $query .= " AND COLUMN_NAME='{$column}'";
-               $fetch =  $stmt->fetch();
-        }
-        else
-        {
-            $fetch = $stmt->fetchAll();
-        }
-
-        return $fetch;
+        return $result->fetchAll();
     }
+    else
+    {
+        return $result->fetch(PDO::FETCH_ASSOC);
+    }
+    }
+
+ public function hasForeignKey(): array
+{
+    $query = "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME
+              FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+              WHERE REFERENCED_TABLE_SCHEMA IS NOT NULL";
+
+    $stmt = $this->query($query);
+     $rows = $stmt->fetchAll();
+    
+
+
+    if (!$stmt) {
+        return []; // query failed, return empty
+    }
+
+    return $rows ?: []; // always return an array
+}
 
     public function hasColumn($name)
     {
