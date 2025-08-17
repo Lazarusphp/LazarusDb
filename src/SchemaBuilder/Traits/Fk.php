@@ -10,27 +10,60 @@ trait Fk
 {
 
     private static array  $fk = [];
+    private static $fkName;
+    private static $constraint = [];
 
-    // tablename ColumnName if constraint is true command 1 and 2 are on update or ondelete
-
-    public function fk($table="",$column="",$constraint=false)
+    private static function hasfk($column)
     {
-        $actions = ["currentColumn"=>$this->name,"table"=>$table,"column"=>$column,"cont"=>$constraint];
-        $this->processRequest($this->name,"fk",$actions);
+        $validator = new  SchemaValidator(self::$table);
+        return $validator->hasForeignKey($column);
+    }
+    
+    // Column will be the constraint name.
+    public function foreignKey(string $column,$constraint=false)
+    {
+        if(!in_array($column,self::$constraint))
+        {
+            self::$constraint[] = $column;
+        }
+        self::$fkName = $column;
+        $constraint = ($constraint===true) ? true : false;
+        $actions = ["table"=>self::$table,"column"=>$column,"constraint"=>$constraint];
+         $this->processRequest(self::$fkName,"fk",$actions);
+
         return $this;
     }
+
+     public function rebase($column="")
+    {
+        if(!empty($column))
+        {
+            self::$fkName = $column;
+        }
+        
+        $actions = ["name"=>self::$fkName,"action"=>"rebase","command"=>"DROP FOREIGN KEY "];
+        $this->processRequest(self::$fkName,"fkRebase",$actions);
+        // unset(self::$fkName);
+    }
+    public function reference($refTable,$refColumn)
+    {
+        $actions = ["referenceTable"=>$refTable,"referenceColumn"=>$refColumn];
+         $this->processRequest(self::$fkName,"fkReference",$actions);
+        return $this;
+    }
+
+   
     public function onUpdate($action = "cascade")
     {
         $actions = ["command"=>"$action"];
-        $this->processRequest($this->name,"fkUpdate",$actions);
+        $this->processRequest(self::$fkName,"fkUpdate",$actions);
         return $this;
     }
 
     public function onDelete($action = "cascade")
     {
-     
         $actions = ["command"=>"$action"];
-        $this->processRequest($this->name,"fkDelete",$actions);
+        $this->processRequest(self::$fkName,"fkDelete",$actions);
         return $this;
     }
 
