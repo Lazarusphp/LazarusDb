@@ -62,10 +62,7 @@ class Schema extends SchemaCore
             self::$sql .= $class->build();
         }
         echo self::$sql;
-        !$this->save() ? SchemaErrors::generate(
-            "Schema Build Failed",
-            ["table" => self::$table, "reason" => self::$sql]
-        ) : "";
+        $this->save();
         // Count Migrations Errors
 
         if (SchemaErrors::countErrors()) {
@@ -83,20 +80,12 @@ class Schema extends SchemaCore
             }
             else
             {
-                echo "table not working";
+                echo "table not loaded ";
             }
         }
         return $this;
     }
 
-    public function index(string|array $column)
-    {
-        $key = is_array($column) ? implode(",", $column) : "idx_$column";
-        $column = is_array($column) ? implode(", ", $column) : $column;
-        self::$sql = "CREATE INDEX $key ON " . self::$table . "($column)";
-        echo "<br>" . self::$sql;
-        $this->save();
-    }
 
     public function rename($table2)
     {
