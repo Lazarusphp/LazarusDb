@@ -189,7 +189,6 @@ class SchemaActions extends SchemaCore implements SchemActionInterface
             return "";
         }
     }
-
     private static function passPosition($props)
     {
         if (isset($props["position"])) {
@@ -267,7 +266,7 @@ class SchemaActions extends SchemaCore implements SchemActionInterface
                 
                     if(self::method() === "alter" && $validator->hasIndexes($data["name"]))
                     {
-                        self::$query["uniqes"][] = " DROP INDEX {$data["name"]}";
+                        self::$query["uniques"][] = " DROP INDEX {$data["name"]}";
                     }
                     
                     if (is_array($data["value"])) {
@@ -297,115 +296,84 @@ class SchemaActions extends SchemaCore implements SchemActionInterface
 
     public static function passfk()
     {
+        $reference = [];        
+        $params = array_filter(self::getParams(), function ($properties) {
+            return isset($properties["fk"])
+                && isset($properties["fkReference"])
+                && !empty($properties["fkReference"]["referenceTable"])
+                && !empty($properties["fkReference"]["referenceColumn"]);
+        });
 
+        foreach ($params as $index => $properties) {
+            $props = $properties["fk"] ?? "";
+            $constraint = $properties["fk"]["constraint"] ?? "";
+            $table = $props["table"] ?? "";
+            $column = $props["column"] ?? "";
 
-        $fk = [];
+            $refTable = $properties["fkReference"]["referenceTable"] ?? "";
+            $refColumn = $properties["fkReference"]["referenceColumn"] ?? "";
+            $onDelete = $properties["fkDelete"]["command"] ?? "restrict";
+            $onUpdate = $properties["fkUpdate"]["command"] ?? "restrict";
+
+            (!in_array($table,$reference)) ? $reference[$index]["table"] = $table : "";
+            (!in_array($column,$reference)) ? $reference[$index]["column"] = $column : "";
+            (!in_array($constraint,$reference)) ? $reference[$index]["constraint"] = $constraint: "" ;
+            (!in_array($refTable,$reference)) ? $reference[$index]["refTable"] = $refTable : "";
+            (!in_array($table,$reference)) ? $reference[$index]["refColumn"] = $refColumn : "";
+            (!in_array($onDelete,$reference)) ? $reference[$index]["onDelete"] = $onDelete : "";
+            (!in_array($onUpdate,$reference)) ? $reference[$index]["onUpdate"] = $onUpdate : "";
+        }
+
+        $add = (self::method() === "alter") ? " ADD " : "";
+       
+        // Generate New Foreign Key.
         $foreignKey = [];
-        $params = self::getParams();
-        $keys = [];
-        
-        $fkdrops = [];
 
-        // Generate date in loop
-        foreach ($params as $indexes => $properties) 
+        $validator = new SchemaValidator(self::$table);
+
+        $hasfk = $validator->hasForeignKey();
+        $cnactive = [];
+        foreach($hasfk as $cn)
         {
-          
-            // Check if fk propery is valid
-            if (isset($properties["fk"])) {
-                $props = $properties["fk"];
+            foreach(self::$constraint as $c)
+            {
+                if($c === $cn->CONSTRAINT_NAME)
+                {
+                        $cnactive[$c] = $c;
+                    
 
-                $table = $properties["fk"]["table"];
-                $column = $properties["fk"]["column"];
-
-                if (!isset($fk[$indexes])) {
-                    $fk[] = $indexes;
                 }
-
-                if (isset($props["table"]) && isset($props["column"])) {
-                    $fk[$indexes] = [
-                        "table" => $props["table"],
-                        "columns" => $props["column"]
-                    ];
-                }
-
-                if (!array_key_exists($table, $keys)) {
-                    $keys[$table] = [
-                        "column" => $column,
-                    ];
-                }
-
-                if (!in_array($table, $foreignKey)) {
-                    $foreignKey[$table] = [];
-                }
-
-
-                if (isset($properties["fkDelete"])) {
-                    $props = $properties["fkDelete"];
-
-                    if (isset($props["command"])) {
-                        $delete = $props["command"];
-                    }
-                }
-
-                if (isset($properties["fkUpdate"])) {
-                    $props = $properties["fkUpdate"];
-
-                    if (isset($props["command"])) {
-                        $update = $props["command"];
-                    }
-                }
-
-                // Store Foreign key Command in an array for later
-                $foreignKey[$table] = "FOREIGN KEY (" . $properties["fk"]['currentColumn'] . ") REFERENCES " . $properties["fk"]['table'] . " (" . $properties["fk"]['column'] . ") ON DELETE $delete ON UPDATE $update";
             }
+        }
 
+        foreach($reference as $index => $command)
+        {
+            if(!isset($cnactive[$index]))
+            {
+                $constraintStr = ($constraint === true) ? "CONSTRAINT {$command["column"]} " : "";
+            $foreignKey[$index] =
+                "$add $constraintStr FOREIGN KEY ({$command["column"]}) REFERENCES {$command["refTable"]}"
+                . "({$command["refColumn"]})"
+                . " ON UPDATE {$command["onUpdate"]} ON DELETE {$command["onDelete"]}";
+        
+            }
+      
             
+      }
 
-
-            // End foreach loop below
+        
+        foreach($foreignKey as $idxName => $command)
+        {
+            self::$query["fk"][] = $command;
         }
-
-        // New Loop validate code against database or generate errors
-        foreach ($keys as $key => $value) {
-            if ($key) {
-                $validator = new SchemaValidator($key);
-
-                if (!$validator->hasTable()) {
-                    SchemaErrors::generate("Foreign Key Cannot be Applied Because ", [
-                        "table" => self::$table,
-                        "reason" => "Table $key does not match Schema Migration Request"
-                    ]);
-                }
-
-                if ($validator->hasTable()) {
-                    if ($validator->hasColumn($value["column"]) === false) {
-                        SchemaErrors::generate(
-                            "Foreign Key Cannot be Applied",
-                            [
-                                "table" => self::$table,
-                                "reason" => "Column does not match Schema Migration Request",
-                                "required column" => $value["column"],
-                            ]
-                        );
-                    }
-                }
-            } else {
-            }
-        }
-
-        // Final execute foreign key array and add to self::$query
-        foreach ($foreignKey as $table => $value) {
-            self::$query["fk"][] = $value;
-        }
+        // Functions::dd(self::$query["fk"]);
+        // exit();
     }
 
 
 
     protected static function processParams()
     {
-        // Code for processing params goes here
-
-        // dd(self::getParams());
         $columns = [];
         $params = self::getParams();
         if (!is_array($params)) {
@@ -424,48 +392,29 @@ class SchemaActions extends SchemaCore implements SchemActionInterface
             $position = self::passPosition($props);
             self::passPrimary($props);
             $columns[] = trim("$modifier $datatype $attributes $null $default $ai $position");
-        
+            
         }
 
+        self::passfk();
         self::passIndexes();
         self::passUniques();
-        self::passfk();
 
         self::$query["datatypes"] = $columns;
 
-        $columns = [];
+        $allParts = array_merge(
+    self::$query["fkDrop"] ?? [],
+    self::$query['datatypes'] ?? [],
+    self::$query['fk'] ?? [],
+    self::$query['indexes'] ?? [],
+    self::$query['uniques'] ?? []
+);
 
-        foreach (self::$query as $key => $value) {
-            // Check if Load Primary key and indexes are in an array
-            if (is_array($value)) {
-                foreach ($value as $item) {
-                    $columns[] =   $item;
-                }
-                // output data as normal;
-            } else {
-                $columns[] = $value;
-            }
-        }
-
-
-
-        if ((count($columns) && SchemaErrors::countErrors() === false)) {
-            self::$query = [];
-            return implode(", ", $columns);
-        } else {
-            echo " there are errors";
-        }
-
-
-
-        // Code for Database table goes here
-
-        // Verify and match both local and database code to see if they match or dont match
+    return implode(",",array_filter($allParts));
     }
 
 
     public function build()
-    {
+    {   
         return self::processParams();
     }
 }
