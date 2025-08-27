@@ -5,9 +5,10 @@ namespace LazarusPhp\LazarusDb\SchemaBuilder;
 use App\System\Core\Functions;
 use LazarusPhp\LazarusDb\Database\CoreFiles\Database;
 use LazarusPhp\LazarusDb\SchemaBuilder\CoreFiles\SchemaCore;
+use LazarusPhp\LazarusBridge\DbQueries;
 use PDO;
 
-class SchemaValidator extends SchemaCore
+class SchemaValidator extends DbQueries
 {
 
     // Generate a Tablename
@@ -62,17 +63,18 @@ class SchemaValidator extends SchemaCore
         if ($this->column) {
             $column = $this->column;
         }
+        
+        $param1 = uniqid("table_");
 
         $query = "SELECT * ";
         $query .= " FROM INFORMATION_SCHEMA.COLUMNS";
         $query .= " WHERE TABLE_SCHEMA='" . $_ENV['dbname'] . "' ";
-        $query .= " AND TABLE_NAME = '" . $table . "'";
-        
-        if (!empty($column) && is_string($column)) {
-            $query .= " AND COLUMN_NAME = '" . $column . "'";
-        }
+        $query .= " AND TABLE_NAME = :$param1 ";
+     
 
-        $result = $this->query($query);
+        self::$param[$param1] = $table;
+        
+        $result = $this->save($query);
         if ($result && $result->rowCount() >= 1) {
             $this->rows = $result->fetchALL();
             return true;
