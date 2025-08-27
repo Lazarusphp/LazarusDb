@@ -3,6 +3,7 @@
 namespace LazarusPhp\LazarusDb\SchemaBuilder;
 
 use App\System\Core\Functions;
+use LazarusPhp\LazarusBridge\DbQueries;
 use LazarusPhp\LazarusDb\SchemaBuilder\Schema;
 use LazarusPhp\LazarusDb\SchemaBuilder\Traits\Datatypes;
 use LazarusPhp\LazarusDb\SchemaBuilder\Traits\Indexes;
@@ -17,7 +18,7 @@ use LazarusPhp\LazarusDb\SchemaBuilder\Interfaces\SchemActionInterface;
 use LazarusPhp\LazarusDb\SchemaBuilder\SchemaErrors;
 use LazarusPhp\LazarusDb\SchemaBuilder\SchemaValidator;
 
-class SchemaActions extends SchemaCore implements SchemActionInterface
+class SchemaActions extends DbQueries implements SchemActionInterface
 {
     private static $params = [];
     private static $column;
@@ -199,7 +200,7 @@ class SchemaActions extends SchemaCore implements SchemActionInterface
     private static function passPrimary($props)
     {
         if (isset($props["primary"])) {
-            self::$query["primary"] = $props["primary"]["command"];
+            self::$query["primary"][] = $props["primary"]["command"];
         }
     }
 
@@ -404,6 +405,7 @@ class SchemaActions extends SchemaCore implements SchemActionInterface
         $allParts = array_merge(
     self::$query["fkDrop"] ?? [],
     self::$query['datatypes'] ?? [],
+    self::$query["primary"] ?? [],
     self::$query['fk'] ?? [],
     self::$query['indexes'] ?? [],
     self::$query['uniques'] ?? []
