@@ -9,6 +9,15 @@ use LazarusPhp\LazarusDb\TableManagement\TableControl;
 use LazarusPhp\LazarusDb\SchemaBuilder\SchemaLoader;
 use LazarusPhp\LazarusDb\TableManagement\CoreFiles\TableCore;
 
+enum SchemaDropActions :string
+{
+    case table = "table";
+    case fk = "fk";
+    case index = "index";
+    case unique = "unique";
+    case column = $column;
+}
+
 class Schema extends SchemaCore
 {
     protected static $function;
@@ -103,9 +112,34 @@ class Schema extends SchemaCore
      * Deletes the table completly if it exists;
      * @return void
      */
-    public function drop()
+    public function drop(SchemaDropActions $action,$name)
     {
-        self::$sql = "DROP TABLE IF EXISTS " . self::$table;
+        if(is_string($action))
+        {
+            $action = SchemaDropActions::from($action);
+        }   
+
+        if($action = "table")
+        {
+            self::$sql = "DROP TABLE IF EXISTS " . self::$table;
+        }
+        elseif($action = "fk")
+        {
+            self::$sql = "ALTER TABLE " . self::$table . " DROP FOREIGN KEY $name";
+        }
+        elseif($action = "index")
+        {
+            self::$sql = "ALTER TABLE " . self::$table . " DROP INDEX $name";
+        }
+        elseif($action = "unique")
+        {
+            self::$sql = "ALTER TABLE " . self::$table . " DROP INDEX $name";
+        }
+        elseif($action = "column")
+        {
+            self::$sql = "ALTER TABLE " . self::$table . " DROP COLUMN $name";
+        }   
+        
         return $this->save() ? true : false;
     }
 
