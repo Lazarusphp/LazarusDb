@@ -51,7 +51,6 @@ trait Modifier
         }
         else
         {
-            self::unsetParams($this->name);
         }
     }
 
