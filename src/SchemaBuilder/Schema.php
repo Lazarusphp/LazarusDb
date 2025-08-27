@@ -40,10 +40,8 @@ class Schema extends SchemaCore
             self::$sql .= $class->build();
         }
         self::$sql .= ")";
-        !$this->save() ? SchemaErrors::generate(
-            "Schema Build Failed",
-            ["table" => self::$table, "reason" => self::$sql]
-        ) : "";
+        echo self::$sql;
+        $this->save();
         // Count Migrations Errors
 
         // Display Errors if any occur
