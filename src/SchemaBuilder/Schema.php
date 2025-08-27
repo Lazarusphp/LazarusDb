@@ -15,7 +15,7 @@ enum SchemaDropActions :string
     case fk = "fk";
     case index = "index";
     case unique = "unique";
-    case column = $column;
+    case column = "column";
 }
 
 class Schema extends SchemaCore
@@ -112,34 +112,24 @@ class Schema extends SchemaCore
      * Deletes the table completly if it exists;
      * @return void
      */
-    public function drop(SchemaDropActions $action,$name)
+    public function drop(SchemaDropActions|string $action, $name)
     {
-        if(is_string($action))
-        {
+        if (is_string($action)) {
             $action = SchemaDropActions::from($action);
-        }   
+        }
 
-        if($action = "table")
-        {
-            self::$sql = "DROP TABLE IF EXISTS " . self::$table;
-        }
-        elseif($action = "fk")
-        {
+        if ($action === SchemaDropActions::table) {
+            self::$sql = "DROP TABLE IF EXISTS `" . self::$table . "`";
+        } elseif ($action === SchemaDropActions::fk) {
             self::$sql = "ALTER TABLE " . self::$table . " DROP FOREIGN KEY $name";
-        }
-        elseif($action = "index")
-        {
+        } elseif ($action === SchemaDropActions::index) {
             self::$sql = "ALTER TABLE " . self::$table . " DROP INDEX $name";
-        }
-        elseif($action = "unique")
-        {
+        } elseif ($action === SchemaDropActions::unique) {
             self::$sql = "ALTER TABLE " . self::$table . " DROP INDEX $name";
-        }
-        elseif($action = "column")
-        {
+        } elseif ($action === SchemaDropActions::column) {
             self::$sql = "ALTER TABLE " . self::$table . " DROP COLUMN $name";
-        }   
-        
+        }
+
         return $this->save() ? true : false;
     }
 
