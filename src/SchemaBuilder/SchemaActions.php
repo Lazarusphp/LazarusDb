@@ -199,7 +199,7 @@ class SchemaActions extends SchemaCore implements SchemActionInterface
     private static function passPrimary($props)
     {
         if (isset($props["primary"])) {
-            self::$query["primary"] = $props["primary"]["command"];
+            self::$query["primary"][] = $props["primary"]["command"];
         }
     }
 
@@ -404,6 +404,7 @@ class SchemaActions extends SchemaCore implements SchemActionInterface
         $allParts = array_merge(
     self::$query["fkDrop"] ?? [],
     self::$query['datatypes'] ?? [],
+    self::$query['primary'] ?? [],
     self::$query['fk'] ?? [],
     self::$query['indexes'] ?? [],
     self::$query['uniques'] ?? []
