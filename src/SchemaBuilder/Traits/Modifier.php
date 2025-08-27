@@ -78,6 +78,7 @@ trait Modifier
         return $this;
     }
 
+    // Merge with Modify.
     public function change()
     {
         $name  = ($this->oldname || !empty($this->oldname)) ? $this->oldname : $this->name;
@@ -89,6 +90,7 @@ trait Modifier
         ]);
     }
 
+    // Delete this and move into its own file.
     public function drop(string|DropType $type,string $name)
     {
         $this->name = $name;
@@ -164,6 +166,7 @@ trait Modifier
         return $this;
     }
 
+    // Add a new Column
     public function add()
     {
         if($this->ValidateTable($this->name) === false){
