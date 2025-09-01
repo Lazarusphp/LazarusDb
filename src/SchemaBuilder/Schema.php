@@ -2,12 +2,11 @@
 
 namespace LazarusPhp\LazarusDb\SchemaBuilder;
 
+use LazarusPhp\LazarusBridge\SchemaValidator;
 use LazarusPhp\LazarusDb\SchemaBuilder\CoreFiles\SchemaCore;
 use LazarusPhp\LazarusDb\SchemaBuilder\SchemaActions;
-use LazarusPhp\LazarusDb\TableManagement\Table;
-use LazarusPhp\LazarusDb\TableManagement\TableControl;
 use LazarusPhp\LazarusDb\SchemaBuilder\SchemaLoader;
-use LazarusPhp\LazarusDb\TableManagement\CoreFiles\TableCore;
+
 
 enum SchemaDropActions :string
 {
@@ -70,7 +69,7 @@ class Schema extends SchemaCore
             $table($class);
             self::$sql .= $class->build();
         }
-        echo self::$sql;
+        // echo self::$sql;
         $this->save();
         // Count Migrations Errors
 
@@ -84,7 +83,7 @@ class Schema extends SchemaCore
         
         foreach ($args as $key => $value) {
             $validator = new SchemaValidator(self::$table);
-            if (!$validator->hasTable()) {
+            if ($validator === true) {
                 SchemaLoader::load(ROOT . "/Migrations/Schemas", "up", $value);
             }
             else
@@ -112,24 +111,77 @@ class Schema extends SchemaCore
      * Deletes the table completly if it exists;
      * @return void
      */
-    public function drop(SchemaDropActions|string $action, $name)
+    public function drop(SchemaDropActions|string $action, string $name)
     {
         if (is_string($action)) {
             $action = SchemaDropActions::from($action);
         }
-
-        if ($action === SchemaDropActions::table) {
-            self::$sql = "DROP TABLE IF EXISTS `" . self::$table . "`";
+        if ($action === SchemaDropActions::table) 
+        {
+            
+            $validator = new SchemaValidator($name);
+            if($validator === false)
+            {
+                echo "No Table Found";
+                SchemaErrors::generate("Cannot Drop Table",["reason"=>"Table $name Does not exist"]);
+                return false;
+            }
+            
+            // If true Drop the table.
+            self::$sql = "DROP TABLE IF EXISTS  $name ";
         } elseif ($action === SchemaDropActions::fk) {
+        
             self::$sql = "ALTER TABLE " . self::$table . " DROP FOREIGN KEY $name";
         } elseif ($action === SchemaDropActions::index) {
-            self::$sql = "ALTER TABLE " . self::$table . " DROP INDEX $name";
+            $validator = new SchemaValidator(self::$table);
+
+            if(is_array($name))
+            {
+                SchemaErrors::generate("Cannot Drop Index",["reason"=>"Index name must be a string, array given"]);
+                return false;
+            }
+            if($validator->hasIndexes($name) === false)
+            {
+                SchemaErrors::generate("Cannot Drop Index",["reason"=>"Index $name Does not exist"]);
+                return false;
+            }
+            else
+            {
+                self::$sql = "ALTER TABLE " . self::$table . " DROP INDEX $name";
+            }
+           
         } elseif ($action === SchemaDropActions::unique) {
+            $validator = new SchemaValidator(self::$table);
+            if($validator->hasUnique($name) === false)
+            {
+                SchemaErrors::generate("Failed to Drop Unique",["reason"=>"Unique name $name cannot be found"]);
+                return false;
+            }
             self::$sql = "ALTER TABLE " . self::$table . " DROP INDEX $name";
         } elseif ($action === SchemaDropActions::column) {
-            self::$sql = "ALTER TABLE " . self::$table . " DROP COLUMN $name";
+            
+        $validator = new SchemaValidator(self::$table);
+
+        if($validator === false)
+        {
+            SchemaErrors::generate("Cannot Drop Column",["reason"=>"Table ".self::$table." Does not exist"]);
+            return false;
         }
 
+        if (is_array($name)) {
+            SchemaErrors::generate("Cannot Drop Column",["reason"=>"Column name must be a string, array given"]);
+            return false;
+        }
+
+        if($validator->hasColumn($name) === false)
+        {
+            SchemaErrors::generate("Cannot Drop Column",["reason"=>"Column $name Does not exist"]);
+            return false;
+        }
+        echo "Dropping Column $name";
+            self::$sql = "ALTER TABLE " . self::$table . " DROP COLUMN $name";
+        }
+        // echo self::$sql;
         return $this->save() ? true : false;
     }
 
