@@ -2,8 +2,7 @@
 
 namespace LazarusPhp\LazarusDb\QueryBuilder\CoreFiles;
 
-use LazarusPhp\LazarusDb\Database\Connection;
-use LazarusPhp\LazarusDb\Database\CoreFiles\Database;
+use LazarusPhp\Database\Database;
 use LazarusPhp\LazarusDb\QueryBuilder\Traits\Controllers\Insert;
 use LazarusPhp\LazarusDb\QueryBuilder\Traits\Controllers\Delete;
 use LazarusPhp\LazarusDb\QueryBuilder\Traits\Controllers\Update;
@@ -19,7 +18,7 @@ use PDOException;
 
 
 use PDO;
-
+use PDOStatement;
 
 abstract class QueryBuilderCore extends Database
 {
@@ -28,6 +27,7 @@ abstract class QueryBuilderCore extends Database
     protected $sql;
     protected $table;
     protected $param = [];
+    protected ?PDOStatement $stmt = null;
     // End Properties
 
     // Load Trait Files;
@@ -152,7 +152,6 @@ abstract class QueryBuilderCore extends Database
     private function unbind()
     {
         $this->param = [];
-        Connection::resetConnection();
     }
 
     // End Param Binding
